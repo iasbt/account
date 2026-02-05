@@ -6,6 +6,11 @@ import { supabase } from './lib/supabase'
 import LoginForm from './features/auth/components/LoginForm'
 import { useAuthStore } from './store/useAuthStore'
 import DashboardPage from './pages/DashboardPage'
+import AdminGuard from './components/auth/AdminGuard'
+import AdminLayout from './layouts/AdminLayout'
+import AdminDashboard from './pages/admin/AdminDashboard'
+import ApplicationsPage from './pages/admin/ApplicationsPage'
+import UsersPage from './pages/admin/UsersPage'
 
 function FullScreenLoader() {
   return (
@@ -46,11 +51,25 @@ function PublicOnly({ children }: { children: ReactElement }) {
 
 export default function App() {
   const setUser = useAuthStore((state) => state.setUser)
+  const setRole = useAuthStore((state) => state.setRole)
   const setSession = useAuthStore((state) => state.setSession)
   const setLoading = useAuthStore((state) => state.setLoading)
 
   useEffect(() => {
     let active = true
+
+    const fetchRole = async (userId: string) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single()
+      if (error) {
+        console.error('Failed to load profile role:', error)
+        return null
+      }
+      return data?.role ?? null
+    }
 
     const init = async () => {
       setLoading(true)
@@ -58,22 +77,45 @@ export default function App() {
       if (active) {
         setSession(data.session)
         setUser(data.session?.user ?? null)
-        setLoading(false)
+        if (data.session?.user) {
+          const role = await fetchRole(data.session.user.id)
+          if (active) {
+            setRole(role)
+          }
+        } else {
+          setRole(null)
+        }
+        if (active) {
+          setLoading(false)
+        }
       }
     }
 
     init()
 
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!active) return
+      setLoading(true)
       setSession(session)
       setUser(session?.user ?? null)
+      if (session?.user) {
+        const role = await fetchRole(session.user.id)
+        if (active) {
+          setRole(role)
+        }
+      } else {
+        setRole(null)
+      }
+      if (active) {
+        setLoading(false)
+      }
     })
 
     return () => {
       active = false
       data.subscription.unsubscribe()
     }
-  }, [setLoading, setSession, setUser])
+  }, [setLoading, setRole, setSession, setUser])
 
   return (
     <Routes>
@@ -93,6 +135,13 @@ export default function App() {
           </RequireAuth>
         }
       />
+      <Route element={<AdminGuard />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="apps" element={<ApplicationsPage />} />
+          <Route path="users" element={<UsersPage />} />
+        </Route>
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

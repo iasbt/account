@@ -7,6 +7,12 @@ export type Application = {
   auth_mode: 'cookie' | 'fragment' | string
 }
 
+export type Profile = {
+  id: string
+  email: string | null
+  role: 'user' | 'admin' | string
+}
+
 export type UserAppAccess = {
   id: string
   user_id: string
