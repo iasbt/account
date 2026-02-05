@@ -50,72 +50,28 @@ function PublicOnly({ children }: { children: ReactElement }) {
 }
 
 export default function App() {
-  const setUser = useAuthStore((state) => state.setUser)
-  const setRole = useAuthStore((state) => state.setRole)
-  const setSession = useAuthStore((state) => state.setSession)
-  const setLoading = useAuthStore((state) => state.setLoading)
+  const initialize = useAuthStore((state) => state.initialize)
+  const syncSession = useAuthStore((state) => state.syncSession)
 
   useEffect(() => {
     let active = true
 
-    const fetchRole = async (userId: string) => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single()
-      if (error) {
-        console.error('Failed to load profile role:', error)
-        return null
-      }
-      return data?.role ?? null
-    }
-
     const init = async () => {
-      setLoading(true)
-      const { data } = await supabase.auth.getSession()
-      if (active) {
-        setSession(data.session)
-        setUser(data.session?.user ?? null)
-        if (data.session?.user) {
-          const role = await fetchRole(data.session.user.id)
-          if (active) {
-            setRole(role)
-          }
-        } else {
-          setRole(null)
-        }
-        if (active) {
-          setLoading(false)
-        }
-      }
+      await initialize()
     }
 
     init()
 
     const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!active) return
-      setLoading(true)
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        const role = await fetchRole(session.user.id)
-        if (active) {
-          setRole(role)
-        }
-      } else {
-        setRole(null)
-      }
-      if (active) {
-        setLoading(false)
-      }
+      await syncSession(session)
     })
 
     return () => {
       active = false
       data.subscription.unsubscribe()
     }
-  }, [setLoading, setRole, setSession, setUser])
+  }, [initialize, syncSession])
 
   return (
     <Routes>
