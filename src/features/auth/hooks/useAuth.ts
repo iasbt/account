@@ -8,6 +8,7 @@ type AuthResult<T> = {
 
 export function useAuth() {
   const setLoading = useAuthStore((state) => state.setLoading)
+  const storeSignOut = useAuthStore((state) => state.signOut)
 
   const signInWithEmail = async (
     email: string,
@@ -52,17 +53,13 @@ export function useAuth() {
   }
 
   const signOut = async (): Promise<AuthResult<boolean>> => {
-    setLoading(true)
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
+      await storeSignOut()
       return { data: true, error: null }
     } catch (error) {
       const normalizedError =
         error instanceof Error ? error : new Error('登出失败')
       return { data: null, error: normalizedError }
-    } finally {
-      setLoading(false)
     }
   }
 

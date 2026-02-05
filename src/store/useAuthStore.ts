@@ -10,6 +10,7 @@ type AuthState = {
   loading: boolean
   initialize: () => Promise<void>
   syncSession: (session: Session | null) => Promise<void>
+  signOut: () => Promise<void>
   setUser: (user: User | null) => void
   setRole: (role: Profile['role'] | null) => void
   setSession: (session: Session | null) => void
@@ -79,6 +80,21 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: null, session: null, role: null })
     } finally {
       set({ loading: false })
+    }
+  },
+  signOut: async () => {
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      set({ user: null, session: null, role: null, loading: false })
+      try {
+        localStorage.clear()
+      } catch (error) {
+        console.error(error)
+      }
+      window.location.href = '/login'
     }
   },
   setUser: (user) => set({ user }),
