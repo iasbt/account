@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { LogOut, Shield } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { AppGrid } from '../features/dashboard/components/AppGrid'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { useAuthStore } from '../store/useAuthStore'
@@ -8,7 +8,6 @@ import { useAuthStore } from '../store/useAuthStore'
 export default function DashboardPage() {
   const { signOut } = useAuth()
   const loading = useAuthStore((state) => state.loading)
-  const role = useAuthStore((state) => state.role)
   const [error, setError] = useState('')
   const location = useLocation()
   const showUnauthorized = Boolean(
@@ -36,15 +35,6 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {role === 'admin' && (
-            <Link
-              to="/admin"
-              className="inline-flex items-center gap-2 rounded-lg border border-cyan-300/30 bg-cyan-500/10 px-3 py-2 text-sm text-cyan-200 transition hover:border-cyan-300/50 hover:text-cyan-100"
-            >
-              <Shield className="h-4 w-4" />
-              Admin Console
-            </Link>
-          )}
           <button
             type="button"
             disabled={loading}

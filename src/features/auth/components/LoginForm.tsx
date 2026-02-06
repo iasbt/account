@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Loader2, LogIn, UserPlus } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useAuthStore } from '../../../store/useAuthStore'
 
@@ -12,6 +13,9 @@ export default function LoginForm() {
   const [error, setError] = useState('')
   const loading = useAuthStore((state) => state.loading)
   const { signInWithEmail, signUp } = useAuth()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectUrl = searchParams.get('redirect')
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -29,7 +33,16 @@ export default function LoginForm() {
 
     if (result.error) {
       setError(result.error.message || '操作失败')
+      return
     }
+
+    if (redirectUrl) {
+      console.log(`🔀 SSO Redirecting to: ${redirectUrl}`)
+      window.location.href = redirectUrl
+      return
+    }
+
+    navigate('/', { replace: true })
   }
 
   const isLogin = mode === 'login'
