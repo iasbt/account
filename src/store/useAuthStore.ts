@@ -25,23 +25,44 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     set({ loading: true })
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+      console.log('🚀 [Auth] Starting parallel init...')
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Profile query timeout')), 2000)
+      )
+
+      const profileQuery = supabase.from('profiles').select('role').single()
+
+      const [sessionResult, profileResult] = await Promise.all([
+        supabase.auth.getSession(),
+        Promise.race([profileQuery, timeoutPromise]).catch((error) => ({
+          data: null,
+          error,
+        })),
+      ])
+
+      const session = sessionResult.data.session
 
       if (!session) {
         set({ user: null, session: null, role: null })
         return
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single()
+      const profileData = (
+        profileResult as { data: { role?: Profile['role'] } | null }
+      ).data
+      const profileError = (profileResult as { error?: unknown }).error
 
-      const role = (profile?.role ?? 'user') as Profile['role']
+      if (profileError) {
+        console.warn(
+          "⚠️ [Auth] Profile fetch skipped/failed (using default 'user'):",
+          profileError
+        )
+      }
 
+      const role = (profileData?.role ?? 'user') as Profile['role']
+
+      console.log(`✅ [Auth] Logged in as ${role}`)
       set({
         session,
         user: session.user,
