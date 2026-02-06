@@ -290,8 +290,3 @@ _Gallery 或 Note 等应用接入时注意：_
 1. **Client 配置**: 不要设置 `schema: 'gallery'`，保持默认 `public`。
     
 2. **SSO 链接**: 使用 `https://account.iasbt.com/login?redirect={你的子应用URL}`。
-    
-
----
-
-_End of Grand Master Documentation_
