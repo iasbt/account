@@ -210,7 +210,7 @@ export default function ApplicationsPage() {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? ''
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
     const accountUrl = window.location.origin
-    return `VITE_SUPABASE_URL=${supabaseUrl}\nVITE_SUPABASE_KEY=${supabaseKey}\nVITE_ACCOUNT_URL=${accountUrl}`
+    return `VITE_SUPABASE_URL=${supabaseUrl}\nVITE_SUPABASE_ANON_KEY=${supabaseKey}\nVITE_ACCOUNT_URL=${accountUrl}`
   }, [])
 
   const authCallbackSnippet = useMemo(() => {
@@ -220,7 +220,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 )
 
 export default function AuthCallback() {

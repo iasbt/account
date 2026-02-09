@@ -16,6 +16,26 @@ export default function LoginForm() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirectUrl = searchParams.get('redirect')
+  const allowlistRaw = import.meta.env.VITE_SSO_REDIRECT_ALLOWLIST ?? ''
+  const allowedHosts = allowlistRaw
+    .split(',')
+    .map((item: string) => item.trim())
+    .filter(Boolean)
+
+  const isAllowedRedirect = (target: string) => {
+    try {
+      const resolved = new URL(target, window.location.origin)
+      if (resolved.origin === window.location.origin) {
+        return true
+      }
+      return (
+        allowedHosts.includes(resolved.host) ||
+        allowedHosts.includes(resolved.hostname)
+      )
+    } catch {
+      return false
+    }
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -37,9 +57,11 @@ export default function LoginForm() {
     }
 
     if (redirectUrl) {
-      console.log(`🔀 SSO Redirecting to: ${redirectUrl}`)
-      window.location.href = redirectUrl
-      return
+      if (isAllowedRedirect(redirectUrl)) {
+        window.location.href = redirectUrl
+        return
+      }
+      setError('回跳地址不允许')
     }
 
     navigate('/', { replace: true })

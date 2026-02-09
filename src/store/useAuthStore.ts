@@ -25,22 +25,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     set({ loading: true })
     try {
-      console.log('🚀 [Auth] Starting parallel init...')
-
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Profile query timeout')), 2000)
-      )
-
-      const profileQuery = supabase.from('profiles').select('role').single()
-
-      const [sessionResult, profileResult] = await Promise.all([
-        supabase.auth.getSession(),
-        Promise.race([profileQuery, timeoutPromise]).catch((error) => ({
-          data: null,
-          error,
-        })),
-      ])
-
+      const sessionResult = await supabase.auth.getSession()
       const session = sessionResult.data.session
 
       if (!session) {
@@ -48,21 +33,28 @@ export const useAuthStore = create<AuthState>((set) => ({
         return
       }
 
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Profile query timeout')), 2000)
+      )
+
+      const profileQuery = supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
+
+      const profileResult = await Promise.race([
+        profileQuery,
+        timeoutPromise,
+      ]).catch((error) => ({
+        data: null,
+        error,
+      }))
+
       const profileData = (
         profileResult as { data: { role?: Profile['role'] } | null }
       ).data
-      const profileError = (profileResult as { error?: unknown }).error
-
-      if (profileError) {
-        console.warn(
-          "⚠️ [Auth] Profile fetch skipped/failed (using default 'user'):",
-          profileError
-        )
-      }
-
       const role = (profileData?.role ?? 'user') as Profile['role']
-
-      console.log(`✅ [Auth] Logged in as ${role}`)
       set({
         session,
         user: session.user,
@@ -112,6 +104,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: null, session: null, role: null, loading: false })
       try {
         localStorage.clear()
+        sessionStorage.clear()
       } catch (error) {
         console.error(error)
       }

@@ -2,15 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
-import App from './App.jsx'
+import App from './App.tsx'
 
 const APP_VERSION = 'v1.1.0'
 const storedVersion = localStorage.getItem('app_version')
 
 if (storedVersion !== APP_VERSION) {
-  console.log(
-    `♻️ [Cache Buster] Detecting update from ${storedVersion} to ${APP_VERSION}. Cleaning up...`
-  )
   localStorage.clear()
   sessionStorage.clear()
   localStorage.setItem('app_version', APP_VERSION)

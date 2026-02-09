@@ -71,19 +71,17 @@ export function useAppLauncher(): AppLauncherState {
   const launchApp = useCallback(
     async (app: Application) => {
       if (user) {
-        // ✅ 核心修复：字段名修正为 app_id
-        const { error: upsertError } = await supabase
+        const { error: insertError } = await supabase
           .from('user_app_access')
-          .upsert({
+          .insert({
             user_id: user.id,
-            app_id: app.id, // 这里之前是 application_id (错误)，现已修正为 app_id
+            app_id: app.id,
+            app_name: app.name,
             last_accessed_at: new Date().toISOString(),
-          }, {
-            onConflict: 'user_id, app_id'
           })
 
-        if (upsertError) {
-          console.error('Failed to upsert user_app_access:', upsertError)
+        if (insertError) {
+          console.error('Failed to insert user_app_access:', insertError)
         }
       }
 

@@ -16,7 +16,7 @@ export type Profile = {
 export type UserAppAccess = {
   id: string
   user_id: string
-  application_id: string
+  app_id: string
+  app_name: string
   last_accessed_at: string | null
-  created_at: string | null
 }
