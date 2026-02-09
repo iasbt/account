@@ -1,0 +1,211 @@
+# Account System - 最新合并版开发与维护日志
+
+> 版本: v2.3.0  
+> 更新日期: 2026-02-10  
+> 适用对象: 新开发者 / 产品负责人 / 维护人员  
+> 目标: 基于当前代码与历史演进，形成唯一可信的最新版本
+
+---
+
+## 1. 项目定位与核心价值
+
+Account System 是 Life OS 生态的统一身份中心，负责注册登录、权限控制、Token 发放与 SSO 回跳。核心价值在于为所有子应用提供稳定一致的身份底座与权限入口。
+
+---
+
+## 2. 现状技术栈与环境
+
+- 前端框架: React 19 + Vite
+- 语言: TypeScript
+- 路由: React Router v7
+- 状态管理: Zustand
+- 后端服务: Supabase (Auth + Postgres)
+- 样式: TailwindCSS
+- 部署: Vercel (SPA Rewrite)
+
+**环境变量**
+- VITE_SUPABASE_URL
+- VITE_SUPABASE_ANON_KEY
+- VITE_SSO_REDIRECT_ALLOWLIST
+
+---
+
+## 3. 关键架构与入口
+
+**入口与自动排毒**
+- main.tsx 在挂载前比对 APP_VERSION，不一致即清理缓存并刷新。
+
+**路由与权限**
+- App.tsx 为唯一入口路由，/login 为公共入口，/ 为登录后启动台，/admin 为管理端入口。
+- AdminGuard 仅允许 role=admin 访问管理端，未授权统一回退。
+
+**认证状态**
+- useAuthStore 负责 session 与 role 初始化，profile 查询设定 2 秒超时兜底为 user。
+- signOut 强制清理本地缓存并硬刷新，避免移动端状态残留。
+
+**SSO**
+- LoginForm 支持 redirect 回跳，并按 VITE_SSO_REDIRECT_ALLOWLIST 校验目标域名。
+
+**业务页面**
+- DashboardPage 展示应用启动台。
+- ApplicationsPage 管理子应用接入配置与接入片段输出。
+- UsersPage 管理用户角色与列表。
+
+---
+
+## 4. 关键业务链路
+
+**链路 A：用户登录与鉴权**
+1. 用户进入 /login
+2. 登录成功进入 /
+3. useAuthStore 初始化 session 与 role
+4. role=admin 可访问 /admin
+
+**链路 B：子应用接入与 SSO**
+1. 子应用跳转 /login?redirect=xxx
+2. 登录成功后回跳外部应用
+3. 启动台展示可用应用入口
+4. 应用访问日志写入 user_app_access
+
+**链路 C：管理员运营**
+1. 管理员访问 /admin
+2. 管理应用接入配置与用户角色
+3. 必要时在 profiles 表中手动提升权限
+
+---
+
+## 5. 数据库与权限模型
+
+**profiles**
+- 角色来源: profiles.role (user/admin)
+- 触发器: 新用户注册后自动写入 profiles
+
+**applications**
+- 维护子应用接入信息
+- 关键字段: id, code, name, icon_url, redirect_url, auth_mode
+
+**user_app_access**
+- 记录用户访问应用的行为
+- 关键字段: user_id, app_id, app_name, last_accessed_at
+
+**RLS**
+- profiles 与 user_app_access 需启用并保证读写策略一致
+
+---
+
+## 6. 运维与发布规范
+
+- 修改认证逻辑必须更新 APP_VERSION，触发 Auto-Detox
+- Admin 入口保持隐藏，仅允许直接访问 /admin
+- SSO 回跳必须通过 allowlist 校验
+- 合并前需通过 lint、typecheck、build
+- Vercel 必须启用 SPA rewrite
+
+---
+
+## 7. 风险与缺口
+
+- 类型定义与数据库字段可能存在偏差，需要定期核对
+- 缺少自动化测试与回归脚本
+- 管理员权限依赖数据库手动操作
+- 接入文档与实际接入流程需持续同步
+
+---
+
+## 8. 产品路线（合并版）
+
+**近期目标**
+- 入口标准统一：仅保留 App.tsx 路由体系
+- 登录与回跳一致：来源优先、无来源回启动台
+- SSO 回跳安全：白名单校验与链接格式统一
+- 应用接入流程完善：接入片段与最小校验内置
+- 权限模型对齐：profiles.role 为唯一权限源
+- 类型与表结构一致性：database.types.ts 与数据库对齐
+- 最小审计闭环：user_app_access 访问可追踪
+
+**中期目标**
+- 形成 RBAC 可配置化角色矩阵
+- 管理员授权流程化并可回溯
+- 子应用接入状态可视化与健康检查
+- 访问统计与错误码规范化
+
+**长期目标**
+- 提供统一身份 SDK 或回调模板
+- 构建权限审计与风控能力
+- 支持多租户与组织级管理
+- 统一身份与应用运营指标看板
+
+---
+
+## 9. SSO 集成清单与落地文件
+
+**清单**
+- 阶段 1（基础一致性）：登录回跳来源优先、非法回跳拦截、统一回跳路径策略
+- 阶段 2（令牌与交付）：token 交付模式规范、最小化暴露、刷新策略
+- 阶段 3（会话同步）：跨系统会话续期、统一登出、权限对齐
+- 阶段 4（安全与审计）：访问审计闭环、异常追踪与可观测指标
+
+**对应文件**
+- LOG/SSO/PHASE_1_BASIC.md
+- LOG/SSO/PHASE_2_TOKEN.md
+- LOG/SSO/PHASE_3_SESSION.md
+- LOG/SSO/PHASE_4_OBSERVABILITY.md
+
+---
+
+## 10. 开发记录
+
+### 2026-02-10T12:00:00+08:00 - v2.1.1 - 功能开发 - SSO 阶段1/登录回跳 - 完成回跳策略与单元测试
+- 作者: Account Maintainer
+- 评审人: Security Reviewer
+- 新增功能列表: 登录回跳来源优先、非法回跳拦截、回跳路径策略统一、回跳解析工具
+- 修改的代码文件清单: src/features/auth/components/LoginForm.tsx, src/features/auth/utils/redirect.ts, src/features/auth/utils/redirect.test.ts, LOG/SSO/PHASE_1_BASIC.md, package.json
+- 已修复的缺陷编号: 无
+- 性能优化点: 同源回跳改为前端导航减少整页刷新
+- 接口变更说明: 无
+- 测试覆盖率统计: 未配置覆盖率工具，已执行单元测试
+- 潜在风险点: 允许的回跳白名单配置不完整可能导致合法回跳被阻断
+
+### 2026-02-10T13:10:00+08:00 - v2.1.2 - 安全修复 - 依赖/测试工具 - 处理依赖漏洞并升级测试框架
+- 作者: Account Maintainer
+- 评审人: Security Reviewer
+- 新增功能列表: 依赖漏洞修复、vitest 主版本升级
+- 修改的代码文件清单: package.json, package-lock.json
+- 已修复的缺陷编号: 无
+- 性能优化点: 无
+- 接口变更说明: 无
+- 测试覆盖率统计: 未配置覆盖率工具，已执行单元测试
+- 潜在风险点: 测试框架主版本升级可能导致后续用例兼容性问题
+
+### 2026-02-10T13:40:00+08:00 - v2.2.0 - 功能开发 - SSO 阶段2/令牌与交付 - 统一交付模式与交换通道
+- 作者: Account Maintainer
+- 评审人: Security Reviewer
+- 新增功能列表: token 交付统一、exchange 交付通道、回跳规范更新、子应用回跳兼容
+- 修改的代码文件清单: src/features/dashboard/hooks/useAppLauncher.ts, src/features/dashboard/utils/tokenDelivery.ts, src/features/dashboard/utils/tokenDelivery.test.ts, src/pages/SsoExchangePage.tsx, src/pages/admin/ApplicationsPage.tsx, src/App.tsx, LOG/SSO/PHASE_2_TOKEN.md
+- 已修复的缺陷编号: 无
+- 性能优化点: 无
+- 接口变更说明: 子应用回跳新增 sso_code 与 sso_origin，新增 /sso/exchange 交换通道
+- 测试覆盖率统计: 未配置覆盖率工具，新增单元测试
+- 潜在风险点: 子应用未接入 exchange 流程会导致 cookie 模式无法建立 session
+
+### 2026-02-10T14:30:00+08:00 - v2.2.1 - 功能开发 - SSO 阶段3/会话同步 - 刷新机制与统一登出
+- 作者: Account Maintainer
+- 评审人: Security Reviewer
+- 新增功能列表: 会话刷新机制、跨标签页统一登出、会话状态同步
+- 修改的代码文件清单: src/store/useAuthStore.ts, src/App.tsx, LOG/SSO/PHASE_3_SESSION.md
+- 已修复的缺陷编号: 无
+- 性能优化点: 无
+- 接口变更说明: 无
+- 测试覆盖率统计: 未配置覆盖率工具，已执行单元测试
+- 潜在风险点: 跨标签页登出广播触发重复登出动作
+
+### 2026-02-10T15:10:00+08:00 - v2.3.0 - 功能开发 - SSO 阶段4/安全与审计 - 指标与审计落地
+- 作者: Account Maintainer
+- 评审人: Security Reviewer
+- 新增功能列表: 登录与注册审计日志、回跳阻断与交换失败指标、登录耗时统计
+- 修改的代码文件清单: src/features/auth/hooks/useAuth.ts, src/features/auth/utils/metrics.ts, src/features/auth/utils/metrics.test.ts, src/features/auth/components/LoginForm.tsx, src/pages/SsoExchangePage.tsx, LOG/SSO/PHASE_4_OBSERVABILITY.md
+- 已修复的缺陷编号: 无
+- 性能优化点: 无
+- 接口变更说明: 无
+- 测试覆盖率统计: 未配置覆盖率工具，新增单元测试
+- 潜在风险点: 前端指标仅存储在本地，需配合后端采集完善

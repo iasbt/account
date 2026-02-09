@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Loader2, LogIn, UserPlus } from 'lucide-react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { resolvePostLoginDestination } from '../utils/redirect'
+import { recordMetric } from '../utils/metrics'
 import { useAuthStore } from '../../../store/useAuthStore'
 
 type Mode = 'login' | 'signup'
@@ -14,6 +16,7 @@ export default function LoginForm() {
   const loading = useAuthStore((state) => state.loading)
   const { signInWithEmail, signUp } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const redirectUrl = searchParams.get('redirect')
   const allowlistRaw = import.meta.env.VITE_SSO_REDIRECT_ALLOWLIST ?? ''
@@ -21,21 +24,25 @@ export default function LoginForm() {
     .split(',')
     .map((item: string) => item.trim())
     .filter(Boolean)
+  const fromState = (
+    location.state as
+      | { from?: { pathname?: string; search?: string; hash?: string } }
+      | null
+  )?.from
+  const fromPath =
+    fromState?.pathname && fromState.pathname !== '/login'
+      ? `${fromState.pathname ?? ''}${fromState.search ?? ''}${fromState.hash ?? ''}`
+      : '/'
 
-  const isAllowedRedirect = (target: string) => {
+  useEffect(() => {
     try {
-      const resolved = new URL(target, window.location.origin)
-      if (resolved.origin === window.location.origin) {
-        return true
+      if (!sessionStorage.getItem('login_start_ts')) {
+        sessionStorage.setItem('login_start_ts', String(Date.now()))
       }
-      return (
-        allowedHosts.includes(resolved.host) ||
-        allowedHosts.includes(resolved.hostname)
-      )
     } catch {
-      return false
+      return
     }
-  }
+  }, [])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -56,15 +63,36 @@ export default function LoginForm() {
       return
     }
 
-    if (redirectUrl) {
-      if (isAllowedRedirect(redirectUrl)) {
-        window.location.href = redirectUrl
-        return
-      }
-      setError('回跳地址不允许')
+    const { destination, error: redirectError } = resolvePostLoginDestination({
+      redirectUrl,
+      allowedHosts,
+      baseOrigin: window.location.origin,
+      fromPath,
+    })
+
+    if (redirectError) {
+      recordMetric(localStorage, 'redirect_blocked')
+      setError(redirectError)
+      return
     }
 
-    navigate('/', { replace: true })
+    try {
+      const start = sessionStorage.getItem('login_start_ts')
+      if (start) {
+        const duration = Date.now() - Number(start)
+        recordMetric(localStorage, 'login_duration_ms', Math.max(0, duration))
+        sessionStorage.removeItem('login_start_ts')
+      }
+    } catch {
+      return
+    }
+
+    if (destination?.kind === 'external') {
+      window.location.href = destination.url
+      return
+    }
+
+    navigate(destination?.url ?? '/', { replace: true })
   }
 
   const isLogin = mode === 'login'

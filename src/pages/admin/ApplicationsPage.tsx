@@ -222,6 +222,40 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 )
+const accountUrl = import.meta.env.VITE_ACCOUNT_URL
+
+const requestExchange = (code: string, origin: string) =>
+  new Promise<{ accessToken: string; refreshToken: string } | null>((resolve) => {
+    const targetOrigin = new URL(origin).origin
+    const iframe = document.createElement('iframe')
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== targetOrigin) return
+      const data = event.data
+      if (data?.type === 'sso_exchange_success' && data.code === code) {
+        cleanup()
+        resolve({
+          accessToken: data.session.accessToken,
+          refreshToken: data.session.refreshToken,
+        })
+        return
+      }
+      if (data?.type === 'sso_exchange_error' && data.code === code) {
+        cleanup()
+        resolve(null)
+      }
+    }
+    const cleanup = () => {
+      window.removeEventListener('message', handler)
+      iframe.remove()
+    }
+    window.addEventListener('message', handler)
+    iframe.setAttribute('aria-hidden', 'true')
+    iframe.style.display = 'none'
+    iframe.src = \`\${targetOrigin}/sso/exchange?code=\${encodeURIComponent(code)}&target_origin=\${encodeURIComponent(
+      window.location.origin
+    )}\`
+    document.body.appendChild(iframe)
+  })
 
 export default function AuthCallback() {
   const navigate = useNavigate()
@@ -233,7 +267,25 @@ export default function AuthCallback() {
     const refreshToken = params.get('refresh_token')
 
     if (!accessToken || !refreshToken) {
-      navigate('/')
+      const searchParams = new URLSearchParams(window.location.search)
+      const ssoCode = searchParams.get('sso_code')
+      const ssoOrigin = searchParams.get('sso_origin') ?? accountUrl
+      if (!ssoCode || !ssoOrigin) {
+        navigate('/')
+        return
+      }
+      requestExchange(ssoCode, ssoOrigin).then((session) => {
+        if (!session) {
+          navigate('/')
+          return
+        }
+        supabase.auth
+          .setSession({
+            access_token: session.accessToken,
+            refresh_token: session.refreshToken,
+          })
+          .finally(() => navigate('/'))
+      })
       return
     }
 

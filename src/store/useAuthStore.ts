@@ -10,7 +10,8 @@ type AuthState = {
   loading: boolean
   initialize: () => Promise<void>
   syncSession: (session: Session | null) => Promise<void>
-  signOut: () => Promise<void>
+  refreshSession: () => Promise<void>
+  signOut: (options?: { broadcast?: boolean }) => Promise<void>
   setUser: (user: User | null) => void
   setRole: (role: Profile['role'] | null) => void
   setSession: (session: Session | null) => void
@@ -95,7 +96,33 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false })
     }
   },
-  signOut: async () => {
+  refreshSession: async () => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession()
+      if (error) {
+        set({ user: null, session: null, role: null })
+        return
+      }
+      await useAuthStore.getState().syncSession(data.session)
+    } catch (error) {
+      console.error('Auth Refresh Error:', error)
+      set({ user: null, session: null, role: null })
+    }
+  },
+  signOut: async (options) => {
+    const shouldBroadcast = options?.broadcast !== false
+    if (shouldBroadcast) {
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const channel = new BroadcastChannel('account-auth')
+          channel.postMessage({ type: 'signout' })
+          channel.close()
+        }
+        localStorage.setItem('account.signout', String(Date.now()))
+      } catch (error) {
+        console.error(error)
+      }
+    }
     try {
       await supabase.auth.signOut()
     } catch (error) {

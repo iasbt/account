@@ -3,6 +3,10 @@
 ````
 # Account System - 终极开发全书 (The Project Bible)
 
+> 状态: 已归档
+> 归档时间: 2026-02-09
+> 归档责任人: Account Maintainer
+>
 > **版本**: v2.0.0 (Ultimate Edition)
 > **最后更新**: 2026-02-05
 > **文档密级**: 最高 (Top Secret)

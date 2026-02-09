@@ -11,6 +11,7 @@ import AdminLayout from './layouts/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import ApplicationsPage from './pages/admin/ApplicationsPage'
 import UsersPage from './pages/admin/UsersPage'
+import SsoExchangePage from './pages/SsoExchangePage'
 
 function FullScreenLoader() {
   return (
@@ -52,6 +53,8 @@ function PublicOnly({ children }: { children: ReactElement }) {
 export default function App() {
   const initialize = useAuthStore((state) => state.initialize)
   const syncSession = useAuthStore((state) => state.syncSession)
+  const refreshSession = useAuthStore((state) => state.refreshSession)
+  const signOut = useAuthStore((state) => state.signOut)
 
   useEffect(() => {
     let active = true
@@ -67,11 +70,57 @@ export default function App() {
       await syncSession(session)
     })
 
+    const channel =
+      typeof BroadcastChannel !== 'undefined'
+        ? new BroadcastChannel('account-auth')
+        : null
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'signout') {
+        signOut({ broadcast: false })
+      }
+    }
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'account.signout' && event.newValue) {
+        signOut({ broadcast: false })
+      }
+    }
+
+    const handleFocus = () => {
+      refreshSession()
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        refreshSession()
+      }
+    }
+
+    if (channel) {
+      channel.addEventListener('message', handleMessage)
+    }
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    const refreshTimer = window.setInterval(() => {
+      refreshSession()
+    }, 10 * 60 * 1000)
+
     return () => {
       active = false
       data.subscription.unsubscribe()
+      if (channel) {
+        channel.removeEventListener('message', handleMessage)
+        channel.close()
+      }
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.clearInterval(refreshTimer)
     }
-  }, [initialize, syncSession])
+  }, [initialize, syncSession, refreshSession, signOut])
 
   return (
     <Routes>
@@ -91,6 +140,7 @@ export default function App() {
           </RequireAuth>
         }
       />
+      <Route path="/sso/exchange" element={<SsoExchangePage />} />
       <Route element={<AdminGuard />}>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />

@@ -2,6 +2,10 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { useAuthStore } from '../../../store/useAuthStore'
 import type { Application } from '../../../types/database.types'
+import {
+  buildExchangeRedirect,
+  buildFragmentRedirect,
+} from '../utils/tokenDelivery'
 
 type AppLauncherState = {
   apps: Application[]
@@ -94,10 +98,22 @@ export function useAppLauncher(): AppLauncherState {
       }
 
       if (app.auth_mode === 'fragment') {
-        const accessToken = encodeURIComponent(session.access_token)
-        const refreshToken = encodeURIComponent(session.refresh_token)
-        const targetUrl = `${app.redirect_url}#access_token=${accessToken}&refresh_token=${refreshToken}&type=recovery`
-        window.location.href = targetUrl
+        window.location.href = buildFragmentRedirect(app.redirect_url, session)
+        return
+      }
+
+      if (app.auth_mode === 'cookie') {
+        const exchange = buildExchangeRedirect({
+          redirectUrl: app.redirect_url,
+          session,
+          accountOrigin: window.location.origin,
+          storage: window.sessionStorage,
+        })
+        if (exchange) {
+          window.location.href = exchange.url
+          return
+        }
+        window.location.href = buildFragmentRedirect(app.redirect_url, session)
         return
       }
 

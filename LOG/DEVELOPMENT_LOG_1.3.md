@@ -5,6 +5,10 @@
 
 # Account System - 终极全息开发档案 (The Grand Master Edition)
 
+> 状态: 已归档
+> 归档时间: 2026-02-09
+> 归档责任人: Account Maintainer
+
 > **版本**: v5.0.0 (Grand Master)
 > **最后更新**: 2026-02-05
 > **密级**: 核心绝密 (Top Secret)
