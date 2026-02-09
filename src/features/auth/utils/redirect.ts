@@ -29,6 +29,41 @@ export const normalizeFromPath = (fromPath?: string | null) => {
   return fromPath
 }
 
+export const resolveReferrerRedirect = ({
+  referrer,
+  allowedHosts,
+  baseOrigin,
+  callbackPath = '/auth/callback',
+}: {
+  referrer?: string | null
+  allowedHosts: string[]
+  baseOrigin: string
+  callbackPath?: string
+}): string | null => {
+  if (!referrer) {
+    return null
+  }
+
+  try {
+    const resolved = new URL(referrer)
+    if (resolved.origin === baseOrigin) {
+      return null
+    }
+
+    if (
+      !allowedHosts.includes(resolved.host) &&
+      !allowedHosts.includes(resolved.hostname)
+    ) {
+      return null
+    }
+
+    const callbackUrl = new URL(callbackPath, resolved.origin)
+    return callbackUrl.toString()
+  } catch {
+    return null
+  }
+}
+
 export const resolvePostLoginDestination = ({
   redirectUrl,
   allowedHosts,

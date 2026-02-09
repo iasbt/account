@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Loader2, LogIn, UserPlus } from 'lucide-react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { resolvePostLoginDestination } from '../utils/redirect'
+import {
+  resolvePostLoginDestination,
+  resolveReferrerRedirect,
+} from '../utils/redirect'
 import { recordMetric } from '../utils/metrics'
 import { useAuthStore } from '../../../store/useAuthStore'
 
@@ -34,6 +37,16 @@ export default function LoginForm() {
       ? `${fromState.pathname ?? ''}${fromState.search ?? ''}${fromState.hash ?? ''}`
       : '/'
 
+  const referrerRedirect = useMemo(
+    () =>
+      resolveReferrerRedirect({
+        referrer: document.referrer,
+        allowedHosts,
+        baseOrigin: window.location.origin,
+      }),
+    [allowedHosts]
+  )
+
   useEffect(() => {
     try {
       if (!sessionStorage.getItem('login_start_ts')) {
@@ -64,7 +77,7 @@ export default function LoginForm() {
     }
 
     const { destination, error: redirectError } = resolvePostLoginDestination({
-      redirectUrl,
+      redirectUrl: redirectUrl ?? referrerRedirect,
       allowedHosts,
       baseOrigin: window.location.origin,
       fromPath,

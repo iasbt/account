@@ -9,7 +9,10 @@ type AuthState = {
   session: Session | null
   loading: boolean
   initialize: () => Promise<void>
-  syncSession: (session: Session | null) => Promise<void>
+  syncSession: (
+    session: Session | null,
+    options?: { silent?: boolean }
+  ) => Promise<void>
   refreshSession: () => Promise<void>
   signOut: (options?: { broadcast?: boolean }) => Promise<void>
   setUser: (user: User | null) => void
@@ -68,21 +71,39 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false })
     }
   },
-  syncSession: async (session) => {
-    set({ loading: true })
+  syncSession: async (session, options) => {
+    const silent = options?.silent
+    if (!silent) {
+      set({ loading: true })
+    }
     try {
       if (!session) {
         set({ user: null, session: null, role: null })
         return
       }
 
-      const { data: profile } = await supabase
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Profile query timeout')), 2000)
+      )
+
+      const profileQuery = supabase
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
         .single()
 
-      const role = (profile?.role ?? 'user') as Profile['role']
+      const profileResult = await Promise.race([
+        profileQuery,
+        timeoutPromise,
+      ]).catch((error) => ({
+        data: null,
+        error,
+      }))
+
+      const profileData = (
+        profileResult as { data: { role?: Profile['role'] } | null }
+      ).data
+      const role = (profileData?.role ?? 'user') as Profile['role']
 
       set({
         session,
@@ -93,7 +114,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.error('Auth Init Error:', error)
       set({ user: null, session: null, role: null })
     } finally {
-      set({ loading: false })
+      if (!silent) {
+        set({ loading: false })
+      }
     }
   },
   refreshSession: async () => {
@@ -103,7 +126,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user: null, session: null, role: null })
         return
       }
-      await useAuthStore.getState().syncSession(data.session)
+      await useAuthStore.getState().syncSession(data.session, { silent: true })
     } catch (error) {
       console.error('Auth Refresh Error:', error)
       set({ user: null, session: null, role: null })

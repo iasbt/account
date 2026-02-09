@@ -3,6 +3,7 @@ import {
   isAllowedRedirect,
   normalizeFromPath,
   resolvePostLoginDestination,
+  resolveReferrerRedirect,
 } from './redirect'
 
 describe('isAllowedRedirect', () => {
@@ -85,5 +86,37 @@ describe('resolvePostLoginDestination', () => {
     })
     expect(result.error).toBeNull()
     expect(result.destination).toEqual({ kind: 'internal', url: '/apps' })
+  })
+})
+
+describe('resolveReferrerRedirect', () => {
+  const baseOrigin = 'https://account.test'
+  const allowedHosts = ['app.test', 'app.test:8080']
+
+  it('returns callback path for allowed referrer origin', () => {
+    const result = resolveReferrerRedirect({
+      referrer: 'https://app.test/sso/login',
+      allowedHosts,
+      baseOrigin,
+    })
+    expect(result).toBe('https://app.test/auth/callback')
+  })
+
+  it('returns null for same-origin referrer', () => {
+    const result = resolveReferrerRedirect({
+      referrer: 'https://account.test/login',
+      allowedHosts,
+      baseOrigin,
+    })
+    expect(result).toBeNull()
+  })
+
+  it('returns null for disallowed referrer', () => {
+    const result = resolveReferrerRedirect({
+      referrer: 'https://evil.test/login',
+      allowedHosts,
+      baseOrigin,
+    })
+    expect(result).toBeNull()
   })
 })
