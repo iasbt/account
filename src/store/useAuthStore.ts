@@ -8,6 +8,7 @@ type AuthState = {
   role: Profile['role'] | null
   session: Session | null
   loading: boolean
+  initialized: boolean
   initialize: () => Promise<void>
   syncSession: (
     session: Session | null,
@@ -26,6 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   role: null,
   session: null,
   loading: true,
+  initialized: false,
   initialize: async () => {
     set({ loading: true })
     try {
@@ -68,7 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       console.error('Auth Init Error:', error)
       set({ user: null, session: null, role: null })
     } finally {
-      set({ loading: false })
+      set({ loading: false, initialized: true })
     }
   },
   syncSession: async (session, options) => {

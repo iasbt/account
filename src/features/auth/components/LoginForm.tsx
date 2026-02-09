@@ -37,15 +37,22 @@ export default function LoginForm() {
       ? `${fromState.pathname ?? ''}${fromState.search ?? ''}${fromState.hash ?? ''}`
       : '/'
 
-  const referrerRedirect = useMemo(
-    () =>
-      resolveReferrerRedirect({
-        referrer: document.referrer,
-        allowedHosts,
-        baseOrigin: window.location.origin,
-      }),
-    [allowedHosts]
-  )
+  const referrerRedirect = useMemo(() => {
+    return resolveReferrerRedirect({
+      referrer: document.referrer,
+      allowedHosts,
+      baseOrigin: window.location.origin,
+    })
+  }, [allowedHosts])
+
+  const referrerOrigin = useMemo(() => {
+    if (!document.referrer) return null
+    try {
+      return new URL(document.referrer).origin
+    } catch {
+      return null
+    }
+  }, [])
 
   useEffect(() => {
     try {
@@ -81,6 +88,7 @@ export default function LoginForm() {
       allowedHosts,
       baseOrigin: window.location.origin,
       fromPath,
+      referrerOrigin,
     })
 
     if (redirectError) {

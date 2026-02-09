@@ -69,15 +69,37 @@ export const resolvePostLoginDestination = ({
   allowedHosts,
   baseOrigin,
   fromPath,
+  referrerOrigin,
 }: {
   redirectUrl: string | null
   allowedHosts: string[]
   baseOrigin: string
   fromPath?: string | null
+  referrerOrigin?: string | null
 }): RedirectDecision => {
   const normalizedFromPath = normalizeFromPath(fromPath)
 
   if (redirectUrl) {
+    const looksRelative =
+      !redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')
+    if (looksRelative && referrerOrigin) {
+      try {
+        const referrerHost = new URL(referrerOrigin).host
+        if (
+          allowedHosts.includes(referrerHost) ||
+          allowedHosts.includes(new URL(referrerOrigin).hostname)
+        ) {
+          const resolved = new URL(redirectUrl, referrerOrigin)
+          return {
+            destination: { kind: 'external', url: resolved.toString() },
+            error: null,
+          }
+        }
+      } catch {
+        return { destination: null, error: '回跳地址不允许' }
+      }
+    }
+
     if (!isAllowedRedirect(redirectUrl, allowedHosts, baseOrigin)) {
       return { destination: null, error: '回跳地址不允许' }
     }

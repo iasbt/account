@@ -66,6 +66,21 @@ describe('resolvePostLoginDestination', () => {
     })
   })
 
+  it('resolves relative redirect against referrer origin', () => {
+    const result = resolvePostLoginDestination({
+      redirectUrl: '/auth/callback',
+      allowedHosts,
+      baseOrigin,
+      fromPath: '/dashboard',
+      referrerOrigin: 'https://app.test',
+    })
+    expect(result.error).toBeNull()
+    expect(result.destination).toEqual({
+      kind: 'external',
+      url: 'https://app.test/auth/callback',
+    })
+  })
+
   it('returns error for disallowed redirect', () => {
     const result = resolvePostLoginDestination({
       redirectUrl: 'https://evil.test/callback',
