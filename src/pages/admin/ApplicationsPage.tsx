@@ -57,6 +57,9 @@ const ensureLoaded = () => {
 }
 
 const tabItems = [
+  { id: 'quick', label: 'Quick Start' },
+  { id: 'login', label: 'Login URL' },
+  { id: 'button', label: 'Login Button' },
   { id: 'env', label: '.env' },
   { id: 'callback', label: 'AuthCallback.tsx' },
   { id: 'router', label: 'Router' },
@@ -213,6 +216,35 @@ export default function ApplicationsPage() {
     return `VITE_SUPABASE_URL=${supabaseUrl}\nVITE_SUPABASE_ANON_KEY=${supabaseKey}\nVITE_ACCOUNT_URL=${accountUrl}`
   }, [])
 
+  const accountOrigin = useMemo(() => window.location.origin, [])
+
+  const appOrigin = useMemo(() => {
+    if (!createdApp?.redirect_url) return ''
+    try {
+      return new URL(createdApp.redirect_url).origin
+    } catch {
+      return ''
+    }
+  }, [createdApp])
+
+  const loginUrlSnippet = useMemo(() => {
+    if (!createdApp?.redirect_url) return ''
+    const loginUrl = new URL('/login', accountOrigin)
+    loginUrl.searchParams.set('redirect', createdApp.redirect_url)
+    if (appOrigin) {
+      loginUrl.searchParams.set('redirect_origin', appOrigin)
+    }
+    return loginUrl.toString()
+  }, [accountOrigin, appOrigin, createdApp])
+
+  const loginButtonSnippet = useMemo(() => {
+    return `const accountUrl = import.meta.env.VITE_ACCOUNT_URL
+const loginUrl = new URL('/login', accountUrl)
+loginUrl.searchParams.set('redirect', \`\${window.location.origin}/auth/callback\`)
+loginUrl.searchParams.set('redirect_origin', window.location.origin)
+window.location.href = loginUrl.toString()`
+  }, [])
+
   const authCallbackSnippet = useMemo(() => {
     return `import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -305,6 +337,20 @@ export default function AuthCallback() {
   <Route path="/auth/callback" element={<AuthCallback />} />
 </Routes>`
   }, [])
+
+  const quickStartSnippet = useMemo(() => {
+    return `1) 复制 .env
+${envSnippet}
+
+2) 在登录按钮中跳转
+${loginButtonSnippet}
+
+3) 添加回调页 /auth/callback
+${authCallbackSnippet}
+
+4) 在路由中挂载回调
+${routerSnippet}`
+  }, [authCallbackSnippet, envSnippet, loginButtonSnippet, routerSnippet])
 
   return (
     <div className="space-y-6">
@@ -538,6 +584,15 @@ export default function AuthCallback() {
               🚀 {createdApp.name} Created Successfully!
             </div>
             <Tabs items={tabItems} value={activeTab} onChange={setActiveTab} />
+            {activeTab === 'quick' && (
+              <CodeBlock code={quickStartSnippet} language="text" />
+            )}
+            {activeTab === 'login' && (
+              <CodeBlock code={loginUrlSnippet} language="url" />
+            )}
+            {activeTab === 'button' && (
+              <CodeBlock code={loginButtonSnippet} language="tsx" />
+            )}
             {activeTab === 'env' && (
               <CodeBlock code={envSnippet} language=".env" />
             )}

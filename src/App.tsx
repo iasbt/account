@@ -22,10 +22,10 @@ function FullScreenLoader() {
 }
 
 function RequireAuth({ children }: { children: ReactElement }) {
-  const { user, loading } = useAuthStore()
+  const { user, initialized } = useAuthStore()
   const location = useLocation()
 
-  if (loading) {
+  if (!initialized) {
     return <FullScreenLoader />
   }
 
@@ -37,9 +37,9 @@ function RequireAuth({ children }: { children: ReactElement }) {
 }
 
 function PublicOnly({ children }: { children: ReactElement }) {
-  const { user, loading } = useAuthStore()
+  const { user, initialized } = useAuthStore()
 
-  if (loading) {
+  if (!initialized) {
     return <FullScreenLoader />
   }
 
@@ -67,7 +67,7 @@ export default function App() {
 
     const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!active) return
-      await syncSession(session)
+      await syncSession(session, { silent: true })
     })
 
     const channel =
