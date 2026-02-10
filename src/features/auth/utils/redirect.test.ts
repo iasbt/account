@@ -66,13 +66,13 @@ describe('resolvePostLoginDestination', () => {
     })
   })
 
-  it('resolves relative redirect against referrer origin', () => {
+  it('resolves relative redirect against source origin', () => {
     const result = resolvePostLoginDestination({
       redirectUrl: '/auth/callback',
       allowedHosts,
       baseOrigin,
       fromPath: '/dashboard',
-      referrerOrigin: 'https://app.test',
+      sourceOrigin: 'https://app.test',
     })
     expect(result.error).toBeNull()
     expect(result.destination).toEqual({

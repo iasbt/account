@@ -69,27 +69,27 @@ export const resolvePostLoginDestination = ({
   allowedHosts,
   baseOrigin,
   fromPath,
-  referrerOrigin,
+  sourceOrigin,
 }: {
   redirectUrl: string | null
   allowedHosts: string[]
   baseOrigin: string
   fromPath?: string | null
-  referrerOrigin?: string | null
+  sourceOrigin?: string | null
 }): RedirectDecision => {
   const normalizedFromPath = normalizeFromPath(fromPath)
 
   if (redirectUrl) {
     const looksRelative =
       !redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')
-    if (looksRelative && referrerOrigin) {
+    if (looksRelative && sourceOrigin) {
       try {
-        const referrerHost = new URL(referrerOrigin).host
+        const sourceHost = new URL(sourceOrigin).host
         if (
-          allowedHosts.includes(referrerHost) ||
-          allowedHosts.includes(new URL(referrerOrigin).hostname)
+          allowedHosts.includes(sourceHost) ||
+          allowedHosts.includes(new URL(sourceOrigin).hostname)
         ) {
-          const resolved = new URL(redirectUrl, referrerOrigin)
+          const resolved = new URL(redirectUrl, sourceOrigin)
           return {
             destination: { kind: 'external', url: resolved.toString() },
             error: null,

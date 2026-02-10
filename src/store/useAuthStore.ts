@@ -31,15 +31,27 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     set({ loading: true })
     try {
-      const sessionResult = await supabase.auth.getSession()
-      const session = sessionResult.data.session
+      const sessionTimeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Session query timeout')), 2000)
+      )
+
+      const sessionResult = await Promise.race([
+        supabase.auth.getSession(),
+        sessionTimeoutPromise,
+      ]).catch((error) => ({
+        data: { session: null },
+        error,
+      }))
+      const session = (
+        sessionResult as { data: { session: Session | null } | null }
+      ).data?.session
 
       if (!session) {
         set({ user: null, session: null, role: null })
         return
       }
 
-      const timeoutPromise = new Promise<never>((_, reject) =>
+      const profileTimeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Profile query timeout')), 2000)
       )
 
@@ -51,7 +63,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       const profileResult = await Promise.race([
         profileQuery,
-        timeoutPromise,
+        profileTimeoutPromise,
       ]).catch((error) => ({
         data: null,
         error,
@@ -80,11 +92,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
     try {
       if (!session) {
-        set({ user: null, session: null, role: null })
+        set({ user: null, session: null, role: null, initialized: true })
         return
       }
 
-      const timeoutPromise = new Promise<never>((_, reject) =>
+      const profileTimeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Profile query timeout')), 2000)
       )
 
@@ -96,7 +108,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       const profileResult = await Promise.race([
         profileQuery,
-        timeoutPromise,
+        profileTimeoutPromise,
       ]).catch((error) => ({
         data: null,
         error,
@@ -111,6 +123,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         session,
         user: session.user,
         role,
+        initialized: true,
       })
     } catch (error) {
       console.error('Auth Init Error:', error)

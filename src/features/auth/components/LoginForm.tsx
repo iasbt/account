@@ -54,6 +54,20 @@ export default function LoginForm() {
     }
   }, [])
 
+  const redirectOrigin = useMemo(() => {
+    const originParam =
+      searchParams.get('redirect_origin') ??
+      searchParams.get('origin') ??
+      searchParams.get('sso_origin') ??
+      searchParams.get('target_origin')
+    if (!originParam) return referrerOrigin
+    try {
+      return new URL(originParam).origin
+    } catch {
+      return referrerOrigin
+    }
+  }, [referrerOrigin, searchParams])
+
   useEffect(() => {
     try {
       if (!sessionStorage.getItem('login_start_ts')) {
@@ -88,7 +102,7 @@ export default function LoginForm() {
       allowedHosts,
       baseOrigin: window.location.origin,
       fromPath,
-      referrerOrigin,
+      sourceOrigin: redirectOrigin,
     })
 
     if (redirectError) {
