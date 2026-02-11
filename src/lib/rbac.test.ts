@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { hasPermission, hasAnyPermission, ROLE_PERMISSIONS, Role, Permission } from './rbac';
-import { CasdoorUser } from '../store/useAuthStore';
+import type { CasdoorUser } from '../store/useAuthStore';
 
 describe('RBAC System', () => {
   // Mock Users

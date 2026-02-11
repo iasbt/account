@@ -1,4 +1,4 @@
-import { CasdoorUser } from '../store/useAuthStore';
+import type { CasdoorUser } from '../store/useAuthStore';
 
 // 1. 定义权限原子 (Permissions)
 // 使用 "资源:动作" 的格式，清晰明确
