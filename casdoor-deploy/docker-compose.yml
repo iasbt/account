@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  casdoor:
+    image: casbin/casdoor:latest
+    container_name: casdoor
+    restart: always
+    environment:
+      driverName: mysql
+      dataSourceName: root:your_password@tcp(casdoor-db:3306)/
+      dbName: casdoor
+    ports:
+      - "8000:8000"
+    depends_on:
+      - casdoor-db
+    volumes:
+      - ./conf/app.conf:/conf/app.conf
+
+  casdoor-db:
+    image: mysql:8.0
+    container_name: casdoor-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: your_password
+      MYSQL_DATABASE: casdoor
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    # 生产环境建议不暴露数据库端口到公网，仅内部网络访问
+    # ports:
+    #   - "3306:3306"
