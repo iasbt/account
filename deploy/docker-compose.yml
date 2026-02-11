@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # --- 核心数据库 ---
+  # --- 核心数据库 (Casdoor / Auth) ---
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -18,6 +18,27 @@ services:
       - iasbt-net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- 业务数据库 (原 Supabase 数据迁移目标) ---
+  postgres:
+    image: postgres:15
+    container_name: postgres-business
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_ROOT_PASSWORD}
+      POSTGRES_DB: supabase_backup
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # 暴露端口以便迁移数据，生产环境建议关闭或限制 IP
+    networks:
+      - iasbt-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5

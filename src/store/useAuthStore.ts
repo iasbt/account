@@ -115,6 +115,71 @@ export const useAuthStore = create<AuthState>()(
           console.error('Failed to get user info:', userJson.msg);
         }
       },
+      logout: () => {
+        set({ token: null, user: null, isAuthenticated: false });
+        sessionStorage.removeItem('casdoor_code_verifier');
+        // 可选：跳转到 Casdoor 注销
+        // window.location.href = `${casdoorConfig.serverUrl}/logout`;
+      },
+
+      handleCallback: async (code) => {
+        const verifier = sessionStorage.getItem('casdoor_code_verifier');
+        if (!verifier) {
+          throw new Error('Missing code_verifier. Please login again.');
+        }
+
+        const redirectUri = `${window.location.origin}${casdoorConfig.redirectPath}`;
+        
+        const params = new URLSearchParams();
+        params.append('grant_type', 'authorization_code');
+        params.append('client_id', casdoorConfig.clientId);
+        params.append('code', code);
+        params.append('redirect_uri', redirectUri);
+        params.append('code_verifier', verifier);
+
+        const res = await fetch(`${casdoorConfig.serverUrl}/api/login/oauth/access_token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: params.toString(),
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(`Token exchange failed: ${err}`);
+        }
+
+        const data = await res.json();
+        
+        // 解析 User Info (简单解码或再次请求 userinfo 端点)
+        const userRes = await fetch(`${casdoorConfig.serverUrl}/api/userinfo`, {
+          headers: {
+            'Authorization': `Bearer ${data.access_token}`
+          }
+        });
+        
+        if (userRes.ok) {
+           const userData = await userRes.json();
+           set({ 
+             token: data.access_token, 
+             user: {
+               id: userData.sub || userData.id,
+               name: userData.name,
+               displayName: userData.displayName || userData.name,
+               avatar: userData.avatar,
+               email: userData.email,
+               isAdmin: userData.isAdmin || false // Casdoor userinfo 可能包含 isAdmin
+             }, 
+             isAuthenticated: true 
+           });
+        } else {
+           // Fallback if userinfo endpoint fails
+           set({ token: data.access_token, isAuthenticated: true });
+        }
+        
+        sessionStorage.removeItem('casdoor_code_verifier');
+      },
     }),
     {
       name: 'auth-storage',

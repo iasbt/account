@@ -7,7 +7,8 @@ BACKUP_DIR="./backups"
 DATA_DIR="./data"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 FILENAME="iasbt_stack_backup_$TIMESTAMP.tar.gz"
-DB_DUMP_NAME="mysql_dump_$TIMESTAMP.sql"
+MYSQL_DUMP_NAME="mysql_dump_$TIMESTAMP.sql"
+PG_DUMP_NAME="postgres_dump_$TIMESTAMP.sql"
 
 # 加载环境变量
 if [ -f .env ]; then
@@ -20,11 +21,19 @@ echo "[Start] 开始备份任务: $TIMESTAMP"
 mkdir -p $BACKUP_DIR
 
 # 2. 导出数据库 (热备份)
-echo "[Step 1] 导出 MySQL 数据..."
-docker exec mysql mysqldump -u root -p"$DB_ROOT_PASSWORD" --all-databases > "$BACKUP_DIR/$DB_DUMP_NAME"
+echo "[Step 1] 导出数据库..."
 
-if [ $? -ne 0 ]; then
-    echo "[Error] 数据库导出失败！"
+# 2.1 MySQL
+echo "  - 正在导出 MySQL..."
+docker exec mysql mysqldump -u root -p"$DB_ROOT_PASSWORD" --all-databases > "$BACKUP_DIR/$MYSQL_DUMP_NAME"
+
+# 2.2 Postgres (Supabase 迁移数据)
+echo "  - 正在导出 Postgres..."
+# 注意：如果容器未启动或不存在，此步骤可能会报错，增加 || true 忽略错误
+docker exec postgres-business pg_dump -U postgres supabase_backup > "$BACKUP_DIR/$PG_DUMP_NAME" 2>/dev/null || echo "Warning: Postgres backup failed or container not running"
+
+if [ ! -f "$BACKUP_DIR/$MYSQL_DUMP_NAME" ]; then
+    echo "[Error] 主要数据库(MySQL)导出失败！"
     exit 1
 fi
 
@@ -35,10 +44,12 @@ tar -czf "$BACKUP_DIR/$FILENAME" \
     docker-compose.yml \
     .env \
     "$DATA_DIR" \
-    "$BACKUP_DIR/$DB_DUMP_NAME"
+    "$BACKUP_DIR/$MYSQL_DUMP_NAME" \
+    "$BACKUP_DIR/$PG_DUMP_NAME"
 
 # 4. 清理临时 SQL 文件
-rm "$BACKUP_DIR/$DB_DUMP_NAME"
+rm "$BACKUP_DIR/$MYSQL_DUMP_NAME"
+rm -f "$BACKUP_DIR/$PG_DUMP_NAME"
 
 # 5. 上传到 S3 (需要预先配置好 AWS CLI)
 # 如果没有配置 AWS CLI，这步会失败。建议使用 rclone 或简单的 curl PUT

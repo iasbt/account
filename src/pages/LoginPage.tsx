@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { UserCircle } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { useSearchParams } from 'react-router-dom'
+import { casdoorConfig } from '../lib/casdoor'
 
 export default function LoginPage() {
   const loginWithPassword = useAuthStore((state) => state.loginWithPassword)
@@ -34,6 +35,11 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleRegister = () => {
+    // 跳转到 Casdoor 注册页
+    window.location.href = `${casdoorConfig.serverUrl}/signup/${casdoorConfig.appName}`
   }
 
   return (
@@ -94,6 +100,17 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        {/* 注册链接 */}
+        <div className="mt-6 flex items-center justify-center gap-2 text-sm">
+          <span className="text-slate-500">还没有账号？</span>
+          <button
+            onClick={handleRegister}
+            className="font-medium text-cyan-500 hover:text-cyan-400 hover:underline underline-offset-4 transition-colors"
+          >
+            立即注册
+          </button>
+        </div>
 
         <div className="mt-8 text-center">
           <p className="text-xs text-slate-600">
