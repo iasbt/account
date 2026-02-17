@@ -38,19 +38,19 @@ export const useAuthStore = create<AuthState>()(
 
       // 发送验证码
       sendVerificationCode: async (dest) => {
-        const payload = {
+        // Casdoor send-verification-code 接口通常通过 Query Parameters 接收参数
+        const params = new URLSearchParams({
           dest,
           type: "signup",
           applicationId: `${casdoorConfig.organizationName}/${casdoorConfig.appName}`,
-          checkUserExist: true // 注册时检查用户是否存在
-        };
+          checkUserExist: "true"
+        });
 
-        const res = await fetch(`${casdoorConfig.serverUrl}/api/send-verification-code`, {
+        // 使用相对路径 (serverUrl 为空时)
+        const url = `${casdoorConfig.serverUrl}/api/send-verification-code?${params.toString()}`;
+        
+        const res = await fetch(url, {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json' 
-          },
-          body: JSON.stringify(payload)
         });
 
         const result = await res.json();
