@@ -43,7 +43,9 @@ export const useAuthStore = create<AuthState>()(
           dest,
           type: "signup",
           applicationId: `${casdoorConfig.organizationName}/${casdoorConfig.appName}`,
-          checkUserExist: "true"
+          checkUserExist: "true",
+          captchaType: "none", // 必须参数，即使不使用验证码也需要传 none
+          captchaToken: ""     // 对应 captchaType=none，token 为空
         });
 
         // 使用相对路径 (serverUrl 为空时)
@@ -53,7 +55,15 @@ export const useAuthStore = create<AuthState>()(
           method: 'POST',
         });
 
-        const result = await res.json();
+        const text = await res.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error("Failed to parse JSON response:", text);
+            throw new Error(`请求失败: ${res.status} ${res.statusText} - ${text.substring(0, 100)}`);
+        }
+
         if (result.status !== 'ok') {
           throw new Error(result.msg || '发送验证码失败');
         }
