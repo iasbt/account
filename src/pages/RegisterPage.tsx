@@ -1,24 +1,57 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { UserPlus, Mail, Lock, User, AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
-  const { register } = useAuthStore()
+  const { register, sendVerificationCode } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState(0)
   
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    code: ''
   })
+
+  // 倒计时逻辑
+  useEffect(() => {
+    let timer: any
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1)
+      }, 1000)
+    }
+    return () => clearInterval(timer)
+  }, [countdown])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
     setError(null)
+  }
+
+  const handleSendCode = async () => {
+    if (!formData.email) {
+      setError('请输入电子邮箱')
+      return
+    }
+    if (countdown > 0) return
+
+    setLoading(true)
+    setError(null)
+    try {
+      await sendVerificationCode(formData.email)
+      setCountdown(60) // 60秒倒计时
+      // alert('验证码已发送，请查收邮件')
+    } catch (err: any) {
+      setError(err.message || '验证码发送失败')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,6 +67,11 @@ export default function RegisterPage() {
       return
     }
 
+    if (!formData.code) {
+      setError('请输入验证码')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
@@ -42,7 +80,8 @@ export default function RegisterPage() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        displayName: formData.name // 默认使用用户名作为显示名
+        displayName: formData.name, // 默认使用用户名作为显示名
+        code: formData.code
       })
       // 注册成功跳转登录
       navigate('/login', { state: { message: '注册成功，请登录' } })
@@ -108,6 +147,35 @@ export default function RegisterPage() {
                   onChange={handleChange}
                 />
               </div>
+            </div>
+
+            <div>
+              <label htmlFor="code" className="sr-only">验证码</label>
+              <div className="relative flex gap-2">
+                <div className="relative flex-grow">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Mail className="h-5 w-5 text-slate-500" />
+                  </div>
+                  <input
+                  id="code"
+                  name="code"
+                  type="text"
+                  required
+                  className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:text-sm"
+                  placeholder="邮箱验证码"
+                  value={formData.code}
+                  onChange={handleChange}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleSendCode}
+                disabled={countdown > 0 || loading}
+                className="min-w-[100px] rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-4 text-sm font-medium text-cyan-400 hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-cyan-500/10"
+              >
+                {countdown > 0 ? `${countdown}s` : '获取验证码'}
+              </button>
+            </div>
             </div>
 
             <div>

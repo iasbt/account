@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { UserCircle } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -35,11 +35,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleRegister = () => {
-    // 跳转到内部注册页
-    navigate('/register')
   }
 
   return (
@@ -104,12 +99,12 @@ export default function LoginPage() {
         {/* 注册链接 */}
         <div className="mt-6 flex items-center justify-center gap-2 text-sm">
           <span className="text-slate-500">还没有账号？</span>
-          <button
-            onClick={handleRegister}
+          <Link
+            to="/register"
             className="font-medium text-cyan-500 hover:text-cyan-400 hover:underline underline-offset-4 transition-colors"
           >
             立即注册
-          </button>
+          </Link>
         </div>
 
         <div className="mt-8 text-center">

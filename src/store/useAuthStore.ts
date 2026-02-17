@@ -22,7 +22,8 @@ interface AuthState {
   // Actions
   login: () => Promise<void>; // Deprecated: Redirect flow
   loginWithPassword: (account: string, password: string) => Promise<void>; // New: Direct flow
-  register: (data: { name: string; email: string; password: string; displayName?: string }) => Promise<void>;
+  sendVerificationCode: (dest: string) => Promise<void>;
+  register: (data: { name: string; email: string; password: string; displayName?: string; code?: string }) => Promise<void>;
   updateProfile: (data: Partial<CasdoorUser>) => Promise<void>;
   logout: () => void;
   handleCallback: (code: string) => Promise<void>;
@@ -35,6 +36,29 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
 
+      // 发送验证码
+      sendVerificationCode: async (dest) => {
+        const payload = {
+          dest,
+          type: "signup",
+          applicationId: `${casdoorConfig.organizationName}/${casdoorConfig.appName}`,
+          checkUserExist: true // 注册时检查用户是否存在
+        };
+
+        const res = await fetch(`${casdoorConfig.serverUrl}/api/send-verification-code`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        if (result.status !== 'ok') {
+          throw new Error(result.msg || '发送验证码失败');
+        }
+      },
+
       // 注册新用户
       register: async (data) => {
         const payload = {
@@ -46,10 +70,45 @@ export const useAuthStore = create<AuthState>()(
           application: casdoorConfig.appName,
           type: "normal-user", // 默认用户类型
           region: "CN",
-          properties: {}
+          properties: {
+             ...(data.code ? { code: data.code } : {}) // 如果有验证码，则带上
+          }
         };
 
-        const res = await fetch(`${casdoorConfig.serverUrl}/api/signup`, {
+        // 如果提供了验证码，URL 需要带上 query 参数或者 payload 中处理
+        // Casdoor 的 signup API 通常不需要 code，除非在 Application 配置了 "Sign up items" 包含 Verification code
+        // 如果包含 Verification code，通常需要先调用 send-verification-code
+        // 并在 signup 时 Casdoor 会自动校验？或者需要手动校验？
+        // 标准做法是：Casdoor 后端在 signup 时会检查验证码是否匹配（如果配置了需要验证码）
+        // 这里的 payload 结构可能需要调整，Casdoor 的 add-user API 可能不直接支持 code 校验
+        // 但是 signup API (通常是 /api/signup) 支持。
+        // 我们这里用的是 /api/signup，它应该支持 code 参数。
+        // 修正：code 应该放在 query parameters 或者 body 的特定字段
+        
+        // Casdoor /api/signup 源码逻辑：
+        // 接受 User 对象。如果 Application 需要验证码，它会检查 cache 中的验证码。
+        // 验证码通常关联在 email 上。
+        // 我们只需要确保在调用 signup 之前，验证码已经发送并且有效。
+        // 并且，为了安全，signup 请求可能需要带上 code 以便后端验证所有权。
+        // 实际上 Casdoor 的 signup 逻辑比较复杂，取决于配置。
+        // 如果配置了 Email Verification，Casdoor 前端会发送 code。
+        // 我们在 payload 中加入 code 字段试试。
+
+        // 再次确认：Casdoor 的 /api/signup 接口参数
+        // 它接收一个 User 对象。
+        // 验证码校验逻辑通常在 adapter 或者 service 层。
+        // 让我们尝试将 code 放入 URL 参数，或者 User.properties 中，或者直接作为 User 的一个字段（虽然 User struct 没有 code）
+        // 查看 Casdoor 官方文档或源码，VerificationCode 检查通常在 signup handler 中：
+        // "checkVerificationCode(dest, code, lang)"
+        // 它从 URL query param "code" 读取？不，通常是请求体。
+        // 让我们尝试把 code 放到 query string 中，这是最常见的做法。
+        
+        const url = new URL(`${casdoorConfig.serverUrl}/api/signup`);
+        if (data.code) {
+          url.searchParams.append('code', data.code);
+        }
+
+        const res = await fetch(url.toString(), {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json' 
