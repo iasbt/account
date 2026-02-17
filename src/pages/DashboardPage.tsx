@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { LogOut, ExternalLink, Image, UserCircle, Database, Server } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { casdoorConfig } from '../lib/casdoor'
 import { hasPermission } from '../lib/rbac'
 import { getSystemStats } from '../lib/api'
 
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [dbStats, setDbStats] = useState<{ userCount: number } | null>(null)
@@ -32,7 +33,7 @@ export default function DashboardPage() {
       name: '个人中心',
       description: '管理您的账号资料',
       icon: <UserCircle className="h-full w-full text-blue-400" />,
-      url: 'http://119.91.71.30:8080/account'
+      url: '/profile'
     }
   ]
 
@@ -50,11 +51,15 @@ export default function DashboardPage() {
   const handleSignOut = () => {
     setLoading(true)
     logout()
-    window.location.href = `${casdoorConfig.serverUrl}/logout`
+    navigate('/login')
   }
 
   const handleLaunch = (url: string) => {
-    window.open(url, '_blank')
+    if (url.startsWith('http')) {
+      window.open(url, '_blank')
+    } else {
+      navigate(url)
+    }
   }
 
   return (

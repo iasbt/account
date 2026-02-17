@@ -1,8 +1,7 @@
 export const casdoorConfig = {
-  // serverUrl: "https://account.iasbt.cloud",
-  serverUrl: "http://119.91.71.30:8080", // 临时使用 IP 端口绕过备案拦截
-  clientId: "2e31f2f0cac3e22dc501", 
-  organizationName: "built-in",
-  appName: "app-built-in", // 或者您新建的应用名称
+  serverUrl: import.meta.env.VITE_CASDOOR_SERVER_URL || "http://119.91.71.30:8080", 
+  clientId: import.meta.env.VITE_CASDOOR_CLIENT_ID || "2e31f2f0cac3e22dc501", 
+  organizationName: import.meta.env.VITE_CASDOOR_ORGANIZATION_NAME || "built-in",
+  appName: import.meta.env.VITE_CASDOOR_APP_NAME || "app-built-in", 
   redirectPath: "/callback", // 登录回调地址
 };

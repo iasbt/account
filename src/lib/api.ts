@@ -1,6 +1,7 @@
 export const API_CONFIG = {
   // Nginx 代理地址 (使用相对路径以适配同源策略)
-  baseUrl: '/api/rest',
+  // 如果在 Vercel 部署，需要设置为后端完整地址 (注意 Mixed Content 问题)
+  baseUrl: import.meta.env.VITE_API_BASE_URL || '/api/rest',
 };
 
 /**

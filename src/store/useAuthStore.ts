@@ -22,16 +22,84 @@ interface AuthState {
   // Actions
   login: () => Promise<void>; // Deprecated: Redirect flow
   loginWithPassword: (account: string, password: string) => Promise<void>; // New: Direct flow
+  register: (data: { name: string; email: string; password: string; displayName?: string }) => Promise<void>;
+  updateProfile: (data: Partial<CasdoorUser>) => Promise<void>;
   logout: () => void;
   handleCallback: (code: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       token: null,
       user: null,
       isAuthenticated: false,
+
+      // 注册新用户
+      register: async (data) => {
+        const payload = {
+          owner: casdoorConfig.organizationName,
+          name: data.name,
+          displayName: data.displayName || data.name,
+          email: data.email,
+          password: data.password,
+          application: casdoorConfig.appName,
+          type: "normal-user", // 默认用户类型
+          region: "CN",
+          properties: {}
+        };
+
+        const res = await fetch(`${casdoorConfig.serverUrl}/api/signup`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+        if (result.status !== 'ok') {
+          throw new Error(result.msg || '注册失败');
+        }
+      },
+
+      // 更新用户信息
+      updateProfile: async (data) => {
+        const { user, token } = get();
+        if (!user) throw new Error("未登录");
+
+        // 构造 Casdoor 用户对象
+        const updatedUser = {
+          ...user,
+          ...data,
+          owner: casdoorConfig.organizationName, // 必须包含 owner
+          name: user.name // 必须包含 name 作为主键
+        };
+
+        // Casdoor update-user API
+        // 注意：通常需要管理员权限或拥有者权限。如果开启了 "用户自管理"，则用户可以修改自己。
+        // 这里尝试使用 access_token 进行鉴权
+        const res = await fetch(`${casdoorConfig.serverUrl}/api/update-user`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            // 如果 Casdoor 配置了 API 鉴权，需要带上 Token
+             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify(updatedUser)
+        });
+
+        const result = await res.json();
+        if (result.status !== 'ok') {
+          // 尝试兼容性处理：有时 Casdoor 返回 data 字段
+          if (result.data !== 'Affected') {
+             throw new Error(result.msg || '更新失败');
+          }
+        }
+
+        // 更新本地状态
+        set({ user: { ...user, ...data } as CasdoorUser });
+      },
 
       // 旧的跳转登录方式 (保留作为降级方案)
       login: async () => {

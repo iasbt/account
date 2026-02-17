@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { UserCircle } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { useSearchParams } from 'react-router-dom'
-import { casdoorConfig } from '../lib/casdoor'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 
 export default function LoginPage() {
+  const navigate = useNavigate()
   const loginWithPassword = useAuthStore((state) => state.loginWithPassword)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +28,7 @@ export default function LoginPage() {
         window.location.href = from
       } else {
         // 默认进入仪表盘
-        window.location.href = '/'
+        navigate('/')
       }
     } catch (err: any) {
       setError(err.message || '登录失败，请检查账号密码')
@@ -38,8 +38,8 @@ export default function LoginPage() {
   }
 
   const handleRegister = () => {
-    // 跳转到 Casdoor 注册页
-    window.location.href = `${casdoorConfig.serverUrl}/signup/${casdoorConfig.appName}`
+    // 跳转到内部注册页
+    navigate('/register')
   }
 
   return (
