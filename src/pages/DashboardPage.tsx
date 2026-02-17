@@ -1,12 +1,23 @@
-import { useState } from 'react'
-import { LogOut, ExternalLink, Image, UserCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { LogOut, ExternalLink, Image, UserCircle, Database, Server } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { casdoorConfig } from '../lib/casdoor'
 import { hasPermission } from '../lib/rbac'
+import { getSystemStats } from '../lib/api'
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore()
   const [loading, setLoading] = useState(false)
+  const [dbStats, setDbStats] = useState<{ userCount: number } | null>(null)
+
+  useEffect(() => {
+    // 获取数据库状态
+    getSystemStats().then(stats => {
+      setDbStats(stats)
+    }).catch(err => {
+      console.error('Failed to fetch DB stats:', err)
+    })
+  }, [])
 
   const apps = [
     {
@@ -110,6 +121,45 @@ export default function DashboardPage() {
               <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl transition-all duration-500 group-hover:bg-cyan-500/20" />
             </div>
           ))}
+        </div>
+
+        {/* System Status Section */}
+        <div className="mt-12 border-t border-white/10 pt-8">
+          <h3 className="text-lg font-semibold text-slate-300 mb-4 flex items-center gap-2">
+            <Server className="h-5 w-5 text-green-400" />
+            系统状态
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             <div className="rounded-xl bg-slate-900/40 p-4 border border-white/5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-500/10">
+                    <Database className="h-6 w-6 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">业务数据库 (PostgreSQL)</p>
+                    <p className="text-lg font-bold text-slate-100">
+                      {dbStats ? '已连接' : '检查中...'}
+                    </p>
+                  </div>
+                </div>
+             </div>
+             
+             {dbStats && (
+               <div className="rounded-xl bg-slate-900/40 p-4 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-500/10">
+                      <UserCircle className="h-6 w-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400">历史用户数据</p>
+                      <p className="text-lg font-bold text-slate-100">
+                        {dbStats.userCount} 条记录
+                      </p>
+                    </div>
+                  </div>
+               </div>
+             )}
+          </div>
         </div>
       </main>
     </div>
