@@ -20,13 +20,17 @@ export default function RegisterPage() {
 
   // 倒计时逻辑
   useEffect(() => {
-    let timer: any
+    let timer: ReturnType<typeof setInterval> | null = null
     if (countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => prev - 1)
       }, 1000)
     }
-    return () => clearInterval(timer)
+    return () => {
+      if (timer) {
+        clearInterval(timer)
+      }
+    }
   }, [countdown])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,8 +51,9 @@ export default function RegisterPage() {
       await sendVerificationCode(formData.email)
       setCountdown(60) // 60秒倒计时
       // alert('验证码已发送，请查收邮件')
-    } catch (err: any) {
-      setError(err.message || '验证码发送失败')
+    } catch (err: unknown) {
+      const message = err instanceof Error && err.message ? err.message : '验证码发送失败'
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -85,8 +90,9 @@ export default function RegisterPage() {
       })
       // 注册成功跳转登录
       navigate('/login', { state: { message: '注册成功，请登录' } })
-    } catch (err: any) {
-      setError(err.message || '注册失败，请稍后重试')
+    } catch (err: unknown) {
+      const message = err instanceof Error && err.message ? err.message : '注册失败，请稍后重试'
+      setError(message)
     } finally {
       setLoading(false)
     }

@@ -40,7 +40,7 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
  * 获取用户资料列表 (测试用)
  */
 export async function getProfiles() {
-  return apiFetch<any[]>('/profiles?select=*&limit=5');
+  return apiFetch<Record<string, unknown>[]>('/profiles?select=*&limit=5');
 }
 
 /**

@@ -30,8 +30,9 @@ export default function LoginPage() {
         // 默认进入仪表盘
         navigate('/')
       }
-    } catch (err: any) {
-      setError(err.message || '登录失败，请检查账号密码')
+    } catch (err: unknown) {
+      const message = err instanceof Error && err.message ? err.message : '登录失败，请检查账号密码'
+      setError(message)
     } finally {
       setIsLoading(false)
     }

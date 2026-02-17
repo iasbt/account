@@ -59,8 +59,8 @@ export const useAuthStore = create<AuthState>()(
         let result;
         try {
             result = JSON.parse(text);
-        } catch (e) {
-            console.error("Failed to parse JSON response:", text);
+        } catch (error) {
+            console.error("Failed to parse JSON response:", error, text);
             throw new Error(`请求失败: ${res.status} ${res.statusText} - ${text.substring(0, 100)}`);
         }
 
@@ -206,32 +206,52 @@ export const useAuthStore = create<AuthState>()(
         });
 
         if (!tokenRes.ok) {
-           // Fallback: 尝试 Casdoor 内部 login API (模拟前端登录)
-           const loginParams = {
-             organization: casdoorConfig.organizationName,
-             username: account,
-             password: password,
-             application: casdoorConfig.appName,
-             type: "normal",
-             autoSignin: true
-           };
-           
-           const loginRes = await fetch(`${casdoorConfig.serverUrl}/api/login`, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify(loginParams)
-           });
-           
-           const loginData = await loginRes.json();
-           if (loginData.status !== 'ok') {
-             throw new Error(loginData.msg || '登录失败');
-           }
-           
-           // 登录成功后，Casdoor 会设置 Session，我们需要手动获取 Token 或 UserInfo
-           // 由于是跨域，Session Cookie 可能存不上。
-           // 如果 Password Grant 失败，通常是因为配置问题。
-           // 为了确保任务完成，这里我们抛出明确错误，建议使用 Password Grant
-           throw new Error(`直连登录失败 (${tokenRes.status})。请联系管理员开启 Password Grant 支持或检查网络。`);
+          const organizations: string[] = [casdoorConfig.organizationName];
+          if (account === 'admin' && casdoorConfig.organizationName !== 'built-in') {
+            organizations.push('built-in');
+          }
+
+          let lastError: string | null = null;
+
+          for (const organization of organizations) {
+            const loginParams = {
+              organization,
+              username: account,
+              password: password,
+              application: casdoorConfig.appName,
+              type: "code",
+              autoSignin: true
+            };
+
+            const loginRes = await fetch(`${casdoorConfig.serverUrl}/api/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(loginParams),
+              credentials: 'include'
+            });
+
+            const loginData = await loginRes.json();
+            if (loginData.status === 'ok') {
+              set({ isAuthenticated: true });
+
+              const accountRes = await fetch(`${casdoorConfig.serverUrl}/api/get-account`, {
+                credentials: 'include'
+              });
+
+              if (accountRes.ok) {
+                const accountJson = await accountRes.json();
+                if (accountJson.status === 'ok') {
+                  set({ user: accountJson.data });
+                }
+              }
+
+              return;
+            }
+
+            lastError = loginData.msg || '登录失败';
+          }
+
+          throw new Error(lastError || '登录失败');
         }
 
         const tokenData = await tokenRes.json();

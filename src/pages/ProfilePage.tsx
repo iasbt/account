@@ -46,8 +46,9 @@ export default function ProfilePage() {
         // email: formData.email // 暂时不开放修改邮箱，需验证逻辑
       })
       setSuccess('个人资料更新成功')
-    } catch (err: any) {
-      setError(err.message || '更新失败，请稍后重试')
+    } catch (err: unknown) {
+      const message = err instanceof Error && err.message ? err.message : '更新失败，请稍后重试'
+      setError(message)
     } finally {
       setLoading(false)
     }

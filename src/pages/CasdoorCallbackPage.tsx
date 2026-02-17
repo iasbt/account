@@ -7,16 +7,15 @@ export default function CasdoorCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const handleCallback = useAuthStore((state) => state.handleCallback);
-  const [status, setStatus] = useState('正在连接身份认证中心...');
+  const code = searchParams.get('code');
+  const [status, setStatus] = useState(() => code ? '正在连接身份认证中心...' : '错误：未检测到授权码，请重新登录');
   const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const processedRef = useRef(false);
 
   useEffect(() => {
     if (processedRef.current) return;
     
-    const code = searchParams.get('code');
     if (!code) {
-      setStatus('错误：未检测到授权码，请重新登录');
       return;
     }
 
@@ -40,16 +39,17 @@ export default function CasdoorCallbackPage() {
 
         // 5. 默认跳转到仪表盘
         navigate('/', { replace: true });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Login failed:', error);
         setStatus('登录失败');
-        setErrorDetail(error.message || 'Unknown error occurred');
+        const message = error instanceof Error ? error.message : 'Unknown error occurred';
+        setErrorDetail(message);
         processedRef.current = false; // Allow retry if needed
       }
     };
 
     processLogin();
-  }, [searchParams, navigate, handleCallback]);
+  }, [code, navigate, handleCallback]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">

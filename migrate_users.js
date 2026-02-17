@@ -3,19 +3,19 @@ import mysql from 'mysql2/promise';
 
 // --- Configuration ---
 const POSTGRES_CONFIG = {
-  host: '119.91.71.30',
-  port: 5432,
-  user: 'postgres',
-  password: '8plYGAfmtW79aDXL',
-  database: 'supabase_backup',
+  host: process.env.POSTGRES_HOST || '119.91.71.30',
+  port: Number(process.env.POSTGRES_PORT || 5432),
+  user: process.env.POSTGRES_USER || 'postgres',
+  password: process.env.POSTGRES_PASSWORD || '8plYGAfmtW79aDXL',
+  database: process.env.POSTGRES_DB || 'supabase_backup',
 };
 
 const MYSQL_CONFIG = {
-  host: '119.91.71.30',
-  port: 3306,
-  user: 'root',
-  password: '8plYGAfmtW79aDXL',
-  database: 'casdoor',
+  host: process.env.MYSQL_HOST || '119.91.71.30',
+  port: Number(process.env.MYSQL_PORT || 3306),
+  user: process.env.MYSQL_USER || 'root',
+  password: process.env.MYSQL_PASSWORD || '8plYGAfmtW79aDXL',
+  database: process.env.MYSQL_DB || 'casdoor',
 };
 
 // --- Main Migration Logic ---
