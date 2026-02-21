@@ -21,6 +21,62 @@ app.use((req, res, next) => {
   return next();
 });
 
+const ssoSecret = process.env.SSO_JWT_SECRET || "";
+
+const signToken = (payload, ttlSeconds) => {
+  if (!ssoSecret) return null;
+  const header = { alg: "HS256", typ: "JWT" };
+  const now = Math.floor(Date.now() / 1000);
+  const body = { ...payload, iat: now, exp: now + ttlSeconds };
+  const headerPart = Buffer.from(JSON.stringify(header)).toString("base64url");
+  const bodyPart = Buffer.from(JSON.stringify(body)).toString("base64url");
+  const signature = crypto
+    .createHmac("sha256", ssoSecret)
+    .update(`${headerPart}.${bodyPart}`)
+    .digest("base64url");
+  return `${headerPart}.${bodyPart}.${signature}`;
+};
+
+const verifyToken = (token) => {
+  if (!ssoSecret) return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  const [headerPart, bodyPart, signature] = parts;
+  const expected = crypto
+    .createHmac("sha256", ssoSecret)
+    .update(`${headerPart}.${bodyPart}`)
+    .digest("base64url");
+  if (signature !== expected) return null;
+  const body = JSON.parse(Buffer.from(bodyPart, "base64url").toString("utf8"));
+  const now = Math.floor(Date.now() / 1000);
+  if (!body.exp || body.exp < now) return null;
+  return body;
+};
+
+const getAuthUser = (req) => {
+  const header = req.headers.authorization || "";
+  const [type, token] = header.split(" ");
+  if (type !== "Bearer" || !token) return null;
+  return verifyToken(token);
+};
+
+const parseAllowlist = () => {
+  const raw = process.env.SSO_REDIRECT_ALLOWLIST || "";
+  return raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const isHostAllowed = (host, allowlist) => {
+  if (allowlist.length > 0) {
+    return allowlist.some((item) => host === item || host.endsWith(`.${item}`));
+  }
+  if (host === "iasbt.com" || host.endsWith(".iasbt.com")) return true;
+  if (host === "localhost" || host === "127.0.0.1") return true;
+  return false;
+};
+
 app.post("/api/auth/send-code", async (req, res) => {
   const { email } = req.body;
 
@@ -99,9 +155,14 @@ app.post("/api/auth/register", async (req, res) => {
       client.release();
     }
 
+    const token = signToken(
+      { sub: userId, email, name, displayName: name, avatar: "", isAdmin: false },
+      60 * 60 * 12
+    );
     return res.json({
       message: "注册成功！",
       success: true,
+      token,
       user: { id: userId, email, name, displayName: name, avatar: "", isAdmin: false },
     });
   } catch (error) {
@@ -141,8 +202,20 @@ app.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ message: "账号或密码错误", success: false });
     }
 
+    const token = signToken(
+      {
+        sub: user.id,
+        email: user.email,
+        name: user.username,
+        displayName: user.username,
+        avatar: "",
+        isAdmin: false,
+      },
+      60 * 60 * 12
+    );
     return res.json({
       success: true,
+      token,
       user: {
         id: user.id,
         email: user.email,
@@ -156,6 +229,44 @@ app.post("/api/auth/login", async (req, res) => {
     console.error("Login error", error);
     return res.status(500).json({ message: "登录失败", success: false });
   }
+});
+
+app.get("/api/sso/issue", async (req, res) => {
+  const target = String(req.query.target || "");
+  if (!target) {
+    return res.status(400).json({ message: "目标地址不能为空" });
+  }
+  const authUser = getAuthUser(req);
+  if (!authUser) {
+    return res.status(401).json({ message: "未登录" });
+  }
+  let url;
+  try {
+    url = new URL(target);
+  } catch {
+    return res.status(400).json({ message: "目标地址不合法" });
+  }
+  const allowlist = parseAllowlist();
+  if (!isHostAllowed(url.hostname, allowlist)) {
+    return res.status(403).json({ message: "目标域名不允许" });
+  }
+  const token = signToken(
+    {
+      sub: authUser.sub,
+      email: authUser.email,
+      name: authUser.name,
+      displayName: authUser.displayName,
+      avatar: authUser.avatar,
+      isAdmin: authUser.isAdmin,
+      aud: url.hostname,
+    },
+    60 * 5
+  );
+  if (!token) {
+    return res.status(500).json({ message: "SSO 未配置" });
+  }
+  url.searchParams.set("sso_token", token);
+  return res.json({ url: url.toString() });
 });
 
 app.get("/api/dashboard/stats", async (req, res) => {

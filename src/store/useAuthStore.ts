@@ -25,7 +25,18 @@ interface AuthState {
 
 const getAuthBaseUrl = () => {
   const raw = import.meta.env.VITE_AUTH_BASE_URL || ''
-  return raw.replace(/\/$/, '')
+  const trimmed = raw.replace(/\/$/, '')
+  if (!trimmed) return ''
+  if (typeof window === 'undefined') return trimmed
+  const allowExternal = import.meta.env.VITE_ALLOW_EXTERNAL_API === 'true'
+  if (!allowExternal && window.location.protocol === 'https:' && trimmed.startsWith('http://')) {
+    return ''
+  }
+  const resolved = new URL(trimmed, window.location.origin)
+  if (!allowExternal && resolved.origin !== window.location.origin) {
+    return ''
+  }
+  return trimmed
 }
 
 const postJson = async (endpoint: string, body: Record<string, unknown>) => {
@@ -60,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
       loginWithPassword: async (account, password) => {
         const data = await postJson('/api/auth/login', { account, password })
         set({
+          token: data.token || null,
           user: data.user,
           isAuthenticated: true
         })
@@ -77,6 +89,7 @@ export const useAuthStore = create<AuthState>()(
         const response = await postJson('/api/auth/register', payload)
         if (response.user) {
           set({
+            token: response.token || null,
             user: response.user,
             isAuthenticated: true
           })

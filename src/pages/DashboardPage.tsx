@@ -6,7 +6,7 @@ import { getSystemStats } from '../lib/api'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const { user, logout } = useAuthStore()
+  const { user, logout, token } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [dbStats, setDbStats] = useState<{ userCount: number } | null>(null)
 
@@ -23,9 +23,10 @@ export default function DashboardPage() {
     {
       id: 'gallery',
       name: '相册图库',
-      description: 'MT Photos 智能相册',
+      description: 'Photos 智能相册',
       icon: <Image className="h-full w-full text-cyan-400" />,
-      url: 'https://img.iasbt.com/'
+      url: 'https://img.iasbt.com/#/admin',
+      sso: true
     },
     {
       id: 'account',
@@ -42,11 +43,23 @@ export default function DashboardPage() {
     navigate('/login')
   }
 
-  const handleLaunch = (url: string) => {
-    if (url.startsWith('http')) {
-      window.open(url, '_blank')
+  const handleLaunch = async (app: { url: string; sso?: boolean }) => {
+    if (app.sso && app.url.startsWith('http')) {
+      const response = await fetch(`/api/sso/issue?target=${encodeURIComponent(app.url)}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+      }).catch(() => null)
+      if (response && response.ok) {
+        const data = await response.json()
+        if (data?.url) {
+          window.open(data.url, '_blank')
+          return
+        }
+      }
+    }
+    if (app.url.startsWith('http')) {
+      window.open(app.url, '_blank')
     } else {
-      navigate(url)
+      navigate(app.url)
     }
   }
 
@@ -93,7 +106,7 @@ export default function DashboardPage() {
           {apps.map((app) => (
             <div
               key={app.id}
-              onClick={() => handleLaunch(app.url)}
+              onClick={() => handleLaunch(app)}
               className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/5 bg-slate-900/50 p-6 transition-all duration-300 hover:border-cyan-500/30 hover:bg-slate-800/80 hover:shadow-2xl hover:shadow-cyan-900/10 hover:-translate-y-1"
             >
               <div className="flex items-start justify-between">
