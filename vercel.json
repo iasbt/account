@@ -1,16 +1,19 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/auth/(.*)",
-      "destination": "/api/auth/$1"
+      "src": "/api/auth/(.*)",
+      "dest": "/api/auth/[...].js"
     },
     {
-      "source": "/api/rest/(.*)",
-      "destination": "http://119.91.71.30:8080/api/rest/$1"
+      "src": "/api/rest/(.*)",
+      "dest": "http://119.91.71.30:8080/api/rest/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
