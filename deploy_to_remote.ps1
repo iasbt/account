@@ -3,7 +3,7 @@
     Automated Deployment Script for Account System & Gallery Server
     
 .DESCRIPTION
-    This script automates the deployment of the full stack (Casdoor, MySQL, Nginx, MT Photos) 
+    This script automates the deployment of the full stack (Nginx, MT Photos, PostgREST, Postgres) 
     to the remote Ubuntu server. It handles:
     1. SSH Connection using private key
     2. Conflict Resolution (Stopping old containers occupying ports 80/443)
@@ -50,8 +50,8 @@ Write-Host "[1/5] Resolving port conflicts (Stopping old Nginx Proxy Manager)...
 # We aggressively stop and remove any container that might be holding port 80 or 443.
 # Specifically 'nginx-proxy-app-1' was identified as a legacy container causing conflicts.
 $CleanupCmd = "
-    sudo docker stop nginx-proxy-app-1 nginx-gateway casdoor mysql mt-photos 2>/dev/null || true;
-    sudo docker rm nginx-proxy-app-1 nginx-gateway casdoor mysql mt-photos 2>/dev/null || true;
+    sudo docker stop nginx-proxy-app-1 nginx-gateway mt-photos postgrest postgres-business 2>/dev/null || true;
+    sudo docker rm nginx-proxy-app-1 nginx-gateway mt-photos postgrest postgres-business 2>/dev/null || true;
     # Kill any processes bound to port 80/443 just in case
     sudo fuser -k 80/tcp 2>/dev/null || true;
     sudo fuser -k 443/tcp 2>/dev/null || true;

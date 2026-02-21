@@ -14,14 +14,14 @@
 
 | 服务组件 | 容器名称 | 端口映射 | 版本 | 说明 |
 | :--- | :--- | :--- | :--- | :--- |
-| **Casdoor** | `casdoor` | 8000 (内部) | latest | 统一身份认证中心 (SSO) |
-| **MySQL** | `mysql` | 3306 (内部) | 8.0 | 核心数据库 (Casdoor/MT Photos共用) |
+| **Postgres** | `postgres-business` | 5432 (内部) | 15 | 业务数据库 |
+| **PostgREST** | `postgrest` | 3000 (内部) | latest | API 数据访问层 |
 | **MT Photos** | `mt-photos` | 8063 (内部) | latest | 轻量级相册服务 |
 | **Nginx Gateway** | `nginx-gateway` | 80:80, 443:443 | alpine | 统一网关，负责反向代理 |
 
 **网络拓扑**：
 - **公网入口**: 腾讯云 EdgeOne (CDN/WAF) -> 服务器 Nginx (80端口)
-- **内部转发**: Nginx -> (Docker Network) -> Casdoor / MT Photos
+- **内部转发**: Nginx -> (Docker Network) -> MT Photos / PostgREST
 - **SSL/HTTPS**: 由 EdgeOne 托管证书，回源协议为 **HTTP**。
 
 ---
@@ -31,7 +31,6 @@
 | 服务 | 网址 | 备注 |
 | :--- | :--- | :--- |
 | **相册 (Gallery)** | [http://iasbt.cloud](http://iasbt.cloud) | 已统一域名，上传无限制 |
-| **账号中心 (Auth)** | [http://account.iasbt.cloud](http://account.iasbt.cloud) | 管理员: `admin` / `123` (请立即修改) |
 | **门户 (Portal)** | [http://www.iasbt.cloud](http://www.iasbt.cloud) | (规划中) |
 
 ---
@@ -45,7 +44,7 @@
 1.  **SSH 连接**: 使用 `D:\OneDrive\Desktop\trae.pem` 密钥连接服务器。
 2.  **冲突清洗**:
     *   **强制停止**并**删除**旧的 `nginx-proxy-app-1` 容器 (解决 80/443 端口占用)。
-    *   清理 `casdoor`, `mysql`, `nginx-gateway` 等旧容器，确保“全新启动”。
+    *   清理 `nginx-gateway`, `postgrest`, `postgres-business` 等旧容器，确保“全新启动”。
 3.  **密码保护**:
     *   自动检测 `.env` 是否存在。**注意**：为了防止数据库重新初始化导致数据丢失，脚本目前硬编码了已知的服务器数据库密码 (`8plYGAfmtW79aDXL`)。
 4.  **文件同步**: 将本地 `deploy/` 目录全量上传至 `/home/ubuntu/stack`。
@@ -58,10 +57,7 @@
 # 1. 一键部署 (慎用，会重启服务)
 .\deploy_to_remote.ps1
 
-# 2. 查看实时日志 (Casdoor)
-ssh -i "D:\OneDrive\Desktop\trae.pem" ubuntu@119.91.71.30 "sudo docker logs -f --tail 100 casdoor"
-
-# 3. 查看所有容器状态
+# 2. 查看所有容器状态
 ssh -i "D:\OneDrive\Desktop\trae.pem" ubuntu@119.91.71.30 "sudo docker ps"
 ```
 
@@ -71,16 +67,7 @@ ssh -i "D:\OneDrive\Desktop\trae.pem" ubuntu@119.91.71.30 "sudo docker ps"
 
 ### [2026-02-11] 关键修复记录
 
-#### 1. Casdoor 启动崩溃 (JSON Unmarshal Error)
-*   **现象**: `panic: json: cannot unmarshal string into Go struct field fileLogWriter.level of type int`
-*   **原因**: `app.conf` 中 `logConfig` 的 `level` 字段使用了字符串 `"info"`，但新版 Casdoor SDK 要求为整数。
-*   **修复**: 将配置修改为 `level: 6` (Info)。
-    ```conf
-    # c:\My_Project\account\deploy\data\casdoor\conf\app.conf
-    logConfig = {"filename": "logs/casdoor.log", ..., "level": 6}
-    ```
-
-#### 2. Nginx 端口冲突 (Bind 443 failed)
+#### 1. Nginx 端口冲突 (Bind 443 failed)
 *   **现象**: Nginx 容器无法启动。
 *   **原因**: 服务器上残留了之前部署的 `nginx-proxy-manager`。
 *   **修复**: 更新 `deploy_to_remote.ps1`，添加前置清理逻辑：
@@ -88,13 +75,6 @@ ssh -i "D:\OneDrive\Desktop\trae.pem" ubuntu@119.91.71.30 "sudo docker ps"
     sudo docker stop nginx-proxy-app-1 ... || true
     sudo docker rm nginx-proxy-app-1 ... || true
     ```
-
-#### 3. Casdoor 登录循环 / MySQL 权限拒绝
-*   **现象**: Casdoor 无法连接数据库，导致无限重启。
-*   **原因**: Docker Volume 中的旧 MySQL 数据密码与 `.env` 中新生成的密码不一致。
-*   **修复**:
-    1.  在部署脚本中固定了密码 `8plYGAfmtW79aDXL` 以匹配现有数据。
-    2.  (如果重置) 需在服务器执行 `sudo rm -rf /home/ubuntu/stack/data/mysql` 清空数据卷。
 
 ---
 
@@ -105,15 +85,6 @@ ssh -i "D:\OneDrive\Desktop\trae.pem" ubuntu@119.91.71.30 "sudo docker ps"
 - [ ] 进入 EdgeOne 控制台 -> `iasbt.cloud`。
 - [ ] **DNS 解析**：添加 `*.iasbt.cloud` CNAME 指向 EdgeOne。
 - [ ] **回源配置**：将 **回源协议 (Origin Protocol)** 设置为 **HTTP** (重要！否则 502)。
-
-### 5.2 账号体系初始化
-1.  登录 Casdoor (`admin/123`) -> 修改密码。
-2.  创建 Organization "iasbt"。
-3.  创建 Application "account-app"，添加 Redirect URL:
-    *   `http://localhost:5173/callback` (本地开发)
-    *   `http://account.iasbt.cloud/callback` (生产环境)
-
----
 
 ## 6. 备份与迁移
 *   **备份**: 运行服务器上的 `bash /home/ubuntu/stack/backup.sh`，数据会自动打包上传至 Bitiful S3。

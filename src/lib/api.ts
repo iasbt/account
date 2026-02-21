@@ -1,7 +1,19 @@
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/rest";
+const allowExternalApi = import.meta.env.VITE_ALLOW_EXTERNAL_API === "true";
+
+const baseUrl = (() => {
+  const trimmed = rawApiBaseUrl.replace(/\/$/, "");
+  if (!trimmed || allowExternalApi) return trimmed;
+  if (typeof window === "undefined") return trimmed;
+  const resolved = new URL(trimmed, window.location.origin);
+  if (resolved.origin !== window.location.origin) {
+    throw new Error("外部 API 地址被禁用。需要请设置 VITE_ALLOW_EXTERNAL_API=true");
+  }
+  return trimmed;
+})();
+
 export const API_CONFIG = {
-  // Nginx 代理地址 (使用相对路径以适配同源策略)
-  // 如果在 Vercel 部署，需要设置为后端完整地址 (注意 Mixed Content 问题)
-  baseUrl: import.meta.env.VITE_API_BASE_URL || '/api/rest',
+  baseUrl,
 };
 
 /**

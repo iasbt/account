@@ -1,27 +1,6 @@
 version: '3.8'
 
 services:
-  # --- 核心数据库 (Casdoor / Auth) ---
-  mysql:
-    image: mysql:8.0
-    container_name: mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: casdoor
-    volumes:
-      # 数据持久化
-      - ./data/mysql:/var/lib/mysql
-      # 初始化脚本
-      - ./data/init-sql:/docker-entrypoint-initdb.d
-    networks:
-      - iasbt-net
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # --- 业务数据库 (原 Supabase 数据迁移目标) ---
   postgres:
     image: postgres:15
@@ -61,27 +40,6 @@ services:
     networks:
       - iasbt-net
 
-  # --- 认证中心 (Casdoor) ---
-  casdoor:
-    image: casbin/casdoor:latest
-    container_name: casdoor
-    restart: always
-    ports:
-      - "8000:8000"
-    environment:
-      driverName: mysql
-      dataSourceName: root:${DB_ROOT_PASSWORD}@tcp(mysql:3306)/
-      dbName: casdoor
-      # 强制使用外部域名，避免跳转错误
-      # origin: https://account.iasbt.cloud # 暂时注释以允许 IP 访问调试
-    volumes:
-      - ./data/casdoor/conf:/conf
-    depends_on:
-      mysql:
-        condition: service_healthy
-    networks:
-      - iasbt-net
-
   # --- 相册服务 (MT Photos / PhotoPrism) ---
   # 这里以 MT Photos 为例，更轻量，适合 4G 内存
   mt-photos:
@@ -117,7 +75,6 @@ services:
       - ./data/nginx/certs:/etc/nginx/certs
       - ./data/nginx/html:/usr/share/nginx/html
     depends_on:
-      - casdoor
       - mt-photos
       - postgrest
     networks:

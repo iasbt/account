@@ -5,7 +5,6 @@ import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
 import { useAuthStore } from './store/useAuthStore'
 import DashboardPage from './pages/DashboardPage'
-import CasdoorCallbackPage from './pages/CasdoorCallbackPage'
 
 // --- 路由守卫 ---
 
@@ -54,12 +53,6 @@ export default function App() {
         }
       />
       
-      <Route
-        path="/callback"
-        element={
-          <CasdoorCallbackPage />
-        }
-      />
 
       {/* 受保护路由 */}
       <Route

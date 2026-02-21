@@ -49,7 +49,7 @@ sudo docker compose up -d
 sudo docker compose ps
 ```
 
-如果看到 `casdoor`, `mysql`, `nginx`, `mt-photos` 的状态都是 `Up` (Running)，恭喜您，部署成功！
+如果看到 `nginx`, `mt-photos`, `postgrest`, `postgres-business` 的状态都是 `Up` (Running)，恭喜您，部署成功！
 
 ## 4. 域名解析 (EdgeOne 配置)
 
@@ -63,12 +63,11 @@ sudo docker compose ps
 ## 5. 验证访问
 
 打开浏览器访问：
-*   `https://account.iasbt.cloud` -> 应该能看到 Casdoor 登录页 (默认账号 admin / 123)
 *   `https://gallery.iasbt.cloud` -> 应该能看到 MT Photos 安装向导
 *   `https://www.iasbt.cloud` -> 应该能看到简单的导航页
 
 ## 6. 后续维护
 
-*   **查看日志**：`docker compose logs -f casdoor`
+*   **查看日志**：`docker compose logs -f nginx`
 *   **重启服务**：`docker compose restart`
 *   **备份数据**：`bash backup.sh`

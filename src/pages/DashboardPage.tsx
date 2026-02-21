@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, ExternalLink, Image, UserCircle, Database, Server } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { hasPermission } from '../lib/rbac'
 import { getSystemStats } from '../lib/api'
 
 export default function DashboardPage() {
@@ -36,17 +35,6 @@ export default function DashboardPage() {
       url: '/profile'
     }
   ]
-
-  // 如果是管理员，显示后台管理入口
-  if (hasPermission(user, 'manage:system')) {
-    apps.push({
-      id: 'admin',
-      name: '系统管理',
-      description: 'Casdoor 身份认证管理后台',
-      icon: <UserCircle className="h-full w-full text-purple-400" />, // 使用不同颜色区分
-      url: 'http://119.91.71.30:8080/routers'
-    })
-  }
 
   const handleSignOut = () => {
     setLoading(true)

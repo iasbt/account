@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { hasPermission, hasAnyPermission, ROLE_PERMISSIONS } from './rbac';
-import type { CasdoorUser } from '../store/useAuthStore';
+import type { AuthUser } from '../store/useAuthStore';
 
 describe('RBAC System', () => {
   // Mock Users
-  const adminUser: CasdoorUser = {
+  const adminUser: AuthUser = {
     id: '1',
     name: 'admin',
     displayName: 'Admin',
@@ -13,7 +13,7 @@ describe('RBAC System', () => {
     isAdmin: true
   };
 
-  const normalUser: CasdoorUser = {
+  const normalUser: AuthUser = {
     id: '2',
     name: 'user',
     displayName: 'User',

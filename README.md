@@ -11,7 +11,6 @@
 - **UI**: TailwindCSS
 
 ### Backend & Infrastructure
-- **Auth Provider**: Casdoor (Hosted on Tencent Cloud)
 - **Database**: MySQL 8.0 (Managed by Docker)
 - **Gateway**: Nginx (Reverse Proxy)
 - **Storage**: Bitiful S3 (Backups)
@@ -31,13 +30,6 @@ npm install
 在项目根目录创建 `.env`：
 
 ```bash
-# Casdoor Config (Future)
-VITE_CASDOOR_SERVER_URL=https://account.iasbt.cloud
-VITE_CASDOOR_CLIENT_ID=<your-client-id>
-VITE_CASDOOR_ORG_NAME=iasbt
-VITE_CASDOOR_APP_NAME=account-app
-
-# Legacy / Database Access (Current)
 VITE_SUPABASE_URL=https://<your-project-id>.supabase.co
 VITE_SUPABASE_ANON_KEY=<your-anon-key>
 ```
@@ -62,7 +54,7 @@ npm run build
 
 ## 目录结构
 - `src/`: 前端源代码
-- `deploy/`: 服务器部署配置 (Docker Compose, Nginx, Casdoor)
+- `deploy/`: 服务器部署配置 (Docker Compose, Nginx)
 - `deployment_docs/`: 详细部署与集成文档
 - `deploy_to_remote.ps1`: 自动化部署脚本
 
