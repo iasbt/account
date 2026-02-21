@@ -1,5 +1,7 @@
 const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/rest";
-const allowExternalApi = import.meta.env.VITE_ALLOW_EXTERNAL_API === "true";
+const explicitAllow = import.meta.env.VITE_ALLOW_EXTERNAL_API === "true";
+const explicitDeny = import.meta.env.VITE_ALLOW_EXTERNAL_API === "false";
+const allowExternalApi = explicitAllow || (import.meta.env.MODE === "production" && !explicitDeny);
 
 const baseUrl = (() => {
   const trimmed = rawApiBaseUrl.replace(/\/$/, "");

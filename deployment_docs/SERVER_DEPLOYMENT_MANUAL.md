@@ -30,7 +30,7 @@
 
 | 服务 | 网址 | 备注 |
 | :--- | :--- | :--- |
-| **相册 (Gallery)** | [http://iasbt.cloud](http://iasbt.cloud) | 已统一域名，上传无限制 |
+| **相册 (Gallery)** | [https://img.iasbt.com/](https://img.iasbt.com/) | 已统一域名，上传无限制 |
 | **门户 (Portal)** | [http://www.iasbt.cloud](http://www.iasbt.cloud) | (规划中) |
 
 ---
@@ -82,8 +82,8 @@ ssh -i "D:\OneDrive\Desktop\trae.pem" ubuntu@119.91.71.30 "sudo docker ps"
 
 ### 5.1 腾讯云 EdgeOne 配置
 由于服务器 Nginx 监听 80 端口，必须调整 EdgeOne 回源策略：
-- [ ] 进入 EdgeOne 控制台 -> `iasbt.cloud`。
-- [ ] **DNS 解析**：添加 `*.iasbt.cloud` CNAME 指向 EdgeOne。
+- [ ] 进入 EdgeOne 控制台 -> `img.iasbt.com`。
+- [ ] **DNS 解析**：添加 `*.iasbt.com` CNAME 指向 EdgeOne。
 - [ ] **回源配置**：将 **回源协议 (Origin Protocol)** 设置为 **HTTP** (重要！否则 502)。
 
 ## 6. 备份与迁移

@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - **Server Migration**: Migrated from Supabase (SaaS) to self-hosted architecture on Tencent Cloud (119.91.71.30).
 - **Domain Strategy**:
-    - `gallery.iasbt.cloud` -> **`iasbt.cloud`** (Unified Gallery URL).
+-    - `gallery.iasbt.cloud` -> **`img.iasbt.com`** (Unified Gallery URL).
 - **Deployment Logic**:
     - Updated `deploy_to_remote.ps1` to automatically clean up conflicting `nginx-proxy-manager` containers.
     - Hardcoded database password in deployment script to prevent data loss on redeployment.

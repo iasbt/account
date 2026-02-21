@@ -25,7 +25,7 @@ export default function DashboardPage() {
       name: '相册图库',
       description: 'MT Photos 智能相册',
       icon: <Image className="h-full w-full text-cyan-400" />,
-      url: 'http://iasbt.cloud'
+      url: 'https://img.iasbt.com/'
     },
     {
       id: 'account',

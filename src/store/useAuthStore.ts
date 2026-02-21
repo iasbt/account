@@ -23,8 +23,26 @@ interface AuthState {
   handleCallback: (code: string) => Promise<void>
 }
 
-const notConfigured = () => {
-  throw new Error('认证服务未配置')
+const getAuthBaseUrl = () => {
+  const raw = import.meta.env.VITE_AUTH_BASE_URL || ''
+  return raw.replace(/\/$/, '')
+}
+
+const postJson = async (endpoint: string, body: Record<string, unknown>) => {
+  const baseUrl = getAuthBaseUrl()
+  const url = `${baseUrl}${endpoint}`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    const message = data?.message || '请求失败'
+    throw new Error(message)
+  }
+  return data
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -33,10 +51,37 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
       isAuthenticated: false,
-      login: async () => notConfigured(),
-      loginWithPassword: async () => notConfigured(),
-      sendVerificationCode: async () => notConfigured(),
-      register: async () => notConfigured(),
+      login: async () => {
+        const { user } = get()
+        if (!user) {
+          throw new Error('未登录')
+        }
+      },
+      loginWithPassword: async (account, password) => {
+        const data = await postJson('/api/auth/login', { account, password })
+        set({
+          user: data.user,
+          isAuthenticated: true
+        })
+      },
+      sendVerificationCode: async (dest) => {
+        await postJson('/api/auth/send-code', { email: dest })
+      },
+      register: async (data) => {
+        const payload = {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          code: data.code
+        }
+        const response = await postJson('/api/auth/register', payload)
+        if (response.user) {
+          set({
+            user: response.user,
+            isAuthenticated: true
+          })
+        }
+      },
       updateProfile: async (data) => {
         const { user } = get()
         if (!user) {
@@ -47,7 +92,9 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         set({ token: null, user: null, isAuthenticated: false })
       },
-      handleCallback: async () => notConfigured(),
+      handleCallback: async () => {
+        throw new Error('暂不支持回调登录')
+      },
     }),
     {
       name: 'auth-storage',
