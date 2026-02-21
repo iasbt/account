@@ -76,6 +76,51 @@ app.use((req, res, next) => {
 const ssoSecret = process.env.SSO_JWT_SECRET || "";
 const ssoTokenTtlSeconds = Number(process.env.SSO_TOKEN_TTL || 300);
 const ssoTokenStore = new Map();
+const logLevel = process.env.LOG_LEVEL || "info";
+const redactHeaders = (headers) => {
+  const result = {};
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === "authorization") {
+      result[key] = "[redacted]";
+      continue;
+    }
+    result[key] = value;
+  }
+  return result;
+};
+
+app.use((req, res, next) => {
+  if (!req.path.startsWith("/api/")) return next();
+  const requestId = crypto.randomUUID();
+  const start = Date.now();
+  req.requestId = requestId;
+  res.setHeader("x-request-id", requestId);
+  const origin = req.headers.origin || "";
+  const entry = {
+    requestId,
+    method: req.method,
+    path: req.path,
+    origin,
+    ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+  };
+  if (logLevel === "debug") {
+    entry.headers = redactHeaders(req.headers);
+  }
+  console.log(JSON.stringify({ level: "info", event: "api_request_start", ...entry }));
+  res.on("finish", () => {
+    const durationMs = Date.now() - start;
+    console.log(
+      JSON.stringify({
+        level: "info",
+        event: "api_request_end",
+        requestId,
+        status: res.statusCode,
+        durationMs,
+      })
+    );
+  });
+  next();
+});
 
 const signToken = (payload, ttlSeconds) => {
   if (!ssoSecret) return null;
@@ -160,7 +205,7 @@ app.post("/api/auth/send-code", async (req, res) => {
 
     return res.json({ message: "验证码发送成功", success: true });
   } catch (error) {
-    console.error("Send code error", error);
+    console.error("Send code error", { requestId: req.requestId, error });
     return res.status(500).json({ message: "验证码发送失败", success: false });
   }
 });
@@ -212,7 +257,7 @@ app.post("/api/auth/register", async (req, res) => {
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK");
-      console.error("Register transaction error", error);
+      console.error("Register transaction error", { requestId: req.requestId, error });
       return res.status(500).json({ message: "注册失败", success: false });
     } finally {
       client.release();
@@ -229,7 +274,7 @@ app.post("/api/auth/register", async (req, res) => {
       user: { id: userId, email, name, displayName: name, avatar: "", isAdmin: false },
     });
   } catch (error) {
-    console.error("Register error", error);
+    console.error("Register error", { requestId: req.requestId, error });
     return res.status(500).json({ message: "注册失败", success: false });
   }
 });
@@ -289,7 +334,7 @@ app.post("/api/auth/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error", error);
+    console.error("Login error", { requestId: req.requestId, error });
     return res.status(500).json({ message: "登录失败", success: false });
   }
 });

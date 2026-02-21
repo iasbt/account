@@ -50,6 +50,13 @@ const postJson = async (endpoint: string, body: Record<string, unknown>) => {
 
   const data = await response.json().catch(() => ({}))
   if (!response.ok) {
+    const requestId = response.headers.get('x-request-id')
+    console.error('Auth request failed', {
+      url,
+      status: response.status,
+      requestId,
+      message: data?.message
+    })
     const message = data?.message || '请求失败'
     throw new Error(message)
   }
