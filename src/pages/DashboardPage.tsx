@@ -25,7 +25,7 @@ export default function DashboardPage() {
       name: '相册图库',
       description: 'Photos 智能相册',
       icon: <Image className="h-full w-full text-cyan-400" />,
-      url: 'https://img.iasbt.com/#/admin',
+      url: 'https://img.iasbt.com/#/',
       sso: true
     },
     {
@@ -45,13 +45,16 @@ export default function DashboardPage() {
 
   const handleLaunch = async (app: { url: string; sso?: boolean }) => {
     if (app.sso && app.url.startsWith('http')) {
-      const response = await fetch(`/api/sso/issue?target=${encodeURIComponent(app.url)}`, {
+      const response = await fetch('/api/auth/sso-token', {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined
       }).catch(() => null)
       if (response && response.ok) {
         const data = await response.json()
-        if (data?.url) {
-          window.open(data.url, '_blank')
+        if (data?.token) {
+          const email = encodeURIComponent(data.email || user?.email || '')
+          const tokenValue = encodeURIComponent(data.token)
+          const target = `${app.url}?token=${tokenValue}&email=${email}`
+          window.open(target, '_blank')
           return
         }
       }

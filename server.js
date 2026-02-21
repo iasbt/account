@@ -10,11 +10,63 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+const parseOrigins = (value) =>
+  value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const originAllowlist = parseOrigins(
+  process.env.CORS_ALLOWLIST || process.env.CORS_ORIGIN || ""
+);
+
+const defaultAllowlist = [
+  "https://account.iasbt.com",
+  "*.vercel.app",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://account.iasbt.com/login",
+];
+
+const effectiveAllowlist =
+  originAllowlist.length > 0 ? originAllowlist : defaultAllowlist;
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  try {
+    const { host, protocol } = new URL(origin);
+    return effectiveAllowlist.some((allowed) => {
+      if (!allowed) return false;
+      if (allowed.includes("*")) {
+        const escaped = allowed.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(`^${escaped.replace(/\\\*/g, ".*")}$`);
+        if (allowed.includes("://")) {
+          return regex.test(origin);
+        }
+        return regex.test(host);
+      }
+      return origin === allowed || `${protocol}//${host}` === allowed || host === allowed;
+    });
+  } catch {
+    return false;
+  }
+};
+
 app.use((req, res, next) => {
-  const origin = process.env.CORS_ORIGIN || "*";
-  res.setHeader("Access-Control-Allow-Origin", origin);
+  const origin = req.headers.origin;
+  if (origin && !isOriginAllowed(origin)) {
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(403);
+    }
+    return res.status(403).json({ message: "Origin not allowed" });
+  }
+  if (origin && isOriginAllowed(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
   }
@@ -22,6 +74,8 @@ app.use((req, res, next) => {
 });
 
 const ssoSecret = process.env.SSO_JWT_SECRET || "";
+const ssoTokenTtlSeconds = Number(process.env.SSO_TOKEN_TTL || 300);
+const ssoTokenStore = new Map();
 
 const signToken = (payload, ttlSeconds) => {
   if (!ssoSecret) return null;
@@ -58,6 +112,15 @@ const getAuthUser = (req) => {
   const [type, token] = header.split(" ");
   if (type !== "Bearer" || !token) return null;
   return verifyToken(token);
+};
+
+const cleanupSsoTokens = () => {
+  const now = Date.now();
+  for (const [token, item] of ssoTokenStore.entries()) {
+    if (item.expiresAt <= now) {
+      ssoTokenStore.delete(token);
+    }
+  }
 };
 
 const parseAllowlist = () => {
@@ -267,6 +330,32 @@ app.get("/api/sso/issue", async (req, res) => {
   }
   url.searchParams.set("sso_token", token);
   return res.json({ url: url.toString() });
+});
+
+app.get("/api/auth/sso-token", async (req, res) => {
+  const authUser = getAuthUser(req);
+  if (!authUser) {
+    return res.status(401).json({ message: "未登录" });
+  }
+  cleanupSsoTokens();
+  const token = crypto.randomBytes(24).toString("hex");
+  const expiresAt = Date.now() + ssoTokenTtlSeconds * 1000;
+  ssoTokenStore.set(token, {
+    userId: authUser.sub,
+    email: authUser.email,
+    name: authUser.name,
+    displayName: authUser.displayName,
+    avatar: authUser.avatar,
+    isAdmin: authUser.isAdmin,
+    expiresAt,
+  });
+  res.cookie("sso_token", token, {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+    maxAge: ssoTokenTtlSeconds * 1000,
+  });
+  return res.json({ token, email: authUser.email, expiresAt });
 });
 
 app.get("/api/dashboard/stats", async (req, res) => {
