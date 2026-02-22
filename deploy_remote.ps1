@@ -90,20 +90,17 @@ $DeployCmd = @"
     echo '>>> Waiting for services to initialize...'
     sleep 10
     
-    # 6. 版本强校验 (Strong Version Verification)
+    # 6. 版本强校验 (Strong Version Verification) - Simplified
     echo '>>> Verifying Health & Version (Expected: $LocalVersion)...'
     HEALTH_JSON=`$(curl -s http://localhost/api/health)`
     echo "Health Response: `$HEALTH_JSON"
     
-    # Simple extraction using sed
-    REMOTE_VERSION=`$(echo "`$HEALTH_JSON" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')`
-    
-    if [ "$LocalVersion" == "`$REMOTE_VERSION" ]; then
+    if echo "`$HEALTH_JSON" | grep -q "\"version\":\"$LocalVersion\""; then
         echo "✅ Version Verification PASSED: $LocalVersion"
     else
         echo "❌ Version Verification FAILED!"
         echo "   Expected: $LocalVersion"
-        echo "   Got:      `$REMOTE_VERSION"
+        echo "   Got Response: `$HEALTH_JSON"
         exit 1
     fi
     
