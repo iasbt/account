@@ -12,8 +12,6 @@ services:
       POSTGRES_DB: supabase_backup
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-    ports:
-      - "5432:5432" # 暴露端口以便迁移数据，生产环境建议关闭或限制 IP
     networks:
       - iasbt-net
     healthcheck:
@@ -32,8 +30,6 @@ services:
       PGRST_DB_SCHEMA: public
       PGRST_DB_ANON_ROLE: postgres
       PGRST_OPENAPI_SERVER_PROXY_URI: http://119.91.71.30/api/rest
-    ports:
-      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy

@@ -14,8 +14,8 @@
 
 | 服务组件 | 容器名称 | 端口映射 | 版本 | 说明 |
 | :--- | :--- | :--- | :--- | :--- |
-| **Postgres** | `postgres-business` | 5432 (内部) | 15 | 业务数据库 |
-| **PostgREST** | `postgrest` | 3000 (内部) | latest | API 数据访问层 |
+| **Postgres** | `postgres-business` | 内部网络 | 15 | 业务数据库 |
+| **PostgREST** | `postgrest` | 内部网络 | latest | API 数据访问层 |
 | **Nginx Gateway** | `nginx-gateway` | 80:80, 443:443 | alpine | 统一网关，负责反向代理 |
 
 **网络拓扑**：
