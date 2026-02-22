@@ -1,7 +1,7 @@
 /**
  * @module AdminRoutes
  * @description 管理员门户操作路由
- * @basepath /api/admin
+ * @basepath /admin
  */
 
 import { Router } from "express";
@@ -21,7 +21,7 @@ router.use(requireAuth);
 router.use(requireAdmin);
 
 /**
- * @route GET /api/admin/users
+ * @route GET /admin/users
  * @description 获取所有用户列表
  * @access Admin (管理员)
  */

@@ -7,10 +7,10 @@ import adminRoutes from "./adminRoutes.js";
 
 const router = Router();
 
-router.use("/api", healthRoutes);
-router.use("/api", authRoutes);
-router.use("/api", ssoRoutes);
-router.use("/api", dashboardRoutes);
-router.use("/api/admin", adminRoutes);
+router.use("/", healthRoutes);
+router.use("/", authRoutes);
+router.use("/", ssoRoutes);
+router.use("/", dashboardRoutes);
+router.use("/admin", adminRoutes);
 
 export default router;

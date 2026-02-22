@@ -18,13 +18,14 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
-        '/api/auth': {
-          target: authTarget,
-          changeOrigin: true
-        },
         '/api/rest': {
           target: apiTarget,
           changeOrigin: true
+        },
+        '/api': {
+          target: authTarget,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, '')
         }
       }
     }

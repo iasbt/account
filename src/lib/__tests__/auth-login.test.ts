@@ -44,7 +44,7 @@ describe("auth login", () => {
     });
 
     const response = await request(app as Parameters<typeof request>[0])
-      .post("/api/auth/login")
+      .post("/auth/login")
       .send({ account: "user@test.com", password });
 
     expect(response.status).toBe(200);
@@ -73,7 +73,7 @@ describe("auth login", () => {
     });
 
     const response = await request(app as Parameters<typeof request>[0])
-      .post("/api/admin/auth/login")
+      .post("/admin/auth/login")
       .send({ account: "admin@test.com", password });
 
     expect(response.status).toBe(200);
