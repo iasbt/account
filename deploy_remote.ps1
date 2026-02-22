@@ -95,8 +95,8 @@ $DeployCmd = @"
     HEALTH_JSON=`$(curl -s http://localhost/api/health)`
     echo "Health Response: `$HEALTH_JSON"
     
-    # 使用 Python 解析 JSON (Ubuntu 默认只有 python3)
-    REMOTE_VERSION=`$(echo "`$HEALTH_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('version', 'unknown'))" 2>/dev/null || echo "parse_error")`
+    # Simple Grep extraction for robustness
+    REMOTE_VERSION=`$(echo "`$HEALTH_JSON" | grep -o '"version": *"[^"]*"' | cut -d'"' -f4)`
     
     if [ "$LocalVersion" == "`$REMOTE_VERSION" ]; then
         echo "✅ Version Verification PASSED: $LocalVersion"
