@@ -90,12 +90,14 @@ $DeployCmd = @"
     echo '>>> Waiting for services to initialize...'
     sleep 10
     
-    # 6. 版本强校验 (Strong Version Verification) - Simplified
+    # 6. 版本强校验 (Strong Version Verification) - Bash String Match
     echo '>>> Verifying Health & Version (Expected: $LocalVersion)...'
     HEALTH_JSON=`$(curl -s http://localhost/api/health)`
     echo "Health Response: `$HEALTH_JSON"
     
-    if echo "`$HEALTH_JSON" | grep -q "\"version\":\"$LocalVersion\""; then
+    # Use Bash pattern matching (simplest, no grep/pipe issues)
+    # Match pattern: *"version":"1.6.1"*
+    if [[ "`$HEALTH_JSON" == *'"version":"'$LocalVersion'"'* ]]; then
         echo "✅ Version Verification PASSED: $LocalVersion"
     else
         echo "❌ Version Verification FAILED!"
