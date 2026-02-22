@@ -5,6 +5,7 @@ import { sendCode } from "../emailService.js";
 import { signToken } from "../utils/token.js";
 import { cleanupSsoTokens, ssoTokenStore } from "../utils/ssoStore.js";
 import { config } from "../config/index.js";
+import { logAudit } from "../middlewares/logger.js";
 
 export const sendVerificationCode = async (req, res) => {
   const { email } = req.body;
@@ -160,8 +161,14 @@ export const login = async (req, res) => {
 
 export const adminLogin = async (req, res) => {
   const { account, password } = req.body;
+  const auditBase = {
+    requestId: req.requestId,
+    account: account || "",
+    ip: req.ip,
+  };
 
   if (!account || !password) {
+    logAudit({ ...auditBase, success: false, reason: "missing_params" });
     return res.status(400).json({ message: "参数不完整", success: false });
   }
 
@@ -172,17 +179,20 @@ export const adminLogin = async (req, res) => {
     );
 
     if (adminResult.rowCount === 0) {
+      logAudit({ ...auditBase, success: false, reason: "not_found" });
       return res.status(400).json({ message: "用户不存在", success: false });
     }
 
     const admin = adminResult.rows[0];
     const hash = admin.password_hash || "";
     if (!hash.startsWith("$2")) {
+      logAudit({ ...auditBase, success: false, reason: "invalid_hash", adminId: admin.id });
       return res.status(400).json({ message: "密码格式异常", success: false });
     }
     const isValid = await bcryptjs.compare(password, hash);
 
     if (!isValid) {
+      logAudit({ ...auditBase, success: false, reason: "invalid_password", adminId: admin.id });
       return res.status(400).json({ message: "账号或密码错误", success: false });
     }
 
@@ -200,6 +210,12 @@ export const adminLogin = async (req, res) => {
       60 * 60 * 12
     );
 
+    logAudit({
+      ...auditBase,
+      success: true,
+      adminId: admin.id,
+      securityLevel: admin.security_level || 1,
+    });
     return res.json({
       success: true,
       token,
@@ -213,6 +229,7 @@ export const adminLogin = async (req, res) => {
       },
     });
   } catch (error) {
+    logAudit({ ...auditBase, success: false, reason: "server_error" });
     console.error("Admin login error", { requestId: req.requestId, error });
     return res.status(500).json({ message: "登录失败", success: false });
   }

@@ -34,3 +34,13 @@ export const loggerMiddleware = (req, res, next) => {
   });
   next();
 };
+
+export const logAudit = (entry) => {
+  console.log(
+    JSON.stringify({
+      level: "info",
+      event: "admin_login_audit",
+      ...entry,
+    })
+  );
+};
