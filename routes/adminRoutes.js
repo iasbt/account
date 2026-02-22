@@ -7,7 +7,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/roleCheck.js";
-import { getAllUsers, deleteUser, updateUser } from "../controllers/adminController.js";
+import { getAllUsers, deleteUser, updateUser, resetUserPassword } from "../controllers/adminController.js";
 import { adminLogin } from "../controllers/authController.js";
 
 const router = Router();
@@ -40,5 +40,12 @@ router.delete("/users/:id", deleteUser);
  * @access Admin (管理员)
  */
 router.put("/users/:id", updateUser);
+
+/**
+ * @route POST /admin/users/:id/reset-password
+ * @description 重置用户密码 (发送邮件)
+ * @access Admin (管理员)
+ */
+router.post("/users/:id/reset-password", resetUserPassword);
 
 export default router;

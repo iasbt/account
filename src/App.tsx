@@ -134,6 +134,17 @@ export default function App() {
         }
       />
       
+      <Route
+        path="/reset-password"
+        element={
+          <PublicOnlyUser>
+            <UserLayout>
+              <ResetPasswordPage />
+            </UserLayout>
+          </PublicOnlyUser>
+        }
+      />
+      
       <Route path="/terms" element={<UserLayout><TermsPage /></UserLayout>} />
       <Route path="/privacy" element={<UserLayout><PrivacyPage /></UserLayout>} />
 

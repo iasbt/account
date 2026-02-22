@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { adminService, type AdminUser } from '../services/adminService'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, LayoutDashboard, Users, Settings, Search, Bell, Trash2, Edit2, X, AlertTriangle } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, Settings, Search, Bell, Trash2, Edit2, X, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 
 export default function AdminPanel() {
@@ -198,6 +198,13 @@ export default function AdminPanel() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-3">
                       <button 
+                        onClick={() => setResettingUser(user)}
+                        className="text-text-secondary hover:text-orange-500 transition-colors"
+                        title="重置密码"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </button>
+                      <button 
                         onClick={() => openEditModal(user)}
                         className="text-text-secondary hover:text-accent-blue transition-colors"
                       >
@@ -297,6 +304,39 @@ export default function AdminPanel() {
                  className="flex-1 h-10 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
                >
                  {actionLoading ? '删除中...' : '确认删除'}
+               </button>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Confirmation Modal */}
+      {resettingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-apple-deep p-6 animate-in fade-in zoom-in duration-200">
+             <div className="flex flex-col items-center text-center mb-6">
+               <div className="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 mb-4">
+                 <RefreshCw className="h-6 w-6" />
+               </div>
+               <h3 className="text-xl font-semibold text-text-primary mb-2">确认重置密码?</h3>
+               <p className="text-text-secondary text-sm">
+                 将发送包含重置链接的邮件给 <strong>{resettingUser.email}</strong>。
+               </p>
+             </div>
+             
+             <div className="flex gap-3">
+               <button 
+                 onClick={() => setResettingUser(null)}
+                 className="flex-1 h-10 rounded-full border border-border-light text-text-secondary hover:bg-background-light transition-colors font-medium"
+               >
+                 取消
+               </button>
+               <button 
+                 onClick={handleResetPassword}
+                 disabled={actionLoading}
+                 className="flex-1 h-10 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors font-medium disabled:opacity-50"
+               >
+                 {actionLoading ? '发送中...' : '确认发送'}
                </button>
              </div>
           </div>

@@ -8,4 +8,10 @@ export const config = {
   ssoTokenTtl: Number(process.env.SSO_TOKEN_TTL || 300),
   corsAllowlist: process.env.CORS_ALLOWLIST || process.env.CORS_ORIGIN || "",
   ssoRedirectAllowlist: process.env.SSO_REDIRECT_ALLOWLIST || "",
+  smtp: {
+    host: process.env.SMTP_HOST || "",
+    port: Number(process.env.SMTP_PORT || 465),
+    user: process.env.SMTP_USER || "",
+    pass: process.env.SMTP_PASS || "",
+  },
 };
