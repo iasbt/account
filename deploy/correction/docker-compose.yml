@@ -16,7 +16,7 @@ services:
       # Please ensure these are set in your .env file
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=public
+      - DB_NAME=postgres
       - SSO_JWT_SECRET=${SSO_JWT_SECRET}
       - CORS_ALLOWLIST=${CORS_ALLOWLIST}
       - PORT=3000
