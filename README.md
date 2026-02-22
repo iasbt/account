@@ -1,62 +1,65 @@
-# Account System (IAM / SSO)
+# Account System (IAM / SSO) - V1.6
 
-统一账户中心，负责登录、权限控制与子应用单点登录回跳。
+> **Status**: 🔒 Frozen / Sealed (V1.6)
+> **Docs**: [ACCOUNT_SYSTEM_DEV_DOC_V1.6.md](deployment_docs/ACCOUNT_SYSTEM_DEV_DOC_V1.6.md)
+
+统一账户中心，作为“四合院”项目矩阵的数字基座，负责统一身份认证 (SSO)、权限控制 (RBAC) 和数据中台服务。
 
 ## 技术栈 (Tech Stack)
 
-### Frontend
-- **Framework**: React + Vite + TypeScript
-- **Routing**: React Router v7
-- **State**: Zustand
-- **UI**: TailwindCSS
+### Core
+- **Database**: PostgreSQL 14 (Alpine) - *Single Source of Truth*
+- **Backend**: Node.js 18 (Express) - *RESTful API*
+- **Frontend**: React 18 + Vite + TypeScript - *SPA*
+- **Gateway**: Nginx (Alpine) - *Reverse Proxy & Static Server*
 
-### Backend & Infrastructure
-- **Database**: MySQL 8.0 (Managed by Docker)
-- **Gateway**: Nginx (Reverse Proxy)
-- **Storage**: Bitiful S3 (Backups)
-- **Deployment**: Docker Compose ("Migratory Bird" Architecture)
+### Infrastructure
+- **Orchestration**: Docker Compose (V2)
+- **Deployment**: PowerShell Automation (`deploy_remote.ps1`)
+- **Cloud**: Tencent Cloud (Ubuntu)
 
 ## 快速开始 (Quick Start)
 
 ### 1. 环境准备
-确保本地已安装 Node.js 20+ 和 Docker (可选，用于本地调试后端)。
+- Node.js 18+
+- Docker & Docker Compose
 
 ### 2. 安装依赖
 ```bash
 npm install
 ```
 
-### 3. 配置环境变量
-在项目根目录创建 `.env`：
-
+### 3. 本地开发 (Local Dev)
 ```bash
-VITE_SUPABASE_URL=https://<your-project-id>.supabase.co
-VITE_SUPABASE_ANON_KEY=<your-anon-key>
-```
-
-### 4. 启动开发服务器
-```bash
+# 启动前端 (5173)
 npm run dev
+
+# 启动后端 (3000)
+node server.js
 ```
 
-## 部署与运维 (Deployment)
+## 部署 (Deployment)
 
-服务器部署详情请参考: [SERVER_DEPLOYMENT_MANUAL.md](deployment_docs/SERVER_DEPLOYMENT_MANUAL.md)
-
-### 常用运维命令
-```bash
-# 部署到生产环境 (需配置 SSH Key)
-.\deploy_to_remote.ps1
-
-# 本地构建
-npm run build
+**唯一指定部署脚本**:
+```powershell
+.\deploy_remote.ps1 "Commit Message"
 ```
 
-## 目录结构
+此脚本将自动执行：
+1. Git Push (Local -> GitHub)
+2. SSH Pull (GitHub -> Tencent Cloud)
+3. Docker Build & Restart
+4. Health Check Verification (`/api/health`)
+
+**详情请参阅**: [开发文档 V1.6](deployment_docs/ACCOUNT_SYSTEM_DEV_DOC_V1.6.md)
+
+## 目录结构 (Directory Structure)
+
 - `src/`: 前端源代码
-- `deploy/`: 服务器部署配置 (Docker Compose, Nginx)
-- `deployment_docs/`: 详细部署与集成文档
-- `deploy_to_remote.ps1`: 自动化部署脚本
+- `deploy/correction/`: **部署核心配置 (Docker/Nginx)** - *Do not modify without approval*
+- `deployment_docs/`: 详细架构文档
+- `server.js`: 后端入口文件
+- `deploy_remote.ps1`: 自动化部署脚本
 
 ## 变更日志 (Changelog)
 详细变更记录请查看: [CHANGELOG.md](CHANGELOG.md)

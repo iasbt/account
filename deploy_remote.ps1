@@ -12,12 +12,17 @@ $KeyPath = "D:\OneDrive\Desktop\trae.pem"
 $RepoDir = "/home/ubuntu/account" 
 $DeployDir = "/home/ubuntu/account/deploy/correction"
 
+# 0. 读取本地版本 (Source of Truth)
+$PackageJson = Get-Content -Path "package.json" -Raw | ConvertFrom-Json
+$LocalVersion = $PackageJson.version
+Write-Host ">>> [0/3] Target Version: $LocalVersion" -ForegroundColor Cyan
+
 # 1. 提交代码到 GitHub
 Write-Host ">>> [1/3] Committing and Pushing to GitHub..." -ForegroundColor Cyan
 git add .
 # 只有当有变更时才提交
 if ((git status --porcelain) -ne "") {
-    git commit -m "$Message"
+    git commit -m "$Message (v$LocalVersion)"
     git push origin main
 } else {
     Write-Host "No changes to commit, pushing anyway to ensure remote is up to date..." -ForegroundColor Yellow
@@ -76,7 +81,6 @@ $DeployCmd = @"
     # 5. 网络对齐 (Network Alignment)
     echo '>>> Aligning Networks...'
     # 确保 iasbt-postgres 加入 correction_default 网络
-    # 注意：如果已加入，命令会报错，所以加 || true
     sudo docker network connect correction_default iasbt-postgres 2>/dev/null || echo 'iasbt-postgres already in network or network not ready'
     
     # 重启后端以确保 DNS 解析生效 (iasbt-postgres hostname)
@@ -84,18 +88,22 @@ $DeployCmd = @"
     sudo docker restart account-backend
     
     echo '>>> Waiting for services to initialize...'
-    sleep 5
+    sleep 10
     
-    # 6. 版本对齐验证 (Version Check)
-    echo '>>> Verifying Health & Version...'
+    # 6. 版本强校验 (Strong Version Verification)
+    echo '>>> Verifying Health & Version (Expected: $LocalVersion)...'
     HEALTH_JSON=`$(curl -s http://localhost/api/health)`
     echo "Health Response: `$HEALTH_JSON"
     
-    # 简单的 Grep 检查 (由于没有 jq)
-    if echo "`$HEALTH_JSON" | grep -q "version"; then
-        echo "✅ Version check passed!"
+    # 使用 Python 解析 JSON (Ubuntu 默认只有 python3)
+    REMOTE_VERSION=`$(echo "`$HEALTH_JSON" | python3 -c "import sys, json; print(json.load(sys.stdin).get('version', 'unknown'))" 2>/dev/null || echo "parse_error")`
+    
+    if [ "$LocalVersion" == "`$REMOTE_VERSION" ]; then
+        echo "✅ Version Verification PASSED: $LocalVersion"
     else
-        echo "❌ Version check FAILED! Response invalid."
+        echo "❌ Version Verification FAILED!"
+        echo "   Expected: $LocalVersion"
+        echo "   Got:      `$REMOTE_VERSION"
         exit 1
     fi
     
@@ -106,4 +114,8 @@ $DeployCmd = @"
 # 执行远程命令
 ssh -i $KeyPath -o StrictHostKeyChecking=no "${User}@${ServerIP}" $DeployCmd
 
-Write-Host "`nDeployment Complete!" -ForegroundColor Green
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "`nDeployment Complete & Verified!" -ForegroundColor Green
+} else {
+    Write-Error "`nDeployment FAILED or Verification Failed!"
+}

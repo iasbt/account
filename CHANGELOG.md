@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [V1.6] - 2026-02-22 (Frozen/Sealed)
+
+### 🚀 Major Changes
+- **Architecture Finalized**: "四合院" Project Matrix (Account System as Core Base).
+- **Automated Deployment**: New `deploy_remote.ps1` script with Git-based workflow (Local -> GitHub -> Tencent Cloud).
+- **Infrastructure Alignment**: 
+    - Consolidated containers to `account-frontend`, `account-backend`, `iasbt-postgres`.
+    - Enforced single Docker network (`correction_default`).
+    - Standardized deployment path: `/home/ubuntu/account/deploy/correction`.
+
+### ✨ Added
+- **Health Check**: `GET /api/health` endpoint for version verification.
+- **Documentation**: Created `ACCOUNT_SYSTEM_DEV_DOC_V1.6.md` as the single source of truth.
+- **Security**: Strict whitelist for running containers.
+
+### 🗑️ Removed (Legacy Cleanup)
+- **PostgREST**: Replaced with custom Node.js API logic.
+- **Nginx Gateway**: Merged into `account-frontend`.
+- **Postgres Business**: Removed redundant database instance.
+- **Supabase/MySQL**: Fully migrated to self-hosted PostgreSQL.
+
 ## [Unreleased] - 2026-02-11
 
 ### Added

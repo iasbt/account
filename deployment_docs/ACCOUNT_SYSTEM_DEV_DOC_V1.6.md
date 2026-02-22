@@ -1,206 +1,162 @@
-# Account System 开发文档 (V1.6 重构版)
+# Account System 开发文档 V1.6 (Frozen Edition)
 
-## 1. 封面
+> **版本状态**: 🔒 **已封板 (Sealed)**
+> **最后更新**: 2026-02-22
+> **基准环境**: 腾讯云 (119.91.71.30)
+> **部署脚本**: `deploy_remote.ps1` (PowerShell Automation)
 
-**项目名称**：Account System（IAM / SSO Platform）  
-**版本号**：1.6 (Architecture Reconstruction)  
-**发布日期**：2026-02-22  
-**维护责任人**：Trae AI Assistant  
-**状态**：**已修正 (Corrected)**  
+## 1. 核心架构：四合院项目矩阵 (The Quadrangle Matrix)
 
----
+本系统 (Account System) 作为整个产品矩阵的 **数字基座**，负责统一身份认证 (SSO)、权限控制 (RBAC) 和数据中台服务。
 
-## 2. 修订记录
+### 1.1 拓扑结构 (Topology)
 
-| 版本 | 日期 | 修订人 | 修订原因 | 影响范围 |
-| :--- | :--- | :--- | :--- | :--- |
-| 1.0 - 1.4 | 2026-02 | Maintainer | 早期开发日志与功能迭代 | - |
-| 1.5 | 2026-02-22 | Maintainer | 尝试 Nginx + PostgREST 方案 (已废弃) | 部署架构 |
-| **1.6** | **2026-02-22** | **Trae** | **全局架构修正：确立四合院矩阵，废弃中间件容器，回归 Node.js + React 直连真实数据库** | **全文档重写** |
+我们摒弃了过度设计的微服务架构，回归至最稳健的单体分层架构：
 
----
+```mermaid
+graph TD
+    User[用户/客户端] -->|HTTPS/80| Nginx[前端网关 (account-frontend)]
+    Nginx -->|/api/*| Node[后端 API (account-backend)]
+    Nginx -->|/*| React[静态资源 (SPA)]
+    Node -->|TCP/5432| DB[(核心数据库 iasbt-postgres)]
+    
+    subgraph "Docker Internal Network (correction_default)"
+        Node
+        DB
+    end
+```
 
-## 3. 核心定义：四合院项目矩阵
+### 1.2 容器清单 (Container Whitelist)
 
-本项目（Account System）并非孤立存在，而是“四合院”生态的一部分。以下是各项目的明确定位：
+| 容器名 | 镜像/构建源 | 端口映射 | 职责描述 |
+| :--- | :--- | :--- | :--- |
+| **iasbt-postgres** | `postgres:14-alpine` | 5432:5432 | **唯一真理数据库**。存储所有用户、日志及历史 CSV 数据。 |
+| **account-backend** | `node:18-alpine` | 3000:3000 | **业务核心**。Express.js 框架，提供 RESTful API。 |
+| **account-frontend** | `nginx:alpine` | 80:80 | **流量入口**。托管 React/Vite 产物，反向代理 API 请求。 |
+| **portainer** | `portainer/portainer-ce` | 9000:9000 | **运维面板**。用于可视化容器管理。 |
 
-| 项目代号 | 名称 | 定位 | 数据库 Schema | 职责与特征 |
-| :--- | :--- | :--- | :--- | :--- |
-| **项目 A** | **Account System** | **大门 / 管家 (基座)** | `public` | **生态基座**。负责用户登录、鉴权、SSO Token 签发。B/C/D 项目均无登录页，全靠 A 签发的通行证。 |
-| **项目 B** | **Gallery (图库)** | **后花园** | `gallery` | **资产存储**。元数据存 DB，**原图存 Cloudflare R2** (img.iasbt.com)。强依赖 A 的 Token 访问。 |
-| **项目 C** | **Toolbox** | **储藏室** | `toolbox` | 工具集集合。 |
-| **项目 D** | **Life OS** | **主卧** | `life_os` | 个人生活管理系统。 |
-
----
-
-## 4. 物理架构与数据流 (Physical Architecture)
-
-### 4.1 部署拓扑
-系统跨越三大基础设施，实现了计算与存储的分离：
-
-1.  **数据库与大脑 (腾讯云 119.91.71.30)**
-    *   **核心组件**: 唯一的 **PostgreSQL 实例 (容器名 `iasbt-postgres`, IP 172.17.0.3)**。
-    *   **数据隔离**: 通过 Schema (`public`, `gallery`, etc.) 隔离业务数据。
-    *   **数据关联**: B/C/D 表中的 `user_id` 严格外键关联至 A 项目的 `public.users`。
-    *   **后端服务**: Node.js API 容器运行于此，直连数据库。
-
-2.  **前端售楼部 (Vercel)**
-    *   **组件**: Account System 前端 (React + Vite)。
-    *   **特征**: 静态资源托管在边缘网络，访问极快。
-
-3.  **静态仓库 (Cloudflare R2)**
-    *   **组件**: 图库原图存储。
-    *   **特征**: 零出口带宽费，通过 `img.iasbt.com` 提供访问。
-
-### 4.2 核心运转逻辑 (The Flow)
-**场景：用户查看一张照片**
-1.  **认证**: 用户在 **Vercel (项目A前端)** 输入账号密码。
-2.  **鉴权**: 请求发送至 **腾讯云 (项目A后端)** 验证，成功后签发 Token。
-3.  **跳转**: 携带 Token 跳转至 **项目B (图库)**。
-4.  **查询**: 图库后端使用 Token 向 **腾讯云 (Schema: gallery)** 查询照片元数据 (Path)。
-5.  **加载**: 浏览器根据 Path 直接从 **Cloudflare R2** 加载真实图片。
+> ⚠️ **严禁出现**：`nginx-gateway`, `postgres-business`, `postgrest` 等已废弃容器。
 
 ---
 
-## 5. 架构修正与部署方案 (Correction Plan)
+## 2. 部署与运维 (Deployment & Operations)
 
-**警告 (2026-02-22)**: 之前的部署脚本错误地启动了 `postgres-business`, `postgrest`, `nginx-gateway` 等空壳容器，导致系统分裂。以下方案用于**强制修正**。
+### 2.1 自动化部署流水线
 
-### 5.1 第一步：环境清理 (cleanup.sh)
-目标：清除所有错误容器，释放 80/443 端口。
+所有部署操作 **必须** 通过项目根目录下的 `deploy_remote.ps1` 脚本执行。
 
+**执行命令**:
+```powershell
+.\deploy_remote.ps1 "Commit Message"
+```
+
+**流水线步骤**:
+1.  **Local**: 自动提交代码 (Git Commit & Push)。
+2.  **Remote**: SSH 连接腾讯云，拉取最新代码 (Git Pull via Deploy Key)。
+3.  **Build**: 在服务器端构建 Docker 镜像 (`docker compose build`)。
+4.  **Deploy**: 重启服务 (`down` -> `up -d`)。
+5.  **Verify**: 自动执行 `/api/health` 检查，验证 Version 字段。
+
+### 2.2 目录规范 (Directory Standard)
+
+服务器端文件结构严格遵循：
+
+```text
+/home/ubuntu/account/
+├── deploy/
+│   └── correction/          <-- 部署核心目录 (Source of Truth)
+│       ├── docker-compose.yml
+│       ├── Dockerfile.api
+│       ├── Dockerfile.web
+│       ├── nginx.conf
+│       └── cleanup.sh
+├── server.js                <-- 后端入口
+└── ...
+```
+
+### 2.3 常用运维命令 (Remote SSH)
+
+**查看实时日志**:
 ```bash
-#!/bin/bash
-# 强制停止并删除废弃容器
-docker rm -f postgres-business postgrest nginx-gateway 2>/dev/null || true
-# 清理无用网络
-docker network rm deploy_iasbt-net 2>/dev/null || true
-# 释放端口占用
-fuser -k 80/tcp 2>/dev/null || true
-fuser -k 443/tcp 2>/dev/null || true
+ssh ubuntu@119.91.71.30 "docker logs -f account-backend"
 ```
 
-### 5.2 第二步：后端构建 (Dockerfile.api)
-目标：构建 Node.js 后端，暴露 3000 端口。
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install --omit=dev
-COPY . .
-EXPOSE 3000
-CMD ["node", "server.js"]
-```
-
-### 5.3 第三步：前端与网关构建
-**Dockerfile.web** (多阶段构建):
-```dockerfile
-# Stage 1: Build
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-# Stage 2: Serve
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
-**nginx.conf** (SPA 支持 + API 代理):
-```nginx
-server {
-    listen 80;
-    server_name localhost;
-    root /usr/share/nginx/html;
-    index index.html;
-
-    # SPA 路由支持
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # 后端 API 代理
-    location /api/ {
-        proxy_pass http://account-backend:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-### 5.4 第四步：最终编排 (docker-compose.yml)
-**关键原则**: 绝不创建新数据库，直连 `iasbt-postgres` (172.17.0.3)。
-
-```yaml
-version: '3.8'
-services:
-  account-backend:
-    build:
-      context: ../..
-      dockerfile: deploy/correction/Dockerfile.api
-    container_name: account-backend
-    restart: always
-    environment:
-      - DB_HOST=172.17.0.3
-      - DB_PORT=5432
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=public
-      - PORT=3000
-    ports:
-      - "3000:3000"
-
-  account-frontend:
-    build:
-      context: ../..
-      dockerfile: deploy/correction/Dockerfile.web
-    container_name: account-frontend
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - account-backend
-```
-
----
-
-## 6. 接口与数据规范
-
-### 6.1 接口前缀
-*   **API 接口**: `/api/*` (由 Nginx 转发至 Node.js 后端)
-*   **静态资源**: `/*` (由 Nginx 直接响应)
-
-### 6.2 数据库规范
-*   **Schema 划分**: 严禁跨 Schema 直接 Join，必须通过应用层或视图聚合。
-*   **外键策略**: 强外键约束。删除用户 (`public.users`) 时，需级联处理 (`ON DELETE CASCADE`) 或拒绝删除 (`RESTRICT`)，防止 B/C/D 产生孤儿数据。
-
----
-
-## 7. 运维与交接 (Handover)
-
-### 7.1 部署位置
-所有修正文件位于服务器的 `/home/ubuntu/stack/deploy/correction` (上传后) 或本地 `c:\My_Project\account\deploy\correction`。
-
-### 7.2 启动命令
+**进入数据库控制台**:
 ```bash
-# 1. 进入目录
-cd deploy/correction
-
-# 2. 清理旧环境
-bash cleanup.sh
-
-# 3. 启动新架构
-docker compose up -d --build
+ssh ubuntu@119.91.71.30 "docker exec -it iasbt-postgres psql -U postgres"
 ```
 
-### 7.3 验证清单
-1.  `docker ps` 显示 `account-backend` 和 `account-frontend` 为 Up 状态。
-2.  访问 `http://119.91.71.30` 能看到登录页。
-3.  登录成功后，数据库 `public.session` 表有新记录。
+---
+
+## 3. 接口规范 (API Contract)
+
+### 3.1 健康检查 (Health Check)
+
+用于部署验证和负载均衡探活。
+
+*   **Endpoint**: `GET /api/health`
+*   **Response**:
+    ```json
+    {
+      "status": "ok",
+      "timestamp": "2026-02-22T08:30:46.239Z",
+      "service": "account-backend",
+      "version": "1.6"
+    }
+    ```
+
+### 3.2 认证接口 (Auth)
+
+*   `POST /api/auth/register`: 用户注册
+*   `POST /api/auth/login`: 用户登录 (返回 JWT)
+*   `GET /api/auth/me`: 获取当前用户信息
+
+---
+
+## 4. 废弃方案说明 (Deprecated & Legacy)
+
+以下方案已被正式废弃，代码库中保留仅作归档参考，**严禁在生产环境启用**：
+
+1.  ❌ **PostgREST**: 自动生成 API 的方案已移除，改用手写 Node.js API 以增强逻辑控制。
+2.  ❌ **Nginx Gateway (独立网关)**: 已合并至 `account-frontend` 容器中。
+3.  ❌ **Postgres Business**: 曾尝试的双数据库方案已废弃，统一使用 `iasbt-postgres`。
+4.  ❌ **Kubernetes/HPA**: 当前规模无需 K8s，Docker Compose 足以支撑。
+
+---
+
+## 5. 下一步计划 (Next Steps)
+
+1.  **相册 (Gallery) 存储层**: 基于 Cloudflare R2 完成对象存储对接。
+2.  **SSO 联调 (矩阵互通)**: 实现账户中心直接免登访问 **相册 (Gallery)**、**Toolbox** 及 **Life OS**。
+
+> **架构红线**: 任何新功能开发，均不得破坏 `deploy/correction` 定义的基础设施结构。
+
+---
+
+## 6. 协作与开发规范 (Collaboration Guidelines)
+
+> **严正声明**: 以下规则为项目协作的红线，违反者必究。
+
+### 6.1 路径绝对化 (Absolute Paths)
+在生成任何脚本或操作指令时，**禁止使用相对路径**。
+*   ❌ 错误: `cd deploy/correction`
+*   ✅ 正确: `cd /home/ubuntu/account/deploy/correction/`
+
+### 6.2 部署原子化 (Atomic Deployment)
+所有的修改必须遵循 **Git Flow**：
+1.  **Local**: 修改代码 -> `git commit` -> `git push`
+2.  **Remote**: 服务器端自动 `git pull` -> 重建容器
+*   🚫 **禁止**: 跳过 GitHub 直接 SSH 修改服务器文件。
+
+### 6.3 环境差异化 (Environment Strategy)
+*   **本地环境 (Local)**: 仅用于代码逻辑编写和简单的 `npm test`。
+*   **生产环境 (Prod)**: 必须且仅能运行在 **Docker 容器** 中。
+
+### 6.4 配置隔离 (Config Isolation)
+*   🚫 **禁止**: 将服务器的真实 `.env` 推送到 Git。
+*   ✅ **允许**: 仅修改 `.env.example` 模板。
+
+### 6.5 版本强校验 (Version Control)
+任何针对后端的修改，必须同时修改 `server.js` 中的 `version` 变量。
+*   **校验标准**: 部署后 `/api/health` 必须返回新版本号。
+*   **判定**: 若返回旧版本号，即视为 **部署失败**。
