@@ -1,7 +1,9 @@
 # Deployment & Operations (部署与运维)
 
-> **状态**: ⚙️ **自动化**
-> **工具**: `deploy_remote.ps1`
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Enforcement**: ⚙️ **Automated (自动化)**
+> **Tool**: `deploy_remote.ps1`
 
 ## 1. 流水线
 1.  **本地**: `git push` 提交代码。

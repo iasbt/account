@@ -1,7 +1,9 @@
 # API Contract & Versioning (API 契约与版本控制)
 
-> **状态**: 📝 **稳定**
-> **前缀**: `/api`
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Enforcement**: 📝 **Stable (稳定)**
+> **Prefix**: `/api`
 
 ## 1. 健康检查 (核心)
 *   **GET** `/api/health`

@@ -1,7 +1,9 @@
 # Backend Architecture Standards (后端架构规范)
 
-> **状态**: 🛡️ **强制执行**
-> **技术栈**: Node.js 20 + Express
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Enforcement**: 🛡️ **Strict (严格执行)**
+> **Stack**: Node.js 20 + Express
 
 ## 1. 分层架构 (严格)
 

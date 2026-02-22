@@ -1,7 +1,9 @@
 # System Topology & Containers (系统拓扑与容器)
 
-> **状态**: 🔒 **V1.6 封板**
-> **网络**: `correction_default`
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Enforcement**: 🔒 **Frozen (V1.6 封板)**
+> **Network**: `correction_default`
 
 ## 1. 四边形矩阵
 *   **边缘**: Nginx (前端/网关)

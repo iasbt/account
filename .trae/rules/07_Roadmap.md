@@ -1,7 +1,8 @@
 # Roadmap & Future Plans (路线图与未来计划)
 
-> **状态**: 📅 **规划中**
-> **阶段**: 3.0
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Phase**: 3.0 (Planning/规划中)
 
 ## 1. 近期下一步 (Phase 3)
 *   **相册集成**:

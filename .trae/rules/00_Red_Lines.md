@@ -1,7 +1,9 @@
 # Critical Red Lines (核心红线) - 违规即回滚
 
-> **状态**: 🔴 **严格执行**
-> **优先级**: P0
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Enforcement**: 🔴 **Strict (严格执行)**
+> **Priority**: P0
 
 ## 1. 路径绝对化
 *   **规则**: 脚本与配置中严禁使用相对路径。

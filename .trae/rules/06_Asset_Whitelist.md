@@ -1,6 +1,8 @@
 # Sealed Asset Whitelist (封板资产白名单 V1.6)
 
-> **策略**: 任何未在此列表中出现的文件均为 "Wild (野文件)"，必须上报处理。
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Policy**: 任何未在此列表中出现的文件均为 "Wild (野文件)"。
 
 ## 1. 核心配置
 *   `package.json`, `tsconfig.json`, `vite.config.ts`
@@ -25,5 +27,5 @@
 *   `deploy_remote.ps1`
 
 ## 6. 文档 (`.trae/rules/`)
-*   `00` to `08` (`.md`)
+*   `00` to `09` (`.md`)
 *   `AUDIT_REPORT_V1.6.md`

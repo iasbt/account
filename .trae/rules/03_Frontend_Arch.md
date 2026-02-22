@@ -1,7 +1,9 @@
 # Frontend Architecture Standards (前端架构规范)
 
-> **状态**: 🛡️ **强制执行**
-> **技术栈**: React + Vite + Zustand
+> **Status**: Active
+> **Effective Date**: 2026-02-22
+> **Enforcement**: 🛡️ **Strict (严格执行)**
+> **Stack**: React + Vite + Zustand
 
 ## 1. 分层架构
 
