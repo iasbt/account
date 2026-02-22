@@ -11,7 +11,7 @@ export const sendVerificationCode = async (req, res) => {
   }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  setVerificationCode(email, code);
+  await setVerificationCode(email, code);
 
   const subject = "IASBT 账号验证码";
   const html = `<p>您的验证码是：<strong>${code}</strong></p><p>该验证码5分钟内有效。</p>`;
@@ -238,7 +238,7 @@ export const resetPassword = async (req, res) => {
       [hash, userId]
     );
     
-    deleteVerificationCode(email);
+    await deleteVerificationCode(email);
 
     res.json({ message: "密码重置成功", success: true });
   } catch (error) {

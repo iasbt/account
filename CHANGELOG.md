@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-02-23
+### Infrastructure
+- **Redis Integration**: Introduced Redis for robust verification code storage, replacing in-memory Map.
+- **Docker**: Added `account-redis` container to the stack.
+
 ## [1.7.0] - 2026-02-23
 ### Added
 - **Feature Completion**: 全面补全了开发文档中缺失的页面与功能，实现了系统的闭环。

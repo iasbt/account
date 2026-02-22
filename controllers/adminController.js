@@ -113,7 +113,7 @@ export const resetUserPassword = async (req, res) => {
     const user = userResult.rows[0];
     
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setVerificationCode(user.email, code);
+    await setVerificationCode(user.email, code);
     
     // 前端页面地址，需确保路由存在
     // 假设 ResetPasswordPage 路由为 /reset-password

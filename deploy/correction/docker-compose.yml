@@ -45,3 +45,6 @@ services:
 networks:
   correction_default:
     external: true
+
+volumes:
+  redis_data:
