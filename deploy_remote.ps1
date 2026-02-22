@@ -95,8 +95,8 @@ $DeployCmd = @"
     HEALTH_JSON=`$(curl -s http://localhost/api/health)`
     echo "Health Response: `$HEALTH_JSON"
     
-    # Simple Grep extraction for robustness
-    REMOTE_VERSION=`$(echo "`$HEALTH_JSON" | grep -o '"version": *"[^"]*"' | cut -d'"' -f4)`
+    # Simple extraction using sed
+    REMOTE_VERSION=`$(echo "`$HEALTH_JSON" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')`
     
     if [ "$LocalVersion" == "`$REMOTE_VERSION" ]; then
         echo "✅ Version Verification PASSED: $LocalVersion"

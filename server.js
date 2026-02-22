@@ -128,7 +128,7 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "account-backend",
-    version: "1.6"
+    version: "1.6.1"
   });
 });
 
