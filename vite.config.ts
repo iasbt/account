@@ -8,6 +8,14 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    test: {
+      environment: "node",
+      include: ["src/lib/__tests__/**/*.test.ts"],
+      coverage: {
+        provider: "v8",
+        reporter: ["text", "json", "html"]
+      }
+    },
     server: {
       proxy: {
         '/api/auth': {

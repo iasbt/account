@@ -1,7 +1,7 @@
 {
   "name": "account",
   "private": true,
-  "version": "1.6.6-dim",
+  "version": "1.6.7-qa",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -18,7 +19,6 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "lucide-react": "^0.563.0",
-    "mysql2": "^3.17.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^8.0.1",
     "pg": "^8.18.0",
@@ -29,22 +29,30 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^24.10.1",
+    "@types/express": "^5.0.0",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@types/supertest": "^6.0.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@tailwindcss/postcss": "^4.0.0",
     "autoprefixer": "^10.4.24",
-    "eslint": "^9.39.1",
+    "eslint": "^10.0.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.17",
+    "supertest": "^7.1.1",
+    "tailwindcss": "^4.0.0",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.46.4",
+    "typescript-eslint": "^8.56.0",
     "vite": "^7.2.4",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "minimatch": "^10.2.1"
   },
   "description": "统一账户中心，负责登录、权限控制与子应用单点登录回跳。",
   "main": "eslint.config.js",
