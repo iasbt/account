@@ -62,6 +62,14 @@ $DeployCmd = @"
     git fetch origin main
     git reset --hard origin/main
     
+    # 1.5 Update .env for CORS (Auto Evolution)
+    echo '>>> Updating .env CORS configuration...'
+    if [ -f .env ]; then
+        sed -i 's|^CORS_ALLOWLIST=.*|CORS_ALLOWLIST=https://account.iasbt.com,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173|' .env
+    else
+        echo "CORS_ALLOWLIST=https://account.iasbt.com,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173" > .env
+    fi
+    
     # 2. 进入部署目录 (Context Alignment)
     echo '>>> Switching to Deployment Context: $DeployDir'
     cd $DeployDir

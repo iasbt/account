@@ -23,3 +23,8 @@
 *   **格式**: `Major.Minor.Patch` (如 1.6.1)。
 *   **规则**: 后端逻辑变更必须触发 Patch 版本递增。
 *   **基准**: 以 `package.json` 为唯一真理来源 (Source of Truth)。
+
+## 5. 多环境 Origin 容错
+*   **原则**: 必须同时兼容生产域名与裸 IP 访问。
+*   **配置**: `CORS_ALLOWLIST` 必须包含 `https://account.iasbt.com` 与 `http://119.91.71.30`。
+*   **原因**: 防止 DNS 解析延迟或调试期间的直接 IP 访问被 CORS 拦截。
