@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
 import { useAuthStore } from './store/useAuthStore'
 import DashboardPage from './pages/DashboardPage'
+import AdminPanel from './pages/AdminPanel'
 
 // --- 路由守卫 ---
 
@@ -14,6 +15,21 @@ function RequireAuth({ children }: { children: ReactElement }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  return children
+}
+
+function RequireAdmin({ children }: { children: ReactElement }) {
+  const { user, isAuthenticated } = useAuthStore()
+  const location = useLocation()
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />
+  }
+  
+  if (!user?.isAdmin) {
+    return <Navigate to="/" replace />
   }
 
   return children
