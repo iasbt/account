@@ -10,7 +10,8 @@ services:
     restart: always
     environment:
       # Connect to the EXISTING TRUE DATABASE (iasbt-postgres)
-      - DB_HOST=172.17.0.3
+      # Using hostname 'iasbt-postgres' requires it to be in the same network
+      - DB_HOST=iasbt-postgres
       - DB_PORT=5432
       # Please ensure these are set in your .env file
       - DB_USER=${DB_USER}

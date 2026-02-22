@@ -9,7 +9,8 @@ $ServerIP = "119.91.71.30"
 $User = "ubuntu"
 $KeyPath = "D:\OneDrive\Desktop\trae.pem"
 # 强制指定正确路径
-$RemoteDir = "/home/ubuntu/account" 
+$RepoDir = "/home/ubuntu/account" 
+$DeployDir = "/home/ubuntu/account/deploy/correction"
 
 # 1. 提交代码到 GitHub
 Write-Host ">>> [1/3] Committing and Pushing to GitHub..." -ForegroundColor Cyan
@@ -32,55 +33,66 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host ">>> [2/3] Deploying on Remote Server ($ServerIP)..." -ForegroundColor Cyan
 
 # 使用 PowerShell Here-String (@" ... "@) 避免转义噩梦
-# 变量 $RemoteDir 会被 PowerShell 展开
-# 变量 `$Var (如 `$COMPOSE_FILE) 会保持原样传给 Linux Shell
 $DeployCmd = @"
     set -e
     
     # 0. 确保 git 目录安全
-    git config --global --add safe.directory $RemoteDir
+    git config --global --add safe.directory $RepoDir
     
-    # 1. 进入正确目录
-    echo '>>> Entering $RemoteDir...'
-    if [ ! -d "$RemoteDir" ]; then
+    # 1. 进入 Repo 目录更新代码
+    echo '>>> Updating Code in $RepoDir...'
+    if [ ! -d "$RepoDir" ]; then
         echo 'Directory not found! Cloning...'
-        git clone https://github.com/iasbt/account.git $RemoteDir
+        git clone https://github.com/iasbt/account.git $RepoDir
     fi
-    cd $RemoteDir
-    
-    # 2. 拉取最新代码
-    echo '>>> Pulling latest code...'
+    cd $RepoDir
     git fetch origin main
     git reset --hard origin/main
     
-    # 3. 暴力清理废弃容器 (除恶务尽)
+    # 2. 进入部署目录 (Context Alignment)
+    echo '>>> Switching to Deployment Context: $DeployDir'
+    cd $DeployDir
+    
+    # 3. 暴力清理废弃容器 (Legacy Ban)
     echo '>>> Cleaning up legacy containers...'
     sudo docker rm -f nginx-gateway postgres-business postgrest 2>/dev/null || true
     
-    # 4. 精准定位部署文件启动
-    echo '>>> Starting services with CORRECT compose file...'
-    # 指定绝对路径的 compose 文件
-    COMPOSE_FILE="$RemoteDir/deploy/correction/docker-compose.yml"
-    
-    if [ ! -f "`$COMPOSE_FILE" ]; then
-        echo "Error: Compose file not found at `$COMPOSE_FILE"
-        exit 1
-    fi
-    
+    # 4. 启动新服务 (Docker Compose)
+    echo '>>> Starting services...'
     # 停止旧服务（如果存在）
-    sudo docker compose -f "`$COMPOSE_FILE" down --remove-orphans
+    sudo docker compose down --remove-orphans
     
-    # 启动新服务
-    sudo docker compose -f "`$COMPOSE_FILE" up -d --build
+    # 启动新服务 (构建)
+    sudo docker compose up -d --build
+    
+    # 5. 网络对齐 (Network Alignment)
+    echo '>>> Aligning Networks...'
+    # 确保 iasbt-postgres 加入 correction_default 网络
+    # 注意：如果已加入，命令会报错，所以加 || true
+    sudo docker network connect correction_default iasbt-postgres 2>/dev/null || echo 'iasbt-postgres already in network or network not ready'
+    
+    # 重启后端以确保 DNS 解析生效 (iasbt-postgres hostname)
+    echo '>>> Restarting backend to ensure DB connection...'
+    sudo docker restart account-backend
     
     echo '>>> Waiting for services to initialize...'
     sleep 5
     
-    echo '>>> Verifying Health...'
-    curl -s http://localhost/api/health
+    # 6. 版本对齐验证 (Version Check)
+    echo '>>> Verifying Health & Version...'
+    HEALTH_JSON=`$(curl -s http://localhost/api/health)`
+    echo "Health Response: `$HEALTH_JSON"
     
-    echo '>>> Current Containers (Should only be: account-backend, account-frontend, iasbt-postgres, portainer):'
-    sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+    # 简单的 Grep 检查 (由于没有 jq)
+    if echo "`$HEALTH_JSON" | grep -q "version"; then
+        echo "✅ Version check passed!"
+    else
+        echo "❌ Version check FAILED! Response invalid."
+        exit 1
+    fi
+    
+    echo '>>> Current Containers (Whitelist Check: account-backend, account-frontend, iasbt-postgres):'
+    sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep -E 'account|iasbt|portainer|NAMES'
 "@
 
 # 执行远程命令
