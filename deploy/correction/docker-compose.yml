@@ -18,6 +18,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=public
       - SSO_JWT_SECRET=${SSO_JWT_SECRET}
+      - CORS_ALLOWLIST=${CORS_ALLOWLIST}
       - PORT=3000
     networks:
       - correction_default

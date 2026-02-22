@@ -70,6 +70,10 @@ $DeployCmd = @"
         echo "CORS_ALLOWLIST=https://account.iasbt.com,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173" > .env
     fi
     
+    # 1.6 Copy .env to deploy context (CRITICAL FIX)
+    echo '>>> Copying .env to deployment directory...'
+    cp .env $DeployDir/.env
+    
     # 2. 进入部署目录 (Context Alignment)
     echo '>>> Switching to Deployment Context: $DeployDir'
     cd $DeployDir

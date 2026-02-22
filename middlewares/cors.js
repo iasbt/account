@@ -6,6 +6,13 @@ const effectiveAllowlist = originAllowlist.length > 0 ? originAllowlist : defaul
 
 export const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
+  
+  // Debug Log for CORS troubleshooting
+  if (origin) {
+    console.log(`[CORS] Incoming Origin: ${origin}`);
+    console.log(`[CORS] Effective Allowlist: ${JSON.stringify(effectiveAllowlist)}`);
+  }
+
   if (origin && !isOriginAllowed(origin, effectiveAllowlist)) {
     console.warn(`[CORS] Blocked Origin: ${origin}. Allowed: ${effectiveAllowlist.join(", ")}`);
     if (req.method === "OPTIONS") {
