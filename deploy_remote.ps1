@@ -108,16 +108,16 @@ $DeployCmd = @"
         echo "✅ Version Verification PASSED: $LocalVersion"
     else
         echo "❌ Version Verification FAILED!"
-        echo "   Expected: $LocalVersion"
-        echo "   Got Response: `$HEALTH_JSON"
         exit 1
     fi
     
-    echo '>>> Current Containers (Whitelist Check: account-backend, account-frontend, iasbt-postgres):'
-    sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep -E 'account|iasbt|portainer|NAMES'
+    # 7. Debug Logs (Auto-Evolution)
+    echo '>>> Debug Logs (Last 20 lines)...'
+    sudo docker logs account-backend --tail 20
 "@
 
-# 执行远程命令
+# 3. 执行远程命令
+Write-Host ">>> [3/3] Executing Remote Commands..." -ForegroundColor Cyan
 ssh -i $KeyPath -o StrictHostKeyChecking=no "${User}@${ServerIP}" $DeployCmd
 
 if ($LASTEXITCODE -eq 0) {
