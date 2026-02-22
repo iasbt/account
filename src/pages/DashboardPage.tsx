@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, ExternalLink, Image, UserCircle, Database, Server } from 'lucide-react'
+import { LogOut, ExternalLink, UserCircle, Database, Server } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { getSystemStats } from '../lib/api'
 
@@ -20,14 +20,6 @@ export default function DashboardPage() {
   }, [])
 
   const apps = [
-    {
-      id: 'gallery',
-      name: '相册图库',
-      description: 'Photos 智能相册',
-      icon: <Image className="h-full w-full text-cyan-400" />,
-      url: 'https://img.iasbt.com/#/',
-      sso: true
-    },
     {
       id: 'account',
       name: '个人中心',

@@ -40,27 +40,6 @@ services:
     networks:
       - iasbt-net
 
-  # --- 相册服务 (MT Photos / PhotoPrism) ---
-  # 这里以 MT Photos 为例，更轻量，适合 4G 内存
-  mt-photos:
-    image: mtphotos/mt-photos:latest
-    container_name: mt-photos
-    restart: always
-    environment:
-      TZ: Asia/Shanghai
-      # --- 数据库配置 (PostgreSQL) ---
-      DB_TYPE: postgresql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: mt_photos
-      DB_USER: postgres
-      DB_PASSWORD: ${DB_ROOT_PASSWORD}
-    volumes:
-      - ./data/gallery/config:/config
-      - ./data/gallery/upload:/upload
-    networks:
-      - iasbt-net
-
   # --- 统一网关 (Nginx) ---
   nginx:
     image: nginx:alpine
@@ -75,7 +54,6 @@ services:
       - ./data/nginx/certs:/etc/nginx/certs
       - ./data/nginx/html:/usr/share/nginx/html
     depends_on:
-      - mt-photos
       - postgrest
     networks:
       - iasbt-net

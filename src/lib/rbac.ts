@@ -4,7 +4,6 @@ import type { AuthUser } from '../store/useAuthStore';
 // 使用 "资源:动作" 的格式，清晰明确
 export type Permission = 
   | 'view:dashboard'      // 访问仪表盘
-  | 'access:gallery'      // 访问相册应用
   | 'access:account'      // 访问个人中心
   | 'manage:system'       // 管理系统
   | 'manage:users'        // 管理用户
@@ -18,7 +17,6 @@ export type Role = 'admin' | 'user' | 'guest';
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   admin: [
     'view:dashboard',
-    'access:gallery',
     'access:account',
     'manage:system',
     'manage:users',
@@ -26,7 +24,6 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ],
   user: [
     'view:dashboard',
-    'access:gallery',
     'access:account'
   ],
   guest: [] // 访客无权限，需登录

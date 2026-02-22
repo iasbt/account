@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased] - 2026-02-11
 
 ### Added
-- **Docker Deployment**: Created `deploy/docker-compose.yml` for full stack deployment (Nginx, MT Photos, PostgREST, Postgres).
+- **Docker Deployment**: Created `deploy/docker-compose.yml` for full stack deployment (Nginx, PostgREST, Postgres).
 - **Deployment Script**: Added `deploy_to_remote.ps1` for automated "one-click" deployment to Tencent Cloud via SSH.
 
 ### Changed

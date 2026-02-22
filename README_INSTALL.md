@@ -49,21 +49,20 @@ sudo docker compose up -d
 sudo docker compose ps
 ```
 
-如果看到 `nginx`, `mt-photos`, `postgrest`, `postgres-business` 的状态都是 `Up` (Running)，恭喜您，部署成功！
+如果看到 `nginx`, `postgrest`, `postgres-business` 的状态都是 `Up` (Running)，恭喜您，部署成功！
 
 ## 4. 域名解析 (EdgeOne 配置)
 
 登录腾讯云 EdgeOne 控制台：
-1.  找到 `img.iasbt.com` 域名。
+1.  找到 `www.iasbt.cloud` 域名。
 2.  添加 DNS 记录：
-    *   `*.iasbt.com` -> CNAME 指向 EdgeOne 提供的加速域名。
-    *   或者分别添加 `account`, `gallery`, `www` 指向您的服务器 IP。
+    *   `www.iasbt.cloud` -> CNAME 指向 EdgeOne 提供的加速域名。
+    *   或者分别添加 `account`, `www` 指向您的服务器 IP。
     *   **重要**：在 EdgeOne 的“回源配置”中，设置 **回源协议** 为 **HTTP** (因为我们的 Nginx 暂时只监听了 80 端口，SSL 由 EdgeOne 负责)。
 
 ## 5. 验证访问
 
 打开浏览器访问：
-*   `https://img.iasbt.com/` -> 应该能看到 MT Photos 安装向导
 *   `https://www.iasbt.cloud` -> 应该能看到简单的导航页
 
 ## 6. 后续维护

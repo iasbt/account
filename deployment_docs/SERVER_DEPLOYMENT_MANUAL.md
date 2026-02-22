@@ -16,12 +16,11 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **Postgres** | `postgres-business` | 5432 (内部) | 15 | 业务数据库 |
 | **PostgREST** | `postgrest` | 3000 (内部) | latest | API 数据访问层 |
-| **MT Photos** | `mt-photos` | 8063 (内部) | latest | 轻量级相册服务 |
 | **Nginx Gateway** | `nginx-gateway` | 80:80, 443:443 | alpine | 统一网关，负责反向代理 |
 
 **网络拓扑**：
 - **公网入口**: 腾讯云 EdgeOne (CDN/WAF) -> 服务器 Nginx (80端口)
-- **内部转发**: Nginx -> (Docker Network) -> MT Photos / PostgREST
+- **内部转发**: Nginx -> (Docker Network) -> PostgREST
 - **SSL/HTTPS**: 由 EdgeOne 托管证书，回源协议为 **HTTP**。
 
 ---
@@ -30,7 +29,6 @@
 
 | 服务 | 网址 | 备注 |
 | :--- | :--- | :--- |
-| **相册 (Gallery)** | [https://img.iasbt.com/](https://img.iasbt.com/) | 已统一域名，上传无限制 |
 | **门户 (Portal)** | [http://www.iasbt.cloud](http://www.iasbt.cloud) | (规划中) |
 
 ---

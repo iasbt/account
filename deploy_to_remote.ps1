@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Automated Deployment Script for Account System & Gallery Server
+    Automated Deployment Script for Account System
     
 .DESCRIPTION
-    This script automates the deployment of the full stack (Nginx, MT Photos, PostgREST, Postgres) 
+    This script automates the deployment of the full stack (Nginx, PostgREST, Postgres) 
     to the remote Ubuntu server. It handles:
     1. SSH Connection using private key
     2. Conflict Resolution (Stopping old containers occupying ports 80/443)

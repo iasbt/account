@@ -13,7 +13,6 @@
 | 权限标识 (Permission) | 对应功能 | 风险等级 |
 | :--- | :--- | :--- |
 | `view:dashboard` | 查看应用启动台 | 低 |
-| `access:gallery` | 进入相册图库应用 | 低 |
 | `access:account` | 进入个人中心 (修改密码/头像) | 低 |
 | `manage:system` | 进入系统管理后台 | **高** |
 | `manage:users` | 管理用户列表 | **高** |
@@ -24,7 +23,6 @@
 | 权限 \ 角色 | Admin (管理员) | User (普通用户) | Guest (访客) |
 | :--- | :---: | :---: | :---: |
 | `view:dashboard` | ✅ | ✅ | ❌ |
-| `access:gallery` | ✅ | ✅ | ❌ |
 | `access:account` | ✅ | ✅ | ❌ |
 | `manage:system` | ✅ | ❌ | ❌ |
 | `manage:users` | ✅ | ❌ | ❌ |
