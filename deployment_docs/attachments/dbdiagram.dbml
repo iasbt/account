@@ -1,0 +1,35 @@
+Table profiles {
+  id uuid [pk]
+  email text
+  role text
+  avatar_url text
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table applications {
+  id text [pk]
+  code text [unique]
+  name text
+  icon_url text
+  redirect_url text
+  auth_mode text
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Table user_app_access {
+  id uuid [pk]
+  user_id uuid
+  app_id text
+  app_name text
+  last_accessed_at timestamp
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Ref: user_app_access.user_id > profiles.id
+Ref: user_app_access.app_id > applications.id

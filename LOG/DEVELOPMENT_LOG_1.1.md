@@ -19,7 +19,7 @@
 ### 1.1 项目定义
 - **名称**: Account System (IAM / SSO Platform)
 - **URL**: `https://account.iasbt.com`
-- **定位**: "Life OS" 生态系统的**中央心脏**。负责所有子应用（如 Gallery, Obsidian 等）的身份认证、Token 分发、权限控制 (RBAC) 和单点登录 (SSO)。
+- **定位**: "Life OS" 生态系统的**中央心脏**。负责所有子应用（如 Gallery（已废弃）, Obsidian 等）的身份认证、Token 分发、权限控制 (RBAC) 和单点登录 (SSO)。
 - **核心原则**: 安全优先、移动端优先、无感跳转。
 
 ### 1.2 技术栈详解 (Detailed Tech Stack)
@@ -127,7 +127,7 @@ _文件_: `src/main.tsx`
 
 _文件_: `src/features/auth/components/LoginForm.tsx`
 
-- **背景**: 外部应用（如 Gallery）跳转来登录时，URL 会携带 `?redirect=https://...`。
+- **背景**: 外部应用（如 Gallery，已废弃）跳转来登录时，URL 会携带 `?redirect=https://...`。
     
 - **逻辑**:
     
@@ -298,7 +298,7 @@ _前端没有注册管理员的界面。必须直接操作数据库。_
 - **修复**: 实施 2.1 章节的并行查询 + 2秒超时熔断。
     
 
-### Bug #006: Gallery 应用报错 "Invalid schema: gallery"
+### Bug #006: Gallery 应用报错 "Invalid schema: gallery"（已废弃）
 
 - **现象**: 子应用连接数据库失败。
     
@@ -315,4 +315,4 @@ _前端没有注册管理员的界面。必须直接操作数据库。_
     
 2. **添加新应用**: 如果 Life OS 增加了新应用（如 Note），请在 `DashboardPage.tsx` 的 Grid 中添加新的 Card，并确保其 URL 带上 `?redirect` 参数。
     
-3. **子应用接入**: 所有子应用 (Gallery, etc.) 的 Supabase Client 配置必须使用默认 Schema (`public`)，**严禁**配置 `db: { schema: '...' }`。
+3. **子应用接入**: 所有子应用 (Gallery 等，已废弃) 的 Supabase Client 配置必须使用默认 Schema (`public`)，**严禁**配置 `db: { schema: '...' }`。

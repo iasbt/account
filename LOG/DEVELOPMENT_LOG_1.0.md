@@ -60,7 +60,7 @@
 
 * **逻辑**:
     1.  检查 URL 参数 `?redirect=...`。
-    2.  **有参数**: 登录成功后，使用 `window.location.href` 跳转至外部应用（如 Gallery）。
+    2.  **有参数**: 登录成功后，使用 `window.location.href` 跳转至外部应用（如 Gallery，已废弃）。
     3.  **无参数**: 使用 `Maps('/')` 跳转至 Account 内部首页。
 
 ### 3.5 管理员隐身模式 (Security by Obscurity)
@@ -120,7 +120,7 @@
     * **原因**: 串行查询（Session + Profile）加上数据库冷启动。
     * **修复**: 实施方案 3.1（并行初始化 + 2秒超时熔断）。
 
-4.  **Bug: Gallery 应用报错 "Invalid schema: gallery"**
+4.  **Bug: Gallery 应用报错 "Invalid schema: gallery"（已废弃）**
     * **原因**: 客户端 Supabase 初始化配置错误地指定了 `db: { schema: 'gallery' }`。
     * **修复**: 移除 schema 配置，默认使用 `public`。
 

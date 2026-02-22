@@ -24,7 +24,7 @@
 - **核心定位**: "Life OS" 生态系统的**中央心脏**。
 - **职责**:
     1.  **身份中心**: 统一管理所有用户注册/登录。
-    2.  **SSO 枢纽**: 外部应用（如 Gallery）跳转至此登录，成功后自动跳回。
+    2.  **SSO 枢纽**: 外部应用（如 Gallery，已废弃）跳转至此登录，成功后自动跳回。
     3.  **权限中台**: 区分 User/Admin，控制谁能访问什么。
 
 ### 1.2 技术栈详解
@@ -143,7 +143,7 @@ if (storedVersion !== APP_VERSION) {
 
 ### 2.4 SSO 跳转流程 (Redirect Flow)
 
-**背景**: 外部应用（如 Gallery）需要登录时，会携带 `?redirect=...` 参数过来。 **逻辑**: 登录成功后，优先跳转回外部 URL。 **核心代码 (`src/features/auth/components/LoginForm.tsx`)**:
+**背景**: 外部应用（如 Gallery，已废弃）需要登录时，会携带 `?redirect=...` 参数过来。 **逻辑**: 登录成功后，优先跳转回外部 URL。 **核心代码 (`src/features/auth/components/LoginForm.tsx`)**:
 
 TypeScript
 
@@ -289,7 +289,7 @@ _当你修改了核心 Auth 逻辑，必须强制用户更新缓存。_
 
 ### Q3: 子应用如何接入?
 
-_Gallery 或 Note 等应用接入时注意：_
+_Gallery（已废弃）或 Note 等应用接入时注意：_
 
 1. **Client 配置**: 不要设置 `schema: 'gallery'`，保持默认 `public`。
     
