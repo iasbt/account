@@ -28,3 +28,12 @@
 *   **原则**: 必须同时兼容生产域名与裸 IP 访问。
 *   **配置**: `CORS_ALLOWLIST` 必须包含 `https://account.iasbt.com` 与 `http://119.91.71.30`。
 *   **原因**: 防止 DNS 解析延迟或调试期间的直接 IP 访问被 CORS 拦截。
+
+## 6. 管理员接口 (Admin APIs)
+*   **GET** `/api/admin/users`
+*   **权限**: `Bearer Token` + `isAdmin=true`
+*   **响应**: `[{ "id": 1, "email": "...", "created_at": "..." }, ...]`
+*   **错误码**:
+    *   `401 Unauthorized`: 未提供 Token 或 Token 无效。
+    *   `403 Forbidden`: 用户不是管理员。
+*   **作用**: 获取所有注册用户列表（仅限管理员）。

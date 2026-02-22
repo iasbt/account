@@ -7,16 +7,16 @@
 
 ## 技术栈 (Tech Stack)
 
-### Core
-- **Database**: PostgreSQL 14 (Alpine) - *Single Source of Truth*
-- **Backend**: Node.js 18 (Express) - *RESTful API*
-- **Frontend**: React 18 + Vite + TypeScript - *SPA*
-- **Gateway**: Nginx (Alpine) - *Reverse Proxy & Static Server*
+### 核心组件 (Core)
+- **数据库**: PostgreSQL 14 (Alpine) - *唯一真理来源 (Single Source of Truth)*
+- **后端**: Node.js 20 (Express) - *RESTful API*
+- **前端**: React 18 + Vite + TypeScript + Zustand - *SPA 与状态管理*
+- **网关**: Nginx (Alpine) - *反向代理与静态服务*
 
-### Infrastructure
-- **Orchestration**: Docker Compose (V2)
-- **Deployment**: PowerShell Automation (`deploy_remote.ps1`)
-- **Cloud**: Tencent Cloud (Ubuntu)
+### 基础设施 (Infrastructure)
+- **编排**: Docker Compose (V2)
+- **部署**: PowerShell 自动化 (`deploy_remote.ps1`)
+- **云服务**: 腾讯云 (Ubuntu)
 
 ## 快速开始 (Quick Start)
 
@@ -46,17 +46,22 @@ node server.js
 ```
 
 此脚本将自动执行：
-1. Git Push (Local -> GitHub)
-2. SSH Pull (GitHub -> Tencent Cloud)
-3. Docker Build & Restart
-4. Health Check Verification (`/api/health`)
+1. Git 推送 (本地 -> GitHub)
+2. SSH 拉取 (GitHub -> 腾讯云)
+3. Docker 构建与重启
+4. 健康检查验证 (`/api/health`)
 
 **详情请参阅**: [开发文档 V1.6](deployment_docs/ACCOUNT_SYSTEM_DEV_DOC_V1.6.md)
 
 ## 目录结构 (Directory Structure)
 
 - `src/`: 前端源代码
-- `deploy/correction/`: **部署核心配置 (Docker/Nginx)** - *Do not modify without approval*
+    - `pages/`: 页面组件 (含 `AdminPanel`, `DashboardPage`)
+    - `store/`: Zustand 状态管理
+- `controllers/`: 后端业务逻辑 (`adminController`, `authController`)
+- `middlewares/`: 中间件 (`roleCheck`, `cors`)
+- `routes/`: 路由定义
+- `deploy/correction/`: **部署核心配置 (Docker/Nginx)** - *未经批准严禁修改*
 - `deployment_docs/`: 详细架构文档
 - `server.js`: 后端入口文件
 - `deploy_remote.ps1`: 自动化部署脚本

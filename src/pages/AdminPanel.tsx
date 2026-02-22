@@ -99,7 +99,7 @@ export default function AdminPanel() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">用户 ID</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">账号信息</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">注册时间</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">权限状态</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">用户类型</th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">操作</th>
               </tr>
             </thead>
@@ -124,15 +124,9 @@ export default function AdminPanel() {
                     {new Date(user.created_at).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {user.is_admin ? (
-                      <span className="px-2.5 py-0.5 inline-flex text-xs font-medium rounded-full bg-purple-100 text-purple-800 border border-purple-200">
-                        管理员 (Admin)
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 inline-flex text-xs font-medium rounded-full bg-green-100 text-green-800 border border-green-200">
-                        普通用户
-                      </span>
-                    )}
+                    <span className="px-2.5 py-0.5 inline-flex text-xs font-medium rounded-full bg-green-100 text-green-800 border border-green-200">
+                      普通用户
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button className="text-blue-600 hover:text-blue-900">编辑</button>

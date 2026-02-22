@@ -85,7 +85,7 @@ export const register = async (req, res) => {
     }
 
     const token = signToken(
-      { sub: userId, email, name, displayName: name, avatar: "", isAdmin: false },
+      { sub: userId, email, name, displayName: name, avatar: "", isAdmin: false, tokenType: "user" },
       60 * 60 * 12
     );
     return res.json({
@@ -114,18 +114,15 @@ export const login = async (req, res) => {
     );
 
     if (userResult.rowCount === 0) {
-      return res.status(400).json({ message: "账号不存在", success: false });
+      return res.status(400).json({ message: "用户不存在", success: false });
     }
 
     const user = userResult.rows[0];
     const hash = user.password_hash || "";
-    let isValid = false;
-
-    if (hash.startsWith("$2")) {
-      isValid = await bcryptjs.compare(password, hash);
-    } else {
-      isValid = password === hash;
+    if (!hash.startsWith("$2")) {
+      return res.status(400).json({ message: "密码格式异常", success: false });
     }
+    const isValid = await bcryptjs.compare(password, hash);
 
     if (!isValid) {
       return res.status(400).json({ message: "账号或密码错误", success: false });
@@ -138,7 +135,8 @@ export const login = async (req, res) => {
         name: user.username,
         displayName: user.username,
         avatar: "",
-        isAdmin: user.is_admin || false,
+        isAdmin: false,
+        tokenType: "user",
       },
       60 * 60 * 12
     );
@@ -151,11 +149,71 @@ export const login = async (req, res) => {
         name: user.username,
         displayName: user.username,
         avatar: "",
-        isAdmin: user.is_admin || false,
+        isAdmin: false,
       },
     });
   } catch (error) {
     console.error("Login error", { requestId: req.requestId, error });
+    return res.status(500).json({ message: "登录失败", success: false });
+  }
+};
+
+export const adminLogin = async (req, res) => {
+  const { account, password } = req.body;
+
+  if (!account || !password) {
+    return res.status(400).json({ message: "参数不完整", success: false });
+  }
+
+  try {
+    const adminResult = await pool.query(
+      "SELECT id, email, password_hash, security_level FROM public.admin_accounts WHERE email = $1 LIMIT 1",
+      [account]
+    );
+
+    if (adminResult.rowCount === 0) {
+      return res.status(400).json({ message: "用户不存在", success: false });
+    }
+
+    const admin = adminResult.rows[0];
+    const hash = admin.password_hash || "";
+    if (!hash.startsWith("$2")) {
+      return res.status(400).json({ message: "密码格式异常", success: false });
+    }
+    const isValid = await bcryptjs.compare(password, hash);
+
+    if (!isValid) {
+      return res.status(400).json({ message: "账号或密码错误", success: false });
+    }
+
+    const token = signToken(
+      {
+        sub: admin.id,
+        email: admin.email,
+        name: admin.email,
+        displayName: admin.email,
+        avatar: "",
+        isAdmin: true,
+        tokenType: "admin",
+        securityLevel: admin.security_level || 1,
+      },
+      60 * 60 * 12
+    );
+
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: admin.id,
+        email: admin.email,
+        name: admin.email,
+        displayName: admin.email,
+        avatar: "",
+        isAdmin: true,
+      },
+    });
+  } catch (error) {
+    console.error("Admin login error", { requestId: req.requestId, error });
     return res.status(500).json({ message: "登录失败", success: false });
   }
 };

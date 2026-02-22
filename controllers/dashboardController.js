@@ -2,19 +2,19 @@ import pool from "../db.js";
 
 export const getDashboardStats = async (req, res) => {
   try {
-    const imageCountResult = await pool.query(
-      "SELECT COUNT(*)::bigint AS count FROM gallery.images"
-    );
-    const latestImagesResult = await pool.query(
-      `SELECT title, file_path
-       FROM gallery.images
-       ORDER BY created_at DESC NULLS LAST
-       LIMIT 5`
-    );
-    const userResult = await pool.query(
-      "SELECT id, email, username FROM public.legacy_users WHERE email = $1 LIMIT 1",
-      ["iasbt@outlook.com"]
-    );
+    const [imageCountResult, latestImagesResult, userResult] = await Promise.all([
+      pool.query("SELECT COUNT(*)::bigint AS count FROM gallery.images"),
+      pool.query(
+        `SELECT title, file_path
+         FROM gallery.images
+         ORDER BY created_at DESC NULLS LAST
+         LIMIT 5`
+      ),
+      pool.query(
+        "SELECT id, email, username FROM public.legacy_users WHERE email = $1 LIMIT 1",
+        ["iasbt@outlook.com"]
+      )
+    ]);
 
     return res.json({
       totalImages: imageCountResult.rows[0]?.count ?? "0",

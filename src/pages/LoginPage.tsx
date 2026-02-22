@@ -19,6 +19,17 @@ export default function LoginPage() {
     
     // 捕获来源 URL，以便登录后自动跳回
     const from = searchParams.get('from') || searchParams.get('redirect')
+    let redirectUrl: string | null = null
+    if (from) {
+      try {
+        const url = new URL(from, window.location.origin)
+        if (url.origin === window.location.origin) {
+          redirectUrl = url.toString()
+        }
+      } catch {
+        redirectUrl = null
+      }
+    }
     
     try {
       await loginWithPassword(account, password)
@@ -27,8 +38,8 @@ export default function LoginPage() {
       const user = useAuthStore.getState().user
 
       // 登录成功后的跳转逻辑
-      if (from) {
-        window.location.href = from
+      if (redirectUrl) {
+        window.location.href = redirectUrl
       } else if (user?.isAdmin) {
         // 管理员默认进入后台管理系统 (Admin Box)
         navigate('/admin')

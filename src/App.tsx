@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
+import AdminLoginPage from './pages/AdminLoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
 import { useAuthStore } from './store/useAuthStore'
@@ -10,11 +11,15 @@ import AdminPanel from './pages/AdminPanel'
 // --- 路由守卫 ---
 
 function RequireAuth({ children }: { children: ReactElement }) {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const location = useLocation()
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  if (user?.isAdmin) {
+    return <Navigate to="/admin" replace />
   }
 
   return children
@@ -25,7 +30,7 @@ function RequireAdmin({ children }: { children: ReactElement }) {
   const location = useLocation()
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />
+    return <Navigate to="/admin/login" replace state={{ from: location }} />
   }
   
   if (!user?.isAdmin) {
@@ -35,14 +40,42 @@ function RequireAdmin({ children }: { children: ReactElement }) {
   return children
 }
 
-function PublicOnly({ children }: { children: ReactElement }) {
-  const { isAuthenticated } = useAuthStore()
-
+function PublicOnlyUser({ children }: { children: ReactElement }) {
+  const { isAuthenticated, user } = useAuthStore()
+  if (isAuthenticated && user?.isAdmin) {
+    return <Navigate to="/admin" replace />
+  }
   if (isAuthenticated) {
     return <Navigate to="/" replace />
   }
-
   return children
+}
+
+function PublicOnlyAdmin({ children }: { children: ReactElement }) {
+  const { isAuthenticated, user } = useAuthStore()
+  if (isAuthenticated && user?.isAdmin) {
+    return <Navigate to="/admin" replace />
+  }
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+  return children
+}
+
+function UserLayout({ children }: { children: ReactElement }) {
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      {children}
+    </div>
+  )
+}
+
+function AdminLayout({ children }: { children: ReactElement }) {
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      {children}
+    </div>
+  )
 }
 
 // --- 主应用 ---
@@ -54,18 +87,33 @@ export default function App() {
       <Route
         path="/login"
         element={
-          <PublicOnly>
-            <LoginPage />
-          </PublicOnly>
+          <PublicOnlyUser>
+            <UserLayout>
+              <LoginPage />
+            </UserLayout>
+          </PublicOnlyUser>
+        }
+      />
+
+      <Route
+        path="/admin/login"
+        element={
+          <PublicOnlyAdmin>
+            <AdminLayout>
+              <AdminLoginPage />
+            </AdminLayout>
+          </PublicOnlyAdmin>
         }
       />
       
       <Route
         path="/register"
         element={
-          <PublicOnly>
-            <RegisterPage />
-          </PublicOnly>
+          <PublicOnlyUser>
+            <UserLayout>
+              <RegisterPage />
+            </UserLayout>
+          </PublicOnlyUser>
         }
       />
       
@@ -75,7 +123,9 @@ export default function App() {
         path="/"
         element={
           <RequireAuth>
-            <DashboardPage />
+            <UserLayout>
+              <DashboardPage />
+            </UserLayout>
           </RequireAuth>
         }
       />
@@ -84,7 +134,9 @@ export default function App() {
         path="/profile"
         element={
           <RequireAuth>
-            <ProfilePage />
+            <UserLayout>
+              <ProfilePage />
+            </UserLayout>
           </RequireAuth>
         }
       />
@@ -93,7 +145,9 @@ export default function App() {
         path="/admin"
         element={
           <RequireAdmin>
-            <AdminPanel />
+            <AdminLayout>
+              <AdminPanel />
+            </AdminLayout>
           </RequireAdmin>
         }
       />

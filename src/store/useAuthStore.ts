@@ -12,6 +12,7 @@ interface AuthState {
   isAuthenticated: boolean
   login: () => Promise<void>
   loginWithPassword: (account: string, password: string) => Promise<void>
+  loginAdmin: (account: string, password: string) => Promise<void>
   sendVerificationCode: (dest: string) => Promise<void>
   register: (data: { name: string; email: string; password: string; code?: string }) => Promise<void>
   updateProfile: (data: Partial<AuthUser>) => Promise<void>
@@ -33,6 +34,17 @@ export const useAuthStore = create<AuthState>()(
       },
       loginWithPassword: async (account, password) => {
         const data = await authService.login(account, password)
+        if (data.token) {
+          apiClient.setToken(data.token)
+          set({
+            token: data.token,
+            user: data.user,
+            isAuthenticated: true
+          })
+        }
+      },
+      loginAdmin: async (account, password) => {
+        const data = await authService.adminLogin(account, password)
         if (data.token) {
           apiClient.setToken(data.token)
           set({
