@@ -138,7 +138,7 @@ export const login = async (req, res) => {
         name: user.username,
         displayName: user.username,
         avatar: "",
-        isAdmin: false,
+        isAdmin: user.is_admin || false,
       },
       60 * 60 * 12
     );
@@ -151,7 +151,7 @@ export const login = async (req, res) => {
         name: user.username,
         displayName: user.username,
         avatar: "",
-        isAdmin: false,
+        isAdmin: user.is_admin || false,
       },
     });
   } catch (error) {

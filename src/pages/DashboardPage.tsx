@@ -92,6 +92,22 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-6 py-12">
+        {/* Admin Portal Entry (Only for Admins) */}
+        {user?.isAdmin && (
+          <div className="mb-8 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-amber-500">管理员控制台</h3>
+              <p className="text-sm text-slate-400">您拥有系统管理权限，可以访问后台管理系统。</p>
+            </div>
+            <button
+              onClick={() => navigate('/admin')}
+              className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition"
+            >
+              进入后台
+            </button>
+          </div>
+        )}
+
         <div className="mb-10">
           <h2 className="text-2xl font-bold tracking-tight text-white">应用启动台</h2>
           <p className="mt-2 text-slate-400">选择您要访问的服务</p>

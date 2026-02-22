@@ -73,6 +73,15 @@ export default function App() {
         }
       />
 
+      <Route
+        path="/admin"
+        element={
+          <RequireAdmin>
+            <AdminPanel />
+          </RequireAdmin>
+        }
+      />
+
       {/* 404 处理 */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

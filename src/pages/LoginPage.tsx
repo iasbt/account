@@ -23,11 +23,17 @@ export default function LoginPage() {
     try {
       await loginWithPassword(account, password)
       
+      // Get the updated user state to check role
+      const user = useAuthStore.getState().user
+
       // 登录成功后的跳转逻辑
       if (from) {
         window.location.href = from
+      } else if (user?.isAdmin) {
+        // 管理员默认进入后台管理系统 (Admin Box)
+        navigate('/admin')
       } else {
-        // 默认进入仪表盘
+        // 普通用户进入应用仪表盘 (User Box)
         navigate('/')
       }
     } catch (err: unknown) {
