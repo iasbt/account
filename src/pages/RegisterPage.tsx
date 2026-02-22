@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { UserPlus, Mail, Lock, User, AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
+import { UserPlus, ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 
 export default function RegisterPage() {
@@ -50,7 +50,6 @@ export default function RegisterPage() {
     try {
       await sendVerificationCode(formData.email)
       setCountdown(60) // 60秒倒计时
-      // alert('验证码已发送，请查收邮件')
     } catch (err: unknown) {
       const message = err instanceof Error && err.message ? err.message : '验证码发送失败'
       setError(message)
@@ -98,122 +97,89 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white">创建新账号</h2>
-          <p className="mt-2 text-sm text-slate-400">
-            加入 IASBT 统一生态系统
+    <div className="min-h-screen bg-background-light text-text-primary flex flex-col items-center justify-center p-4 font-sans antialiased">
+      <div className="w-full max-w-[400px]">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary mb-1">
+            创建账号
+          </h1>
+          <p className="text-sm text-text-secondary font-normal">
+            加入 IASBT 生态系统
           </p>
         </div>
 
-        <div className="relative rounded-2xl border border-white/5 bg-slate-900/50 p-8 shadow-2xl backdrop-blur-xl">
-          {error && (
-            <div className="mb-6 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form className="mt-2 space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="name" className="sr-only">用户名</label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <User className="h-5 w-5 text-slate-500" />
-                </div>
+        {/* Card */}
+        <div className="bg-white p-8 rounded-2xl shadow-apple-card border border-border-subtle">
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-3">
+              <div className="space-y-1">
                 <input
                   id="name"
                   name="name"
                   type="text"
                   required
-                  className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:text-sm"
-                  placeholder="用户名 (登录账号)"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
+                  placeholder="用户名"
                   value={formData.name}
                   onChange={handleChange}
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="email" className="sr-only">电子邮箱</label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Mail className="h-5 w-5 text-slate-500" />
-                </div>
+              <div className="space-y-1">
                 <input
                   id="email"
                   name="email"
                   type="email"
                   required
-                  className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:text-sm"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
                   placeholder="电子邮箱"
                   value={formData.email}
                   onChange={handleChange}
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="code" className="sr-only">验证码</label>
-              <div className="relative flex gap-2">
-                <div className="relative flex-grow">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <Mail className="h-5 w-5 text-slate-500" />
-                  </div>
-                  <input
+              <div className="flex gap-2">
+                <input
                   id="code"
                   name="code"
                   type="text"
                   required
-                  className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:text-sm"
-                  placeholder="邮箱验证码"
+                  className="flex-1 h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
+                  placeholder="验证码"
                   value={formData.code}
                   onChange={handleChange}
                 />
+                <button
+                  type="button"
+                  onClick={handleSendCode}
+                  disabled={countdown > 0 || loading}
+                  className="h-10 px-4 rounded-lg border border-accent-blue text-accent-blue text-xs font-medium hover:bg-blue-50 active:bg-blue-100 disabled:opacity-50 disabled:border-border-light disabled:text-text-tertiary disabled:bg-transparent transition-colors"
+                >
+                  {countdown > 0 ? `${countdown}s` : '获取验证码'}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleSendCode}
-                disabled={countdown > 0 || loading}
-                className="min-w-[100px] rounded-lg border border-cyan-500/50 bg-cyan-500/10 px-4 text-sm font-medium text-cyan-400 hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-cyan-500/10"
-              >
-                {countdown > 0 ? `${countdown}s` : '获取验证码'}
-              </button>
-            </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="sr-only">密码</label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Lock className="h-5 w-5 text-slate-500" />
-                </div>
+              <div className="space-y-1">
                 <input
                   id="password"
                   name="password"
                   type="password"
                   required
-                  className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:text-sm"
-                  placeholder="设置密码 (至少6位)"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
+                  placeholder="密码 (至少6位)"
                   value={formData.password}
                   onChange={handleChange}
                 />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">确认密码</label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Lock className="h-5 w-5 text-slate-500" />
-                </div>
+              <div className="space-y-1">
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
                   required
-                  className="block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-10 text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 sm:text-sm"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
                   placeholder="确认密码"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -221,26 +187,53 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative flex w-full justify-center rounded-lg bg-cyan-600 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <UserPlus className="mr-2 h-5 w-5" />
-              )}
-              {loading ? '正在创建...' : '立即注册'}
-            </button>
+            {error && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-xs">
+                <div className="mt-0.5">⚠️</div>
+                <p>{error}</p>
+              </div>
+            )}
+
+            <div className="pt-1">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-10 flex items-center justify-center rounded-full bg-accent-blue text-white text-[15px] font-medium hover:bg-accent-hover active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    正在创建...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    注册
+                  </span>
+                )}
+              </button>
+            </div>
           </form>
 
-          <div className="mt-6 text-center">
-            <Link to="/login" className="flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-cyan-400">
-              <ArrowLeft className="h-4 w-4" />
+          <div className="mt-6 pt-6 border-t border-border-subtle text-center">
+            <Link 
+              to="/login" 
+              className="inline-flex items-center gap-1 text-xs text-accent-blue hover:underline font-medium"
+            >
+              <ArrowLeft className="h-3 w-3" />
               返回登录
             </Link>
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-[10px] text-text-tertiary">
+            注册即代表您同意我们的服务条款和隐私政策。
+          </p>
         </div>
       </div>
     </div>

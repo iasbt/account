@@ -41,4 +41,8 @@ export const authService = {
   async getSsoToken(): Promise<SsoTokenResponse> {
     return apiClient.get<SsoTokenResponse>('/auth/sso-token');
   },
+
+  async changePassword(oldPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    return apiClient.post<{ success: boolean; message: string }>('/auth/change-password', { oldPassword, newPassword });
+  }
 };

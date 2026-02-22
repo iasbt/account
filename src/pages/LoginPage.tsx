@@ -56,81 +56,107 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        {/* Logo Area */}
-        <div className="mb-10 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 shadow-xl shadow-cyan-500/20">
-            <UserCircle className="h-10 w-10 text-white" />
+    <div className="min-h-screen bg-background-light text-text-primary flex flex-col items-center justify-center p-4 font-sans antialiased">
+      <div className="w-full max-w-[360px]">
+        {/* Header Area */}
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-black text-white shadow-lg">
+            <UserCircle className="h-7 w-7" strokeWidth={1.5} />
           </div>
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-400">
-            统一身份认证
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary mb-1">
+            登录
           </h1>
-          <p className="text-center text-sm text-slate-400">
-            IASBT Unified Account Center
+          <p className="text-sm text-text-secondary font-normal">
+            使用您的 IASBT 账号
           </p>
         </div>
 
-        {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-2">
-            <input
-              type="text"
-              placeholder="用户名 / 邮箱"
-              value={account}
-              onChange={(e) => setAccount(e.target.value)}
-              autoComplete="username"
-              className="w-full rounded-xl bg-slate-900/50 border border-slate-800 px-4 py-3.5 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-500/50 focus:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
-              required
-            />
-            <input
-              type="password"
-              placeholder="密码"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              className="w-full rounded-xl bg-slate-900/50 border border-slate-800 px-4 py-3.5 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-500/50 focus:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
-              required
-            />
-          </div>
-
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-400">
-              {error}
+        {/* Login Card */}
+        <div className="bg-white p-6 rounded-2xl shadow-apple-card border border-border-subtle">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <input
+                  type="text"
+                  placeholder="邮箱或手机号"
+                  value={account}
+                  onChange={(e) => setAccount(e.target.value)}
+                  autoComplete="username"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <input
+                  type="password"
+                  placeholder="密码"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
+                  required
+                />
+              </div>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full group relative flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-cyan-900/20 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-               <span className="animate-pulse">正在验证...</span>
-            ) : (
-              <>
-                <span>登录</span>
-                <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-              </>
+            {error && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-xs">
+                <div className="mt-0.5">⚠️</div>
+                <p>{error}</p>
+              </div>
             )}
-          </button>
-        </form>
 
-        {/* 注册链接 */}
-        <div className="mt-6 flex items-center justify-center gap-2 text-sm">
-          <span className="text-slate-500">还没有账号？</span>
-          <Link
-            to="/register"
-            className="font-medium text-cyan-500 hover:text-cyan-400 hover:underline underline-offset-4 transition-colors"
-          >
-            立即注册
-          </Link>
+            <div className="pt-1">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-10 flex items-center justify-center rounded-full bg-accent-blue text-white text-[15px] font-medium hover:bg-accent-hover active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    登录中...
+                  </span>
+                ) : (
+                  '登录'
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Links */}
+          <div className="mt-5 pt-5 border-t border-border-subtle flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-text-secondary">还没有账号？</span>
+              <Link
+                to="/register"
+                className="text-accent-blue hover:underline font-medium"
+              >
+                立即注册
+              </Link>
+            </div>
+            <Link
+              to="/forgot-password" 
+              className="text-xs text-text-secondary hover:text-accent-blue hover:underline transition-colors"
+            >
+              忘记密码？
+            </Link>
+          </div>
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-xs text-slate-600">
-            Protected by IASBT Security • RBAC Enabled
+        {/* Footer */}
+        <div className="mt-8 text-center space-y-2">
+          <p className="text-[10px] text-text-tertiary">
+            Copyright © 2024 IASBT. All rights reserved.
           </p>
+          <div className="flex items-center justify-center gap-3 text-[10px] text-text-secondary">
+            <a href="#" className="hover:underline">隐私政策</a>
+            <span className="text-border-light">|</span>
+            <a href="#" className="hover:underline">使用条款</a>
+          </div>
         </div>
       </div>
     </div>

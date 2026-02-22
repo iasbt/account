@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, ExternalLink, UserCircle, Database, Server } from 'lucide-react'
+import { LogOut, ExternalLink, UserCircle, Database, Server, LayoutGrid } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { dashboardService } from '../services/dashboardService'
 import { authService } from '../services/authService'
@@ -24,8 +24,8 @@ export default function DashboardPage() {
     {
       id: 'account',
       name: '个人中心',
-      description: '管理您的账号资料',
-      icon: <UserCircle className="h-full w-full text-blue-400" />,
+      description: '管理您的个人信息和安全设置。',
+      icon: <UserCircle className="h-6 w-6 text-accent-blue" />,
       url: '/profile'
     }
   ]
@@ -59,58 +59,58 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen bg-background-light font-sans text-text-primary">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-white/5 bg-slate-950/80 backdrop-blur-md px-6 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
+      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-xl border-b border-border-subtle px-6 py-4">
+        <div className="mx-auto flex max-w-[1280px] items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="relative h-10 w-10 overflow-hidden rounded-full ring-2 ring-white/10 transition hover:ring-cyan-500/50">
+            <div className="h-10 w-10 overflow-hidden rounded-full bg-background-light border border-border-light flex items-center justify-center">
               {user?.avatar ? (
                 <img src={user.avatar} alt={user.displayName} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-slate-800 text-xs font-bold text-slate-400">
+                <span className="text-sm font-medium text-text-secondary">
                   {user?.name?.substring(0, 2).toUpperCase() || 'UA'}
-                </div>
+                </span>
               )}
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-slate-100">{user?.displayName || user?.name}</h1>
-              <p className="text-xs text-slate-400">统一身份认证中心</p>
+              <h1 className="text-sm font-semibold text-text-primary">{user?.displayName || user?.name}</h1>
+              <p className="text-xs text-text-secondary">IASBT ID</p>
             </div>
           </div>
           
           <button
             onClick={handleSignOut}
             disabled={loading}
-            className="group flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 text-sm text-slate-300 transition hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400 active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-full bg-background-light px-4 py-2 text-sm font-medium text-text-primary hover:bg-border-subtle transition-colors active:scale-95 disabled:opacity-50"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4 text-text-secondary" />
             <span>退出登录</span>
           </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-6 py-12">
+      <main className="mx-auto max-w-[1280px] px-6 py-12">
         {/* Admin Portal Entry (Only for Admins) */}
         {user?.isAdmin && (
-          <div className="mb-8 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 p-6 flex items-center justify-between">
+          <div className="mb-12 rounded-3xl bg-white p-8 shadow-apple-card border border-border-subtle flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-bold text-amber-500">管理员控制台</h3>
-              <p className="text-sm text-slate-400">您拥有系统管理权限，可以访问后台管理系统。</p>
+              <h3 className="text-xl font-semibold text-text-primary mb-1">管理控制台</h3>
+              <p className="text-text-secondary">访问系统管理工具和用户控制。</p>
             </div>
             <button
               onClick={() => navigate('/admin')}
-              className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition"
+              className="px-6 py-3 rounded-full bg-black text-white font-medium hover:bg-gray-800 transition-colors shadow-lg shadow-black/10"
             >
-              进入后台
+              进入控制台
             </button>
           </div>
         )}
 
         <div className="mb-10">
-          <h2 className="text-2xl font-bold tracking-tight text-white">应用启动台</h2>
-          <p className="mt-2 text-slate-400">选择您要访问的服务</p>
+          <h2 className="text-3xl font-semibold tracking-tight text-text-primary mb-2">应用</h2>
+          <p className="text-lg text-text-secondary">启动您的已连接服务。</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -118,59 +118,69 @@ export default function DashboardPage() {
             <div
               key={app.id}
               onClick={() => handleLaunch(app)}
-              className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/5 bg-slate-900/50 p-6 transition-all duration-300 hover:border-cyan-500/30 hover:bg-slate-800/80 hover:shadow-2xl hover:shadow-cyan-900/10 hover:-translate-y-1"
+              className="group cursor-pointer rounded-3xl bg-white p-6 shadow-apple-card border border-border-subtle transition-all duration-300 hover:shadow-apple-hover hover:scale-[1.02]"
             >
-              <div className="flex items-start justify-between">
-                <div className="h-14 w-14 rounded-2xl bg-slate-950 p-3 shadow-inner ring-1 ring-white/5 flex items-center justify-center">
+              <div className="flex items-start justify-between mb-6">
+                <div className="h-14 w-14 rounded-2xl bg-background-light flex items-center justify-center">
                   {app.icon}
                 </div>
-                <ExternalLink className="h-5 w-5 text-slate-600 transition-colors group-hover:text-cyan-400" />
+                <div className="h-8 w-8 rounded-full bg-background-light flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ExternalLink className="h-4 w-4 text-text-secondary" />
+                </div>
               </div>
               
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-slate-100 group-hover:text-cyan-100">{app.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-400 group-hover:text-slate-300">
+              <div>
+                <h3 className="text-xl font-semibold text-text-primary mb-2">{app.name}</h3>
+                <p className="text-sm leading-relaxed text-text-secondary">
                   {app.description}
                 </p>
               </div>
-
-              {/* Decorative gradient blob */}
-              <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl transition-all duration-500 group-hover:bg-cyan-500/20" />
             </div>
           ))}
+          
+          {/* Coming Soon Placeholder */}
+          <div className="rounded-3xl border-2 border-dashed border-border-light p-6 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
+            <div className="h-12 w-12 rounded-full bg-background-light flex items-center justify-center mb-4">
+              <LayoutGrid className="h-6 w-6 text-text-tertiary" />
+            </div>
+            <h3 className="text-sm font-medium text-text-secondary">更多功能敬请期待</h3>
+          </div>
         </div>
 
         {/* System Status Section */}
-        <div className="mt-12 border-t border-white/10 pt-8">
-          <h3 className="text-lg font-semibold text-slate-300 mb-4 flex items-center gap-2">
-            <Server className="h-5 w-5 text-green-400" />
+        <div className="mt-16 pt-12 border-t border-border-light">
+          <h3 className="text-lg font-semibold text-text-primary mb-6 flex items-center gap-2">
+            <Server className="h-5 w-5 text-text-secondary" />
             系统状态
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-             <div className="rounded-xl bg-slate-900/40 p-4 border border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/10">
-                    <Database className="h-6 w-6 text-green-400" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <div className="rounded-2xl bg-white p-6 border border-border-subtle shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-green-50">
+                    <Database className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400">业务数据库 (PostgreSQL)</p>
-                    <p className="text-lg font-bold text-slate-100">
-                      {dbStats ? '已连接' : '检查中...'}
-                    </p>
+                    <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">数据库</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className={`h-2 w-2 rounded-full ${dbStats ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`}></div>
+                      <p className="text-lg font-semibold text-text-primary">
+                        {dbStats ? '运行正常' : '检查中...'}
+                      </p>
+                    </div>
                   </div>
                 </div>
              </div>
              
              {dbStats && (
-               <div className="rounded-xl bg-slate-900/40 p-4 border border-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-500/10">
-                      <UserCircle className="h-6 w-6 text-blue-400" />
+               <div className="rounded-2xl bg-white p-6 border border-border-subtle shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-blue-50">
+                      <UserCircle className="h-6 w-6 text-accent-blue" />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400">历史用户数据</p>
-                      <p className="text-lg font-bold text-slate-100">
-                        {dbStats.userCount} 条记录
+                      <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">总用户数</p>
+                      <p className="text-lg font-semibold text-text-primary mt-1">
+                        {dbStats.userCount?.toLocaleString() ?? '-'}
                       </p>
                     </div>
                   </div>

@@ -7,6 +7,11 @@ import ProfilePage from './pages/ProfilePage'
 import { useAuthStore } from './store/useAuthStore'
 import DashboardPage from './pages/DashboardPage'
 import AdminPanel from './pages/AdminPanel'
+import StyleGuide from './pages/StyleGuide'
+import NotFoundPage from './pages/NotFoundPage'
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 
 // --- 路由守卫 ---
 
@@ -64,7 +69,7 @@ function PublicOnlyAdmin({ children }: { children: ReactElement }) {
 
 function UserLayout({ children }: { children: ReactElement }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased">
       {children}
     </div>
   )
@@ -72,7 +77,7 @@ function UserLayout({ children }: { children: ReactElement }) {
 
 function AdminLayout({ children }: { children: ReactElement }) {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased">
       {children}
     </div>
   )
@@ -84,6 +89,7 @@ export default function App() {
   return (
     <Routes>
       {/* 公开路由 */}
+      <Route path="/design-system" element={<StyleGuide />} />
       <Route
         path="/login"
         element={
@@ -117,6 +123,19 @@ export default function App() {
         }
       />
       
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicOnlyUser>
+            <UserLayout>
+              <ForgotPasswordPage />
+            </UserLayout>
+          </PublicOnlyUser>
+        }
+      />
+      
+      <Route path="/terms" element={<UserLayout><TermsPage /></UserLayout>} />
+      <Route path="/privacy" element={<UserLayout><PrivacyPage /></UserLayout>} />
 
       {/* 受保护路由 */}
       <Route
@@ -153,7 +172,7 @@ export default function App() {
       />
 
       {/* 404 处理 */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

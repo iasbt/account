@@ -7,7 +7,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/roleCheck.js";
-import { getAllUsers } from "../controllers/adminController.js";
+import { getAllUsers, deleteUser, updateUser } from "../controllers/adminController.js";
 import { adminLogin } from "../controllers/authController.js";
 
 const router = Router();
@@ -26,5 +26,19 @@ router.use(requireAdmin);
  * @access Admin (管理员)
  */
 router.get("/users", getAllUsers);
+
+/**
+ * @route DELETE /admin/users/:id
+ * @description 删除用户
+ * @access Admin (管理员)
+ */
+router.delete("/users/:id", deleteUser);
+
+/**
+ * @route PUT /admin/users/:id
+ * @description 更新用户信息
+ * @access Admin (管理员)
+ */
+router.put("/users/:id", updateUser);
 
 export default router;

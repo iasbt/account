@@ -15,5 +15,13 @@ export interface AdminUsersResponse {
 export const adminService = {
   getUsers: async () => {
     return apiClient.get<AdminUsersResponse>('/admin/users')
+  },
+  
+  deleteUser: async (id: string) => {
+    return apiClient.delete<{ success: boolean; message: string }>(`/admin/users/${id}`)
+  },
+
+  updateUser: async (id: string, data: Partial<AdminUser>) => {
+    return apiClient.put<{ success: boolean; message: string; user: AdminUser }>(`/admin/users/${id}`, data)
   }
 }

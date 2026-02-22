@@ -27,63 +27,77 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 flex items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        <div className="mb-10 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-500 to-cyan-500 shadow-xl shadow-blue-500/20">
-            <ShieldCheck className="h-10 w-10 text-white" />
+    <div className="min-h-screen bg-background-light text-text-primary flex items-center justify-center p-4 font-sans antialiased">
+      <div className="w-full max-w-[360px]">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-black text-white shadow-lg">
+            <ShieldCheck className="h-7 w-7" strokeWidth={1.5} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            管理员入口
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary mb-1">
+            管理后台
           </h1>
-          <p className="text-center text-sm text-gray-500">
-            IASBT Admin Control Center
+          <p className="text-sm text-text-secondary">
+            IASBT 管理控制中心
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-2">
-            <input
-              type="text"
-              placeholder="管理员邮箱"
-              value={account}
-              onChange={(e) => setAccount(e.target.value)}
-              autoComplete="username"
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500/60 focus:outline-none focus:ring-1 focus:ring-blue-500/40 transition-all"
-              required
-            />
-            <input
-              type="password"
-              placeholder="密码"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500/60 focus:outline-none focus:ring-1 focus:ring-blue-500/40 transition-all"
-              required
-            />
-          </div>
-
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600">
-              {error}
+        {/* Login Card */}
+        <div className="bg-white p-6 rounded-2xl shadow-apple-card border border-border-subtle">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <input
+                  type="text"
+                  placeholder="管理员账号"
+                  value={account}
+                  onChange={(e) => setAccount(e.target.value)}
+                  autoComplete="username"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <input
+                  type="password"
+                  placeholder="密码"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  className="w-full h-10 rounded-lg border border-border-light bg-white px-3 text-[15px] text-text-primary placeholder-text-tertiary focus:border-accent-blue focus:ring-1 focus:ring-accent-blue focus:outline-none transition-all"
+                  required
+                />
+              </div>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full group relative flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-200/40 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isLoading ? (
-              <span className="animate-pulse">正在验证...</span>
-            ) : (
-              <>
-                <span>登录管理台</span>
-                <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-              </>
+            {error && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-xs">
+                <div className="mt-0.5">⚠️</div>
+                <p>{error}</p>
+              </div>
             )}
-          </button>
-        </form>
+
+            <div className="pt-1">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-10 flex items-center justify-center rounded-full bg-black text-white text-[15px] font-medium hover:bg-gray-800 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    验证中...
+                  </span>
+                ) : (
+                  '登录控制台'
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

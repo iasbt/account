@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-02-23
+### Added
+- **Feature Completion**: 全面补全了开发文档中缺失的页面与功能，实现了系统的闭环。
+    - **Legal Pages**: 新增 `TermsPage` (服务条款) 和 `PrivacyPage` (隐私政策)。
+    - **Error Pages**: 新增 `NotFoundPage` (404)，提供友好的错误提示与返回指引。
+    - **Account Recovery**: 新增 `ForgotPasswordPage` (找回密码) 页面。
+- **Admin System V2**: 管理后台功能大幅增强。
+    - **User Management**: 新增“删除用户”与“编辑用户”功能 (前端+后端 API)。
+    - **Interactive UI**: 实现了删除确认弹窗与编辑表单弹窗。
+- **Security**:
+    - **Change Password**: 在个人中心新增修改密码功能，支持旧密码验证与新密码哈希存储。
+    - **Backend API**: 新增 `DELETE /admin/users/:id`, `PUT /admin/users/:id`, `POST /auth/change-password` 接口。
+
+### Optimized
+- **UI/UX Refinement**:
+    - **Layout Compactness**: 大幅收紧了登录页、注册页与管理后台的布局间距，消除了视觉上的松散感。
+    - **Component Styling**: 统一了全站的输入框、按钮高度 (40px) 与字体大小 (15px)，提升精致度。
+
 ## [1.6.5] - 2026-02-22
 ### Fixed
 - **TypeScript Reference**: 修复了 `App.tsx` 中 `AdminPanel` 组件的引用路径错误，解决了生产环境构建失败的问题 (Commit: `f46f1ce`).
