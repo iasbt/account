@@ -65,9 +65,9 @@ $DeployCmd = @"
     # 1.5 Update .env for CORS (Auto Evolution)
     echo '>>> Updating .env CORS configuration...'
     if [ -f .env ]; then
-        sed -i 's|^CORS_ALLOWLIST=.*|CORS_ALLOWLIST=https://account.iasbt.com,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173|' .env
+        sed -i 's|^CORS_ALLOWLIST=.*|CORS_ALLOWLIST=https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173|' .env
     else
-        echo "CORS_ALLOWLIST=https://account.iasbt.com,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173" > .env
+        echo "CORS_ALLOWLIST=https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173" > .env
     fi
     
     # 1.6 Copy .env to deploy context (CRITICAL FIX)

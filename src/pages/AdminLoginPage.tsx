@@ -48,6 +48,7 @@ export default function AdminLoginPage() {
               placeholder="管理员邮箱"
               value={account}
               onChange={(e) => setAccount(e.target.value)}
+              autoComplete="username"
               className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500/60 focus:outline-none focus:ring-1 focus:ring-blue-500/40 transition-all"
               required
             />
@@ -56,6 +57,7 @@ export default function AdminLoginPage() {
               placeholder="密码"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500/60 focus:outline-none focus:ring-1 focus:ring-blue-500/40 transition-all"
               required
             />

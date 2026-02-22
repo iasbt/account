@@ -79,6 +79,7 @@ export default function LoginPage() {
               placeholder="用户名 / 邮箱"
               value={account}
               onChange={(e) => setAccount(e.target.value)}
+              autoComplete="username"
               className="w-full rounded-xl bg-slate-900/50 border border-slate-800 px-4 py-3.5 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-500/50 focus:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
               required
             />
@@ -87,6 +88,7 @@ export default function LoginPage() {
               placeholder="密码"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               className="w-full rounded-xl bg-slate-900/50 border border-slate-800 px-4 py-3.5 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-500/50 focus:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all"
               required
             />
