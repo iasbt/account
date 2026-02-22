@@ -43,9 +43,17 @@ $DeployCmd = @"
     echo '>>> Updating Code in $RepoDir...'
     if [ ! -d "$RepoDir" ]; then
         echo 'Directory not found! Cloning...'
-        git clone https://github.com/iasbt/account.git $RepoDir
+        git clone git@github.com:iasbt/account.git $RepoDir
     fi
     cd $RepoDir
+    
+    # 强制切换到 SSH 协议 (配合 Deploy Key 使用)
+    git remote set-url origin git@github.com:iasbt/account.git
+    
+    # 首次连接自动接受 GitHub Host Key (避免交互式卡死)
+    mkdir -p ~/.ssh
+    ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts 2>/dev/null || true
+    
     git fetch origin main
     git reset --hard origin/main
     
