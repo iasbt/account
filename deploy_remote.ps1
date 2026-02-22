@@ -115,6 +115,12 @@ $DeployCmd = @"
         exit 1
     fi
     
+    echo '>>> Pruning dangling images...'
+    sudo docker image prune -f
+    
+    echo '>>> Disk usage after prune...'
+    df -h
+    
     # 7. Debug Logs (Auto-Evolution)
     echo '>>> Debug Logs (Last 20 lines)...'
     sudo docker logs account-backend --tail 20
