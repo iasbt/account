@@ -1,0 +1,55 @@
+# 项目复盘总结与下一阶段行动计划 (Project Review Summary & Next Steps)
+
+> **项目**: Account System V1.6
+> **复盘时间**: 2026-02-22
+> **批准状态**: 🟢 **Approved** (With Conditions)
+
+## 1. 复盘总结 (Executive Summary)
+
+经过全面的代码审计与架构评估，**Account System V1.6** 已具备作为 **Phase 3 (Gallery)** 基座的基础能力，但在 **代码可维护性** 和 **自动化测试** 方面存在显著短板。
+
+### 1.1 核心成果 (Achievements)
+*   ✅ **部署稳健**: Docker Compose + Nginx + Health Check 架构成熟稳定。
+*   ✅ **基础功能完备**: 注册、登录、JWT 鉴权、RBAC 基础模型已就绪。
+*   ✅ **安全性达标**: 密码哈希、SQL 注入防护、参数校验已落实。
+
+### 1.2 核心风险 (Critical Risks)
+*   ⚠️ **单体代码臃肿**: 后端 `server.js` 包含所有逻辑，难以支撑 Gallery 业务复杂度。
+*   ⚠️ **测试覆盖缺失**: 几乎无自动化测试，任何重构都可能引入回归 Bug。
+*   ⚠️ **前端逻辑重复**: API Client 与 Store 耦合，导致维护成本高。
+
+## 2. 下一阶段行动计划 (Action Plan: Phase 2.5 Refactor)
+
+为了确保 Phase 3 (Gallery) 的顺利实施，必须先进行 **Phase 2.5 (重构与基建)**。
+
+### 2.1 架构重构 (Refactor) - **P0**
+*   **Backend Split**: 将 `server.js` 拆分为 `routes/`, `controllers/`, `services/`, `middlewares/`。
+*   **Frontend API Unification**: 创建 `src/services/api.ts`，统一处理请求拦截与错误。
+*   **Store Cleanup**: 将 API 调用移出 Store，仅保留状态更新逻辑。
+
+### 2.2 测试建设 (Testing) - **P1**
+*   **Backend Integration**: 引入 `supertest`，覆盖 Auth/Health 核心接口。
+*   **Frontend Unit**: 引入 `vitest` + `testing-library`，覆盖 Login/Register 组件。
+*   **CI Setup**: 配置 GitHub Actions，每次 Push 自动运行测试。
+
+### 2.3 文档沉淀 (Documentation) - **P2**
+*   **API Specs**: 使用 Swagger/OpenAPI 生成 API 文档（基于 JSDoc 或 TS 类型）。
+*   **Dev Guide**: 编写 `CONTRIBUTING.md`，规范代码风格与提交流程。
+
+## 3. Phase 3 (Gallery) 准入标准 (Entry Criteria)
+
+**只有在完成以下任务后，才可正式启动 Phase 3 开发**：
+1.  后端 `server.js` 完成模块化拆分。
+2.  前端 API Client 完成统一封装。
+3.  核心 Auth 接口测试覆盖率 > 80%。
+4.  CI 流水线跑通并显示 ✅ Passing。
+
+## 4. 结论 (Conclusion)
+
+**建议**: 暂缓 Phase 3 功能开发 1 周。
+**决策**: 立即启动 Phase 2.5 重构任务，优先解决 **代码结构** 与 **测试防护** 问题。
+
+---
+
+**批准人**: Trae AI Senior Architect
+**日期**: 2026-02-22

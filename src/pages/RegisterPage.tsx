@@ -85,7 +85,6 @@ export default function RegisterPage() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        displayName: formData.name, // 默认使用用户名作为显示名
         code: formData.code
       })
       // 注册成功跳转登录

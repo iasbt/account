@@ -2,17 +2,18 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, ExternalLink, UserCircle, Database, Server } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { getSystemStats } from '../lib/api'
+import { dashboardService } from '../services/dashboardService'
+import { authService } from '../services/authService'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const { user, logout, token } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [dbStats, setDbStats] = useState<{ userCount: number } | null>(null)
 
   useEffect(() => {
     // 获取数据库状态
-    getSystemStats().then(stats => {
+    dashboardService.getStats().then(stats => {
       setDbStats(stats)
     }).catch(err => {
       console.error('Failed to fetch DB stats:', err)
@@ -37,11 +38,8 @@ export default function DashboardPage() {
 
   const handleLaunch = async (app: { url: string; sso?: boolean }) => {
     if (app.sso && app.url.startsWith('http')) {
-      const response = await fetch('/api/auth/sso-token', {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined
-      }).catch(() => null)
-      if (response && response.ok) {
-        const data = await response.json()
+      try {
+        const data = await authService.getSsoToken()
         if (data?.token) {
           const email = encodeURIComponent(data.email || user?.email || '')
           const tokenValue = encodeURIComponent(data.token)
@@ -49,6 +47,8 @@ export default function DashboardPage() {
           window.open(target, '_blank')
           return
         }
+      } catch (error) {
+        console.error('SSO Token Error:', error)
       }
     }
     if (app.url.startsWith('http')) {

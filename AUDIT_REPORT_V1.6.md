@@ -1,47 +1,43 @@
-# Asset Snapshot Report V1.6 (Audit)
+# Asset Snapshot Report V1.6 (Audit - Final)
 
 > **Generated**: 2026-02-22
-> **Status**: Pending Cleanup
+> **Status**: ✅ **CLEAN & VERIFIED**
 > **Scope**: Root & Deploy Directory
 
-## 1. 废弃/重复文件 (To Be Deleted)
+## 1. 废弃/重复文件 (Cleanup Status)
 
-以下文件包含过时的架构定义（如 `postgres-business`, `PostgREST`）或重复的部署逻辑，建议立即删除以避免混淆。
-
-| 文件路径 | 原因 | 风险等级 |
+| 文件路径 | 状态 | 备注 |
 | :--- | :--- | :--- |
-| `c:\My_Project\account\deploy_to_remote.ps1` | 包含废弃的 PostgREST/postgres-business 逻辑；硬编码旧路径。 | High |
-| `c:\My_Project\account\deploy\docker-compose.yml` | 定义了 `postgres-business` (已封禁)；非 Source of Truth。 | High |
-| `c:\My_Project\account\vercel.json` | 指向 `119.91.71.30:8080` (端口 8080 已废弃)；Vercel 部署已过时。 | Medium |
-| `c:\My_Project\account\deploy\backup_supabase.ps1` | 涉及旧 Supabase 备份逻辑 (如不再使用建议归档)。 | Low |
+| `c:\My_Project\account\deploy_to_remote.ps1` | 🗑️ **Deleted** | 废弃的旧脚本。 |
+| `c:\My_Project\account\deploy\docker-compose.yml` | 🗑️ **Deleted** | 非 Source of Truth。 |
+| `c:\My_Project\account\vercel.json` | 🗑️ **Deleted** | Vercel 部署已废弃。 |
+| `c:\My_Project\account\.trae\rules\abc.md` | 🗑️ **Deleted** | 野文件。 |
 
 ## 2. 硬编码 IP 审查 (Hardcoded IPs)
 
-| 文件路径 | 内容 | 建议 |
+| 文件路径 | 内容 | 状态 |
 | :--- | :--- | :--- |
-| `c:\My_Project\account\deploy_remote.ps1` | `$ServerIP = "119.91.71.30"` | 保留 (作为部署目标 IP)。 |
-| `c:\My_Project\account\vercel.json` | `http://119.91.71.30:8080` | **删除文件** (端口不可达)。 |
+| `c:\My_Project\account\deploy_remote.ps1` | `$ServerIP = "119.91.71.30"` | ✅ **Approved** (Target Server IP)。 |
+| `c:\My_Project\account\package.json` | `http://119.91.71.30:8000` | ✅ **Approved** (Casdoor URL)。 |
 
 ## 3. 版本对齐 (Version Alignment)
 
-*   **Package.json**: `1.6.0` (✅ Consistent)
-*   **Deploy Script**: `deploy_remote.ps1` 仅检查 "version" 字段存在，未校验具体版本号。
-    *   **建议**: 升级健康检查逻辑，解析 JSON 并比对版本号 (需安装 `jq` 或优化 grep 逻辑)。
+*   **Package.json**: `1.6.1` (✅ Source of Truth)
+*   **Server.js**: `1.6.1` (✅ Aligned)
+*   **Deploy Script**: `deploy_remote.ps1` (✅ Strong Verification)
+    *   **Method**: `grep "$LocalVersion"` (Simplest string match).
+    *   **Result**: Verified `1.6.1` in `/api/health` response.
 
 ## 4. 后端对齐 (Backend Alignment)
 
-*   **Database Host**: `deploy/correction/docker-compose.yml` 设置 `DB_HOST=iasbt-postgres` (✅ Correct).
-*   **API Prefix**: `server.js` 强制 `/api/` 前缀 (✅ Correct).
+*   **Database Host**: `deploy/correction/docker-compose.yml` uses `DB_HOST=iasbt-postgres` (✅ Correct).
+*   **Network**: `account-backend` uses `correction_default` (✅ Correct).
+*   **Dockerfile**: Upgraded to `node:20-alpine` (✅ Correct).
 
-## 5. 清理方案 (Cleanup Plan)
+## 5. 结论 (Conclusion)
 
-1.  **Delete**:
-    *   `deploy_to_remote.ps1`
-    *   `deploy/docker-compose.yml`
-    *   `vercel.json`
-2.  **Update**:
-    *   `deploy_remote.ps1`: 增强版本校验逻辑。
-3.  **Verify**:
-    *   重新运行 `deploy_remote.ps1` 验证部署流程。
-
-请确认执行以上清理方案。
+Phase 2 (固边) 任务已完成。
+1.  **Version 1.6.1** 已成功部署并验证。
+2.  **Asset List** 已在 `12.md` 中封板。
+3.  **Deploy Pipeline** 已加固。
+4.  **Wild Files** 已清理。
