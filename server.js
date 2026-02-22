@@ -122,6 +122,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- Health Check Endpoint (Added for V1.6) ---
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    service: "account-backend",
+    version: "1.6"
+  });
+});
+
 const signToken = (payload, ttlSeconds) => {
   if (!ssoSecret) return null;
   const header = { alg: "HS256", typ: "JWT" };
