@@ -13,7 +13,7 @@ $RepoDir = "/home/ubuntu/account"
 $DeployDir = "/home/ubuntu/account/deploy/correction"
 
 # 0. 读取本地版本 (Source of Truth)
-$PackageJson = Get-Content -Path "package.json" -Raw | ConvertFrom-Json
+$PackageJson = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
 $LocalVersion = $PackageJson.version
 Write-Host ">>> [0/3] Target Version: $LocalVersion" -ForegroundColor Cyan
 
