@@ -1,7 +1,7 @@
 export const parseOrigins = (value) =>
   value
     .split(",")
-    .map((item) => item.trim())
+    .map((item) => item.trim().replace(/\/$/, ""))
     .filter(Boolean);
 
 export const defaultAllowlist = [
