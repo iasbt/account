@@ -69,7 +69,7 @@ $DeployCmd = @"
     CORS_VALUE="https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
     if [ -f .env ]; then
         if grep -q "^CORS_ALLOWLIST=" .env; then
-            awk -v v="$CORS_VALUE" 'BEGIN{FS=OFS="="} $1=="CORS_ALLOWLIST"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+            awk -v v="$CORS_VALUE" 'BEGIN{FS=OFS="="} `$1=="CORS_ALLOWLIST"{`$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
         else
             echo "CORS_ALLOWLIST=$CORS_VALUE" >> .env
         fi
@@ -79,7 +79,7 @@ $DeployCmd = @"
     
     if [ -n "$PgAdminEmail" ]; then
         if grep -q "^PGADMIN_DEFAULT_EMAIL=" .env; then
-            awk -v v="$PgAdminEmail" 'BEGIN{FS=OFS="="} $1=="PGADMIN_DEFAULT_EMAIL"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+            awk -v v="$PgAdminEmail" 'BEGIN{FS=OFS="="} `$1=="PGADMIN_DEFAULT_EMAIL"{`$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
         else
             echo "PGADMIN_DEFAULT_EMAIL=$PgAdminEmail" >> .env
         fi
@@ -87,7 +87,7 @@ $DeployCmd = @"
     
     if [ -n "$PgAdminPassword" ]; then
         if grep -q "^PGADMIN_DEFAULT_PASSWORD=" .env; then
-            awk -v v="$PgAdminPassword" 'BEGIN{FS=OFS="="} $1=="PGADMIN_DEFAULT_PASSWORD"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+            awk -v v="$PgAdminPassword" 'BEGIN{FS=OFS="="} `$1=="PGADMIN_DEFAULT_PASSWORD"{`$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
         else
             echo "PGADMIN_DEFAULT_PASSWORD=$PgAdminPassword" >> .env
         fi
