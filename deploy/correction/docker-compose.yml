@@ -25,6 +25,18 @@ services:
     ports:
       - "3000:3000"
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - correction_default
+
   # Frontend Service (Nginx + React Static)
   account-frontend:
     build:
