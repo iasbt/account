@@ -2,11 +2,12 @@
 
 本文件记录项目的重要变更。
 
-## [1.7.6] - 2026-02-24
+## [1.7.7] - 2026-02-24
 ### Added
 - 增加 pgAdmin4 服务编排，提供 Web 数据库管理界面。
 ### Changed
 - 部署脚本支持注入 PGADMIN_DEFAULT_EMAIL / PGADMIN_DEFAULT_PASSWORD 到远端 .env。
+- 增加 pgAdmin 预配置服务器清单并挂载到容器。
 
 ## [1.7.5] - 2026-02-24
 ### Fixed

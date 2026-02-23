@@ -22,6 +22,7 @@
 *   `Dockerfile.api`, `Dockerfile.web`
 *   `nginx.conf`
 *   `clean_house.sh`
+*   `servers.json`
 
 ## 5. 自动化
 *   `deploy_remote.ps1`

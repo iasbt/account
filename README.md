@@ -1,6 +1,6 @@
-# Account System (IAM / SSO) - V1.7.6
+# Account System (IAM / SSO) - V1.7.7
 
-> **Status**: ✅ Active (V1.7.6)
+> **Status**: ✅ Active (V1.7.7)
 > **Docs**: [ACCOUNT_SYSTEM_DEV_DOC_V1.6.md](deployment_docs/ACCOUNT_SYSTEM_DEV_DOC_V1.6.md)
 
 统一账户中心，作为“四合院”项目矩阵的数字基座，负责统一身份认证 (SSO)、权限控制 (RBAC) 和数据中台服务。

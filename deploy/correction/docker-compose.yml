@@ -52,6 +52,7 @@ services:
       - "8888:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - /home/ubuntu/account/deploy/correction/servers.json:/pgadmin4/servers.json
     networks:
       - correction_default
 
