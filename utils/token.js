@@ -30,3 +30,21 @@ export const verifyToken = (token) => {
   if (!body.exp || body.exp < now) return null;
   return body;
 };
+
+export const generateToken = (user) => {
+  return signToken({ 
+    sub: user.id, 
+    name: user.username, 
+    email: user.email,
+    isAdmin: user.is_admin || false
+  }, 7 * 24 * 60 * 60); // 7 days
+};
+
+export const generateSsoToken = (user) => {
+  return signToken({ 
+    sub: user.id, 
+    name: user.username, 
+    email: user.email,
+    type: 'sso'
+  }, 5 * 60); // 5 minutes
+};
