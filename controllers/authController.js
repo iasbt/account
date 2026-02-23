@@ -32,7 +32,7 @@ export const register = async (req, res) => {
     return res.status(400).json({ message: "所有字段都是必填的", success: false });
   }
 
-  const storedCode = getVerificationCode(email);
+  const storedCode = await getVerificationCode(email);
   if (!storedCode || storedCode.code !== code || Date.now() > storedCode.expires) {
     return res.status(400).json({ message: "验证码无效或已过期", success: false });
   }
@@ -54,7 +54,7 @@ export const register = async (req, res) => {
     const user = result.rows[0];
     const token = generateToken(user);
     
-    deleteVerificationCode(email);
+    await deleteVerificationCode(email);
 
     res.status(201).json({
       message: "注册成功",
