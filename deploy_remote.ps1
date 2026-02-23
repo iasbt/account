@@ -128,7 +128,7 @@ $DeployCmd = @"
 
 # 3. 执行远程命令
 Write-Host ">>> [3/3] Executing Remote Commands..." -ForegroundColor Cyan
-ssh -i $KeyPath -o StrictHostKeyChecking=no "${User}@${ServerIP}" $DeployCmd
+ssh -i $KeyPath -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "${User}@${ServerIP}" $DeployCmd
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`nDeployment Complete & Verified!" -ForegroundColor Green
