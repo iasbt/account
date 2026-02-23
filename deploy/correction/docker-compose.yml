@@ -20,6 +20,10 @@ services:
       - SSO_JWT_SECRET=${SSO_JWT_SECRET}
       - CORS_ALLOWLIST=${CORS_ALLOWLIST}
       - PORT=3000
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
     networks:
       - correction_default
     ports:
