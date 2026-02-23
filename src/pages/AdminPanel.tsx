@@ -14,6 +14,7 @@ export default function AdminPanel() {
   // Modal States
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
   const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null)
+  const [resettingUser, setResettingUser] = useState<AdminUser | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
 
   // Edit Form State
@@ -76,6 +77,21 @@ export default function AdminPanel() {
     }
   }
 
+  const handleResetPassword = async () => {
+    if (!resettingUser) return
+    setActionLoading(true)
+    try {
+      await adminService.resetUserPassword(resettingUser.id)
+      alert('重置密码邮件已发送')
+      setResettingUser(null)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '重置失败'
+      alert(msg)
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const openEditModal = (user: AdminUser) => {
     setEditingUser(user)
     setEditForm({ username: user.username, email: user.email })
@@ -86,7 +102,39 @@ export default function AdminPanel() {
       <div className="flex flex-col items-center gap-4">
         <div className="animate-spin h-8 w-8 border-4 border-border-light border-t-accent-blue rounded-full"></div>
         <p>正在加载系统...</p>
-      </div>
+        {/* Reset Password Confirmation Modal */}
+      {resettingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-apple-deep p-6 animate-in fade-in zoom-in duration-200">
+             <div className="flex flex-col items-center text-center mb-6">
+               <div className="h-12 w-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-600 mb-4">
+                 <RefreshCw className="h-6 w-6" />
+               </div>
+               <h3 className="text-xl font-semibold text-text-primary mb-2">确认重置密码?</h3>
+               <p className="text-text-secondary text-sm">
+                 将发送包含重置链接的邮件给 <strong>{resettingUser.email}</strong>。
+               </p>
+             </div>
+             
+             <div className="flex gap-3">
+               <button 
+                 onClick={() => setResettingUser(null)}
+                 className="flex-1 h-10 rounded-full border border-border-light text-text-secondary hover:bg-background-light transition-colors font-medium"
+               >
+                 取消
+               </button>
+               <button 
+                 onClick={handleResetPassword}
+                 disabled={actionLoading}
+                 className="flex-1 h-10 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors font-medium disabled:opacity-50"
+               >
+                 {actionLoading ? '发送中...' : '确认发送'}
+               </button>
+             </div>
+          </div>
+        </div>
+      )}
+    </div>
     </div>
   )
 
@@ -199,6 +247,13 @@ export default function AdminPanel() {
                     <div className="flex items-center justify-end gap-3">
                       <button 
                         onClick={() => setResettingUser(user)}
+                        className="text-text-secondary hover:text-orange-500 transition-colors"
+                        title="重置密码"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => openEditModal(user)}setResettingUser(user)}
                         className="text-text-secondary hover:text-orange-500 transition-colors"
                         title="重置密码"
                       >

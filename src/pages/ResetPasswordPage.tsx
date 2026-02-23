@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, KeyRound, CheckCircle, AlertCircle } from 'lucide-react'
+import { ArrowLeft, KeyRound, CheckCircle } from 'lucide-react'
 import { authService } from '../services/authService'
 
 export default function ResetPasswordPage() {
