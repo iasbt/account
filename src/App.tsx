@@ -12,6 +12,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 // --- 路由守卫 ---
 
