@@ -26,6 +26,6 @@ export const adminService = {
   },
 
   resetUserPassword: async (id: string) => {
-    return apiClient.post<{ success: boolean; message: string }>(`/admin/users/${id}/reset-password`)
+    return apiClient.post<{ success: boolean; message: string }>(`/admin/users/${id}/reset-password`, {})
   }
 }
