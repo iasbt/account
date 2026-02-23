@@ -228,7 +228,7 @@ export const resetPassword = async (req, res) => {
     return res.status(400).json({ message: "参数不完整", success: false });
   }
 
-  const storedCode = getVerificationCode(email);
+  const storedCode = await getVerificationCode(email);
   if (!storedCode || storedCode.code !== code || Date.now() > storedCode.expires) {
     return res.status(400).json({ message: "验证码无效或已过期", success: false });
   }

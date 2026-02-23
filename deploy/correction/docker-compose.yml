@@ -41,6 +41,20 @@ services:
     networks:
       - correction_default
 
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "8888:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - correction_default
+
   # Frontend Service (Nginx + React Static)
   account-frontend:
     build:
@@ -64,3 +78,4 @@ networks:
 
 volumes:
   redis_data:
+  pgadmin_data:

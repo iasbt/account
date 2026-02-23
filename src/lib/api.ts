@@ -1,3 +1,5 @@
+import { useAuthStore } from '../store/useAuthStore';
+
 const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL || "/api/rest";
 const explicitAllow = import.meta.env.VITE_ALLOW_EXTERNAL_API === "true";
 const explicitDeny = import.meta.env.VITE_ALLOW_EXTERNAL_API === "false";
@@ -26,16 +28,15 @@ export const API_CONFIG = {
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_CONFIG.baseUrl}${endpoint}`;
   
-  const headers = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers as Record<string, string> | undefined),
   };
 
-  // TODO: 如果需要鉴权，在这里添加 Authorization 头
-  // const token = useAuthStore.getState().token;
-  // if (token) {
-  //   headers['Authorization'] = `Bearer ${token}`;
-  // }
+  const token = useAuthStore.getState().token;
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   const response = await fetch(url, {
     ...options,

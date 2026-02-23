@@ -1,30 +1,35 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, KeyRound, Mail } from 'lucide-react'
+import { useAuthStore } from '../store/useAuthStore'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // TODO: Add actual API call in store
-  // const forgotPassword = useAuthStore(state => state.forgotPassword)
+  const sendVerificationCode = useAuthStore(state => state.sendVerificationCode)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    
-    // 模拟 API 调用
-    setTimeout(() => {
+
+    if (!email || !email.includes('@')) {
+      setError('请输入有效的电子邮箱地址')
       setLoading(false)
-      if (email.includes('@')) {
-        setSuccess(true)
-      } else {
-        setError('请输入有效的电子邮箱地址')
-      }
-    }, 1500)
+      return
+    }
+
+    try {
+      await sendVerificationCode(email)
+      setSuccess(true)
+    } catch (err: unknown) {
+      const message = err instanceof Error && err.message ? err.message : '发送失败'
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

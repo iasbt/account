@@ -1,6 +1,6 @@
-# Account System (IAM / SSO) - V1.6
+# Account System (IAM / SSO) - V1.7.6
 
-> **Status**: 🔒 Frozen / Sealed (V1.6)
+> **Status**: ✅ Active (V1.7.6)
 > **Docs**: [ACCOUNT_SYSTEM_DEV_DOC_V1.6.md](deployment_docs/ACCOUNT_SYSTEM_DEV_DOC_V1.6.md)
 
 统一账户中心，作为“四合院”项目矩阵的数字基座，负责统一身份认证 (SSO)、权限控制 (RBAC) 和数据中台服务。
@@ -10,7 +10,7 @@
 ### 核心组件 (Core)
 - **数据库**: PostgreSQL 14 (Alpine) - *唯一真理来源 (Single Source of Truth)*
 - **后端**: Node.js 20 (Express) - *RESTful API*
-- **前端**: React 18 + Vite + TypeScript + Zustand - *SPA 与状态管理*
+- **前端**: React 19 + Vite + TypeScript + Zustand - *SPA 与状态管理*
 - **网关**: Nginx (Alpine) - *反向代理与静态服务*
 
 ### 基础设施 (Infrastructure)

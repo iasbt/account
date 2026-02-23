@@ -21,9 +21,6 @@ export const authService = {
   async login(account: string, password: string): Promise<LoginResponse> {
     return apiClient.post<LoginResponse>('/auth/login', { account, password });
   },
-  async adminLogin(account: string, password: string): Promise<LoginResponse> {
-    return apiClient.post<LoginResponse>('/admin/auth/login', { account, password });
-  },
 
   async register(data: { name: string; email: string; password: string; code?: string }): Promise<RegisterResponse> {
     return apiClient.post<RegisterResponse>('/auth/register', {

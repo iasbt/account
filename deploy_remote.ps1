@@ -11,6 +11,8 @@ $KeyPath = "D:\OneDrive\Desktop\trae.pem"
 # 强制指定正确路径
 $RepoDir = "/home/ubuntu/account" 
 $DeployDir = "/home/ubuntu/account/deploy/correction"
+$PgAdminEmail = $env:PGADMIN_DEFAULT_EMAIL
+$PgAdminPassword = $env:PGADMIN_DEFAULT_PASSWORD
 
 # 0. 读取本地版本 (Source of Truth)
 $PackageJson = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -68,6 +70,22 @@ $DeployCmd = @"
         sed -i 's|^CORS_ALLOWLIST=.*|CORS_ALLOWLIST=https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173|' .env
     else
         echo "CORS_ALLOWLIST=https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173" > .env
+    fi
+    
+    if [ -n "$PgAdminEmail" ]; then
+        if grep -q "^PGADMIN_DEFAULT_EMAIL=" .env; then
+            sed -i "s|^PGADMIN_DEFAULT_EMAIL=.*|PGADMIN_DEFAULT_EMAIL=$PgAdminEmail|" .env
+        else
+            echo "PGADMIN_DEFAULT_EMAIL=$PgAdminEmail" >> .env
+        fi
+    fi
+    
+    if [ -n "$PgAdminPassword" ]; then
+        if grep -q "^PGADMIN_DEFAULT_PASSWORD=" .env; then
+            sed -i "s|^PGADMIN_DEFAULT_PASSWORD=.*|PGADMIN_DEFAULT_PASSWORD=$PgAdminPassword|" .env
+        else
+            echo "PGADMIN_DEFAULT_PASSWORD=$PgAdminPassword" >> .env
+        fi
     fi
     
     # 1.6 Copy .env to deploy context (CRITICAL FIX)

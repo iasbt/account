@@ -13,6 +13,7 @@ interface AuthState {
   login: () => Promise<void>
   loginWithPassword: (account: string, password: string) => Promise<void>
   sendVerificationCode: (dest: string) => Promise<void>
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<void>
   register: (data: { name: string; email: string; password: string; code?: string }) => Promise<void>
   updateProfile: (data: Partial<AuthUser>) => Promise<void>
   logout: () => void
@@ -44,6 +45,9 @@ export const useAuthStore = create<AuthState>()(
       },
       sendVerificationCode: async (dest) => {
         await authService.sendVerificationCode(dest)
+      },
+      resetPassword: async (email, code, newPassword) => {
+        await authService.resetPassword(email, code, newPassword)
       },
       register: async (data) => {
         const response = await authService.register(data)

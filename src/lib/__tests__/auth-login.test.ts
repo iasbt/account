@@ -56,15 +56,16 @@ describe("auth login", () => {
     const password = "AdminPass123!";
     const passwordHash = await bcryptjs.hash(password, 10);
     mockQuery.mockImplementation((text: string) => {
-      if (text.includes("FROM public.admin_accounts")) {
+      if (text.includes("FROM public.legacy_users")) {
         return Promise.resolve({
           rowCount: 1,
           rows: [
             {
               id: "admin-1",
               email: "admin@test.com",
+              username: "admin",
               password_hash: passwordHash,
-              security_level: 10,
+              is_admin: true,
             },
           ],
         });

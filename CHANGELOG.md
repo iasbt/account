@@ -1,6 +1,22 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+本文件记录项目的重要变更。
+
+## [1.7.6] - 2026-02-24
+### Added
+- 增加 pgAdmin4 服务编排，提供 Web 数据库管理界面。
+### Changed
+- 部署脚本支持注入 PGADMIN_DEFAULT_EMAIL / PGADMIN_DEFAULT_PASSWORD 到远端 .env。
+
+## [1.7.5] - 2026-02-24
+### Fixed
+- 修复重置密码验证码校验未等待异步读取导致的误判问题。
+- 找回密码页面改为真实发送验证码接口，并补充失败提示。
+### Changed
+- 前端重置密码流程统一通过 Store 调用服务，符合数据流规范。
+- 清理未使用的管理员登录服务接口。
+### Tests
+- 更新管理员登录单测以匹配实际数据表与字段。
 
 ## [1.7.1] - 2026-02-23
 ### Infrastructure

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, KeyRound, CheckCircle } from 'lucide-react'
-import { authService } from '../services/authService'
+import { useAuthStore } from '../store/useAuthStore'
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
@@ -14,6 +14,7 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const resetPassword = useAuthStore(state => state.resetPassword)
 
   useEffect(() => {
     if (!email || !code) {
@@ -38,7 +39,7 @@ export default function ResetPasswordPage() {
     setError(null)
 
     try {
-      await authService.resetPassword(email, code, password)
+      await resetPassword(email, code, password)
       setSuccess(true)
       setTimeout(() => {
         navigate('/login')
