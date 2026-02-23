@@ -38,9 +38,19 @@ export const register = async (req, res) => {
   }
 
   try {
-    const existingUser = await pool.query("SELECT id FROM public.legacy_users WHERE email = $1", [email]);
+    // 检查邮箱或用户名是否已存在
+    const existingUser = await pool.query(
+      "SELECT id, email, username FROM public.legacy_users WHERE email = $1 OR username = $2",
+      [email, name]
+    );
+
     if (existingUser.rowCount > 0) {
-      return res.status(400).json({ message: "邮箱已被注册", success: false });
+      if (existingUser.rows.some(row => row.email === email)) {
+        return res.status(400).json({ message: "邮箱已被注册", success: false });
+      }
+      if (existingUser.rows.some(row => row.username === name)) {
+        return res.status(400).json({ message: "用户名已被使用", success: false });
+      }
     }
 
     const salt = await bcryptjs.genSalt(10);

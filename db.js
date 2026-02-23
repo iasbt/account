@@ -33,7 +33,7 @@ const ensureAdminIsolation = async () => {
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       )`
     );
-    await pool.query("ALTER TABLE public.legacy_users DROP COLUMN IF EXISTS is_admin");
+    // await pool.query("ALTER TABLE public.legacy_users DROP COLUMN IF EXISTS is_admin");
     const adminCandidate = await pool.query(
       "SELECT id, email, password_hash FROM public.legacy_users WHERE email = $1 LIMIT 1",
       ["iasbt@outlook.com"]

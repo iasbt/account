@@ -78,7 +78,7 @@ export default function LoginPage() {
               <div className="space-y-1">
                 <input
                   type="text"
-                  placeholder="邮箱或手机号"
+                  placeholder="用户名或邮箱"
                   value={account}
                   onChange={(e) => setAccount(e.target.value)}
                   autoComplete="username"
