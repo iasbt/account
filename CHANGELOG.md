@@ -8,6 +8,7 @@
 ### Changed
 - 部署脚本支持注入 PGADMIN_DEFAULT_EMAIL / PGADMIN_DEFAULT_PASSWORD 到远端 .env。
 - 增加 pgAdmin 预配置服务器清单并挂载到容器。
+- pgAdmin 启动时强制加载 servers.json。
 
 ## [1.7.5] - 2026-02-24
 ### Fixed

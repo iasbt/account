@@ -50,6 +50,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "8888:80"
+    entrypoint: /bin/sh -c "cp /pgadmin4/servers.json /var/lib/pgadmin/servers.json; chown -R pgadmin:pgadmin /var/lib/pgadmin; chmod 600 /var/lib/pgadmin/servers.json; /entrypoint.sh"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
       - /home/ubuntu/account/deploy/correction/servers.json:/pgadmin4/servers.json
