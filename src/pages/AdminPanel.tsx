@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react'
 import { adminService, type AdminUser } from '../services/adminService'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, LayoutDashboard, Users, Settings, Search, Bell, Trash2, Edit2, X, AlertTriangle, RefreshCw } from 'lucide-react'
-import { useAuthStore } from '../store/useAuthStore'
+import { useAdminStore } from '../store/useAdminStore'
 
 export default function AdminPanel() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const logout = useAuthStore(state => state.logout)
+  const logout = useAdminStore(state => state.logout)
 
   // Modal States
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
@@ -43,7 +43,7 @@ export default function AdminPanel() {
 
   const handleLogout = () => {
     logout()
-    navigate('/login')
+    navigate('/admin/login')
   }
 
   const handleDelete = async () => {

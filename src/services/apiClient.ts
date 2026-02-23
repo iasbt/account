@@ -79,3 +79,4 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
+export const adminApiClient = new ApiClient(API_BASE_URL);

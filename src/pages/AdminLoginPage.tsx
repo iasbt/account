@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { ShieldCheck } from 'lucide-react'
-import { useAuthStore } from '../store/useAuthStore'
+import { useAdminStore } from '../store/useAdminStore'
 import { useNavigate } from 'react-router-dom'
 
 export default function AdminLoginPage() {
   const navigate = useNavigate()
-  const loginAdmin = useAuthStore((state) => state.loginAdmin)
+  const login = useAdminStore((state) => state.login)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [account, setAccount] = useState('')
@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
     setError(null)
     setIsLoading(true)
     try {
-      await loginAdmin(account, password)
+      await login(account, password)
       navigate('/admin')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '登录失败，请稍后重试'

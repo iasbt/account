@@ -5,6 +5,7 @@ import AdminLoginPage from './pages/AdminLoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
 import { useAuthStore } from './store/useAuthStore'
+import { useAdminStore } from './store/useAdminStore'
 import DashboardPage from './pages/DashboardPage'
 import AdminPanel from './pages/AdminPanel'
 import StyleGuide from './pages/StyleGuide'
@@ -17,40 +18,29 @@ import ResetPasswordPage from './pages/ResetPasswordPage'
 // --- 路由守卫 ---
 
 function RequireAuth({ children }: { children: ReactElement }) {
-  const { isAuthenticated, user } = useAuthStore()
+  const { isAuthenticated } = useAuthStore()
   const location = useLocation()
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 
-  if (user?.isAdmin) {
-    return <Navigate to="/admin" replace />
-  }
-
   return children
 }
 
 function RequireAdmin({ children }: { children: ReactElement }) {
-  const { user, isAuthenticated } = useAuthStore()
+  const { isAuthenticated } = useAdminStore()
   const location = useLocation()
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace state={{ from: location }} />
-  }
-  
-  if (!user?.isAdmin) {
-    return <Navigate to="/" replace />
   }
 
   return children
 }
 
 function PublicOnlyUser({ children }: { children: ReactElement }) {
-  const { isAuthenticated, user } = useAuthStore()
-  if (isAuthenticated && user?.isAdmin) {
-    return <Navigate to="/admin" replace />
-  }
+  const { isAuthenticated } = useAuthStore()
   if (isAuthenticated) {
     return <Navigate to="/" replace />
   }
@@ -58,12 +48,9 @@ function PublicOnlyUser({ children }: { children: ReactElement }) {
 }
 
 function PublicOnlyAdmin({ children }: { children: ReactElement }) {
-  const { isAuthenticated, user } = useAuthStore()
-  if (isAuthenticated && user?.isAdmin) {
-    return <Navigate to="/admin" replace />
-  }
+  const { isAuthenticated } = useAdminStore()
   if (isAuthenticated) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/admin" replace />
   }
   return children
 }
