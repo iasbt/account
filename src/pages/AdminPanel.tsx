@@ -253,13 +253,6 @@ export default function AdminPanel() {
                         <RefreshCw className="h-4 w-4" />
                       </button>
                       <button 
-                        onClick={() => openEditModal(user)}setResettingUser(user)}
-                        className="text-text-secondary hover:text-orange-500 transition-colors"
-                        title="重置密码"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                      </button>
-                      <button 
                         onClick={() => openEditModal(user)}
                         className="text-text-secondary hover:text-accent-blue transition-colors"
                       >
