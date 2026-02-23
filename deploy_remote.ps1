@@ -39,20 +39,19 @@ if ($LASTEXITCODE -ne 0) {
 # 2. 远程执行部署
 Write-Host ">>> [2/3] Deploying on Remote Server ($ServerIP)..." -ForegroundColor Cyan
 
-# 使用 PowerShell Here-String (@" ... "@) 避免转义噩梦
-$DeployCmd = @"
+$DeployCmd = @'
     set -e
     
     # 0. 确保 git 目录安全
-    git config --global --add safe.directory $RepoDir
+    git config --global --add safe.directory __REPO_DIR__
     
     # 1. 进入 Repo 目录更新代码
-    echo '>>> Updating Code in $RepoDir...'
-    if [ ! -d "$RepoDir" ]; then
+    echo '>>> Updating Code in __REPO_DIR__...'
+    if [ ! -d "__REPO_DIR__" ]; then
         echo 'Directory not found! Cloning...'
-        git clone git@github.com:iasbt/account.git $RepoDir
+        git clone git@github.com:iasbt/account.git __REPO_DIR__
     fi
-    cd $RepoDir
+    cd __REPO_DIR__
     
     # 强制切换到 SSH 协议 (配合 Deploy Key 使用)
     git remote set-url origin git@github.com:iasbt/account.git
@@ -69,7 +68,7 @@ $DeployCmd = @"
     CORS_VALUE="https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
     if [ -f .env ]; then
         if grep -q "^CORS_ALLOWLIST=" .env; then
-            awk -v v="$CORS_VALUE" 'BEGIN{FS=OFS="="} `$1=="CORS_ALLOWLIST"{`$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+            awk -v v="$CORS_VALUE" 'BEGIN{FS=OFS="="} $1=="CORS_ALLOWLIST"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
         else
             echo "CORS_ALLOWLIST=$CORS_VALUE" >> .env
         fi
@@ -77,29 +76,29 @@ $DeployCmd = @"
         echo "CORS_ALLOWLIST=$CORS_VALUE" > .env
     fi
     
-    if [ -n "$PgAdminEmail" ]; then
+    if [ -n "__PGADMIN_EMAIL__" ]; then
         if grep -q "^PGADMIN_DEFAULT_EMAIL=" .env; then
-            awk -v v="$PgAdminEmail" 'BEGIN{FS=OFS="="} `$1=="PGADMIN_DEFAULT_EMAIL"{`$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+            awk -v v="__PGADMIN_EMAIL__" 'BEGIN{FS=OFS="="} $1=="PGADMIN_DEFAULT_EMAIL"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
         else
-            echo "PGADMIN_DEFAULT_EMAIL=$PgAdminEmail" >> .env
+            echo "PGADMIN_DEFAULT_EMAIL=__PGADMIN_EMAIL__" >> .env
         fi
     fi
     
-    if [ -n "$PgAdminPassword" ]; then
+    if [ -n "__PGADMIN_PASSWORD__" ]; then
         if grep -q "^PGADMIN_DEFAULT_PASSWORD=" .env; then
-            awk -v v="$PgAdminPassword" 'BEGIN{FS=OFS="="} `$1=="PGADMIN_DEFAULT_PASSWORD"{`$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+            awk -v v="__PGADMIN_PASSWORD__" 'BEGIN{FS=OFS="="} $1=="PGADMIN_DEFAULT_PASSWORD"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
         else
-            echo "PGADMIN_DEFAULT_PASSWORD=$PgAdminPassword" >> .env
+            echo "PGADMIN_DEFAULT_PASSWORD=__PGADMIN_PASSWORD__" >> .env
         fi
     fi
     
     # 1.6 Copy .env to deploy context (CRITICAL FIX)
     echo '>>> Copying .env to deployment directory...'
-    cp .env $DeployDir/.env
+    cp .env __DEPLOY_DIR__/.env
     
     # 2. 进入部署目录 (Context Alignment)
-    echo '>>> Switching to Deployment Context: $DeployDir'
-    cd $DeployDir
+    echo '>>> Switching to Deployment Context: __DEPLOY_DIR__'
+    cd __DEPLOY_DIR__
     
     # 3. 暴力清理废弃容器 (Legacy Ban)
     echo '>>> Cleaning up legacy containers...'
@@ -126,13 +125,13 @@ $DeployCmd = @"
     sleep 10
     
     # 6. 版本强校验 (Strong Version Verification) - Simplest
-    echo '>>> Verifying Health & Version (Expected: $LocalVersion)...'
+    echo '>>> Verifying Health & Version (Expected: __LOCAL_VERSION__)...'
     HEALTH_JSON=`$(curl -s http://localhost:3000/health)`
     echo "Health Response: `$HEALTH_JSON"
     
     # Simplest check: does the response contain the version string?
-    if echo "`$HEALTH_JSON" | grep "$LocalVersion"; then
-        echo "✅ Version Verification PASSED: $LocalVersion"
+    if echo "`$HEALTH_JSON" | grep "__LOCAL_VERSION__"; then
+        echo "✅ Version Verification PASSED: __LOCAL_VERSION__"
     else
         echo "❌ Version Verification FAILED!"
         exit 1
@@ -147,7 +146,13 @@ $DeployCmd = @"
     # 7. Debug Logs (Auto-Evolution)
     echo '>>> Debug Logs (Last 20 lines)...'
     sudo docker logs account-backend --tail 20
-"@
+'@
+
+$DeployCmd = $DeployCmd.Replace("__REPO_DIR__", $RepoDir)
+$DeployCmd = $DeployCmd.Replace("__DEPLOY_DIR__", $DeployDir)
+$DeployCmd = $DeployCmd.Replace("__LOCAL_VERSION__", $LocalVersion)
+$DeployCmd = $DeployCmd.Replace("__PGADMIN_EMAIL__", $PgAdminEmail)
+$DeployCmd = $DeployCmd.Replace("__PGADMIN_PASSWORD__", $PgAdminPassword)
 
 # 3. 执行远程命令
 Write-Host ">>> [3/3] Executing Remote Commands..." -ForegroundColor Cyan
