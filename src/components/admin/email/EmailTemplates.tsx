@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { adminService, type EmailTemplate } from '../../../services/adminService';
-import { Loader2, Save, RefreshCw, Code, Send, AlertCircle, CheckCircle2, Eye, Layout } from 'lucide-react';
+import { Loader2, Save, RefreshCw, Code, Send, AlertCircle, CheckCircle2, Eye } from 'lucide-react';
 
 export const EmailTemplates: React.FC = () => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
