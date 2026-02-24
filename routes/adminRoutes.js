@@ -8,6 +8,7 @@ import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/roleCheck.js";
 import { getAllUsers, deleteUser, updateUser, resetUserPassword, getSystemStatus, sendTestEmail } from "../controllers/adminController.js";
+import { getTemplates, updateTemplate } from "../controllers/emailTemplateController.js";
 import { adminLogin } from "../controllers/authController.js";
 
 const router = Router();
@@ -33,6 +34,20 @@ router.get("/system/status", getSystemStatus);
  * @access Admin
  */
 router.post("/email/test", sendTestEmail);
+
+/**
+ * @route GET /admin/email/templates
+ * @description 获取邮件模板
+ * @access Admin
+ */
+router.get("/email/templates", getTemplates);
+
+/**
+ * @route PUT /admin/email/templates/:type
+ * @description 更新邮件模板
+ * @access Admin
+ */
+router.put("/email/templates/:type", updateTemplate);
 
 /**
  * @route GET /admin/users

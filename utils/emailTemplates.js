@@ -1,4 +1,6 @@
 
+import pool from '../db.js';
+
 const styles = {
   container: `
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -88,7 +90,56 @@ const layout = (title, bodyContent) => `
 </html>
 `;
 
+// In-memory cache
+let templateCache = {};
+
+export const loadTemplates = async () => {
+  try {
+    const res = await pool.query('SELECT type, subject, content FROM public.email_templates');
+    if (res.rows.length > 0) {
+      res.rows.forEach(row => {
+        templateCache[row.type] = row;
+      });
+      console.log('Email templates loaded from DB:', Object.keys(templateCache));
+    }
+  } catch (err) {
+    console.error('Failed to load email templates from DB:', err.message);
+  }
+};
+
+// Initialize cache
+loadTemplates();
+
+const replaceVars = (content, vars) => {
+  let result = content;
+  for (const [key, value] of Object.entries(vars)) {
+    result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
+  }
+  return result;
+};
+
 export const getVerificationCodeTemplate = (code, type = 'general') => {
+  const cacheKey = type === 'register' ? 'register' : (type === 'reset_password' ? 'reset_password' : 'general');
+  
+  // Use DB template if available
+  if (templateCache[cacheKey]) {
+    // Note: DB templates for 'register'/'reset_password' rely on 'code' variable
+    // If type is 'login', it falls back to 'general' or code fallback below if not mapped
+    // Currently seed script only has register, reset_password, general.
+    // Login will fall back to 'general' cacheKey if we map it, but 'general' expects {{title}} and {{content}}
+    // This is a mismatch. 'general' in DB has variables ["title", "content"].
+    // 'register' has ["code"].
+    
+    // If type is 'login', cacheKey is 'general', but 'general' template expects title/content.
+    // So if type is login, we should probably fall back to code unless we add a 'login' template to DB.
+    // For now, let's stick to the exact matches.
+    
+    if (templateCache[type]) {
+       return replaceVars(templateCache[type].content, { code });
+    }
+  }
+
+  // Fallback to code
   let title = '账号验证';
   let description = '您正在进行账号验证操作，请使用以下验证码完成验证：';
 
@@ -116,6 +167,10 @@ export const getVerificationCodeTemplate = (code, type = 'general') => {
 };
 
 export const getPasswordResetLinkTemplate = (link) => {
+  if (templateCache['reset_link']) {
+    return replaceVars(templateCache['reset_link'].content, { link });
+  }
+
   const title = '重置您的密码';
   const body = `
     <h2 style="margin-top: 0; color: #0f172a; font-size: 20px;">${title}</h2>
@@ -132,6 +187,10 @@ export const getPasswordResetLinkTemplate = (link) => {
 };
 
 export const getNotificationTemplate = (subject, message) => {
+  if (templateCache['general']) {
+    return replaceVars(templateCache['general'].content, { title: subject, content: message });
+  }
+
   const body = `
     <h2 style="margin-top: 0; color: #0f172a; font-size: 20px;">${subject}</h2>
     <p>${message}</p>

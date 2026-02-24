@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, LayoutDashboard, Users, Settings, Box } from 'lucide-react'
+import { LogOut, LayoutDashboard, Users, Settings, Box, Mail } from 'lucide-react'
 import { useAdminStore } from '../store/useAdminStore'
 import UserManager from '../components/admin/UserManager'
 import AppManager from '../components/admin/AppManager'
 import SystemManager from '../components/admin/SystemManager'
+import EmailManager from '../components/admin/EmailManager'
 
-type Tab = 'users' | 'apps' | 'settings'
+type Tab = 'users' | 'apps' | 'settings' | 'email'
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('users')
@@ -58,6 +59,18 @@ export default function AdminPanel() {
           </button>
 
           <button 
+            onClick={() => setActiveTab('email')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+              activeTab === 'email' 
+                ? 'bg-indigo-50 text-indigo-600 shadow-sm' 
+                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+            }`}
+          >
+            <Mail className="w-5 h-5" />
+            <span>邮件服务</span>
+          </button>
+
+          <button 
             onClick={() => setActiveTab('settings')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
               activeTab === 'settings' 
@@ -93,6 +106,7 @@ export default function AdminPanel() {
         <div className="max-w-7xl mx-auto">
           {activeTab === 'users' && <UserManager />}
           {activeTab === 'apps' && <AppManager />}
+          {activeTab === 'email' && <EmailManager />}
           {activeTab === 'settings' && <SystemManager />}
         </div>
       </main>

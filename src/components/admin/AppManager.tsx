@@ -255,7 +255,7 @@ export default function AppManager() {
                 <label className="text-sm font-medium text-gray-700">Token 类型</label>
                 <select
                   value={formData.tokenType}
-                  onChange={e => setFormData({ ...formData, tokenType: e.target.value as any })}
+                  onChange={e => setFormData({ ...formData, tokenType: e.target.value as 'standard' | 'supabase' })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                 >
                   <option value="standard">Standard JWT (默认)</option>

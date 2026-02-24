@@ -1,25 +1,7 @@
 
 import { useState, useEffect } from 'react'
-import { adminService } from '../../services/adminService'
+import { adminService, type SystemStatus } from '../../services/adminService'
 import { Server, Mail, Activity, Database, CheckCircle, AlertCircle, RefreshCw, Send } from 'lucide-react'
-
-interface SystemStatus {
-  nodeVersion: string
-  uptime: number
-  memoryUsage: {
-    rss: number
-    heapTotal: number
-    heapUsed: number
-    external: number
-  }
-  dbConnection: string
-  environment: string
-  smtp: {
-    host: string
-    port: number
-    user: string
-  }
-}
 
 export default function SystemManager() {
   const [status, setStatus] = useState<SystemStatus | null>(null)
@@ -60,8 +42,9 @@ export default function SystemManager() {
       } else {
         setMessage({ type: 'error', text: res.message })
       }
-    } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || '发送失败' })
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : '发送失败'
+      setMessage({ type: 'error', text: errMsg })
     } finally {
       setSending(false)
     }

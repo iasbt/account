@@ -1,3 +1,4 @@
+
 import { adminApiClient } from './apiClient'
 import type { AuthUser } from '../types/auth'
 
@@ -14,9 +15,36 @@ export interface AdminUsersResponse {
   users: AdminUser[]
 }
 
+export interface EmailTemplate {
+  id: number
+  type: string
+  subject: string
+  content: string
+  variables: string[]
+  updated_at: string
+}
+
 interface LoginResponse {
   token: string
   user: AuthUser
+}
+
+export interface SystemStatus {
+  nodeVersion: string
+  uptime: number
+  memoryUsage: {
+    rss: number
+    heapTotal: number
+    heapUsed: number
+    external: number
+  }
+  dbConnection: string
+  environment: string
+  smtp: {
+    host: string
+    port: number
+    user: string
+  }
 }
 
 export const adminService = {
@@ -41,10 +69,18 @@ export const adminService = {
   },
 
   getSystemStatus: async () => {
-    return adminApiClient.get<{ success: boolean; status: any }>('/admin/system/status')
+    return adminApiClient.get<{ success: boolean; status: SystemStatus }>('/admin/system/status')
   },
 
   sendTestEmail: async (email: string, type: string) => {
     return adminApiClient.post<{ success: boolean; message: string }>('/admin/email/test', { email, type })
+  },
+
+  getTemplates: async () => {
+    return adminApiClient.get<EmailTemplate[]>('/admin/email/templates')
+  },
+
+  updateTemplate: async (type: string, data: { subject: string, content: string }) => {
+    return adminApiClient.put<EmailTemplate>(`/admin/email/templates/${type}`, data)
   }
 }
