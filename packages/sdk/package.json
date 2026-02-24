@@ -1,0 +1,22 @@
+{
+  "name": "@ai-app/sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./server.js": "./src/server.js",
+    "./client.js": "./src/client.jsx"
+  },
+  "types": "src/index.d.ts",
+  "dependencies": {
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.5",
+    "typescript": "~5.9.3"
+  }
+}

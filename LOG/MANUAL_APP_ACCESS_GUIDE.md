@@ -1,0 +1,213 @@
+# 应用接入功能配置与使用说明书 (V11)
+
+> **目标读者**: 初级开发人员、运维工程师  
+> **文档属性**: 操作手册、配置指南  
+> **更新时间**: 2026-02-25
+
+## 1. 简介与背景
+
+本项目已全面升级为“一键接入”微服务平台。通过 `packages/cli` 命令行工具和 `@ai-app/sdk` 核心库，开发者可以在无需修改主系统代码的情况下，快速创建、开发并部署新的子应用（Micro-App）。
+
+**核心优势**：
+*   **零侵入**: 仅需通过配置文件 (`ai.apps.d/*.yaml`) 即可注册应用。
+*   **标准化**: 自动生成符合规范的项目骨架与接口。
+*   **自动化**: 提供 CLI 工具，一键完成初始化、校验与热更新部署。
+
+---
+
+## 2. 环境准备 (Prerequisites)
+
+在开始之前，请确保您的开发环境满足以下要求。
+
+### 2.1 Node.js 环境
+*   **要求**: Node.js 版本 ≥ 20.0.0
+*   **检查命令**:
+    ```bash
+    node -v
+    # 输出示例: v20.10.0
+    ```
+    > 如果未安装，请访问 [nodejs.org](https://nodejs.org/) 下载并安装 LTS 版本。
+
+### 2.2 数据库与依赖
+*   **PostgreSQL**: 必须运行，且已执行最新的数据库迁移脚本。
+*   **项目依赖**: 在项目根目录下，确保已安装所有依赖。
+    ```bash
+    # 在 c:\My_Project\account 目录下执行
+    npm install
+    ```
+
+---
+
+## 3. 快速上手 (Quick Start)
+
+本节将引导您从零开始，创建一个名为 `demo-app` 的子应用，并将其部署到主系统中。
+
+### 步骤 1: 初始化应用 (Init)
+
+使用 CLI 工具生成应用骨架。
+
+1.  打开终端（PowerShell 或 CMD），进入项目根目录：
+    ```bash
+    cd c:\My_Project\account
+    ```
+2.  执行初始化命令：
+    ```bash
+    # 语法: node packages/cli/src/index.js init <应用名称>
+    node packages/cli/src/index.js init demo-app
+    ```
+    > **注意**: 应用名称只能包含**小写字母**、**数字**和**短横线**（例如 `my-app-01`）。
+
+**执行结果**:
+*   系统会在 `apps/demo-app` 目录下生成代码。
+*   系统会在 `ai.apps.d/demo-app.yaml` 生成配置文件。
+
+### 步骤 2: 启动主系统 (Start Server)
+
+如果主系统尚未启动，请启动它以便测试。
+
+1.  新开一个终端窗口。
+2.  执行启动命令：
+    ```bash
+    npm run dev
+    # 或者
+    node server.js
+    ```
+3.  等待控制台输出 `Server is running on port 3000`。
+
+### 步骤 3: 部署应用 (Deploy)
+
+将刚创建的应用注册到运行中的主系统。
+
+1.  回到第一个终端窗口。
+2.  执行部署命令：
+    ```bash
+    # 语法: node packages/cli/src/index.js deploy <应用名称>
+    node packages/cli/src/index.js deploy demo-app
+    ```
+
+**执行结果**:
+*   CLI 会自动校验配置 (`validate`)。
+*   CLI 会触发主系统的热更新机制。
+*   主系统控制台会显示 `[AppLoader] demo-app loaded successfully.`。
+
+### 步骤 4: 验证访问 (Verify)
+
+打开浏览器或使用 `curl` 验证应用是否正常工作。
+
+*   **健康检查接口**:
+    ```text
+    http://localhost:3000/demo-app/health
+    ```
+    > **预期返回**: `{"status":"ok","name":"demo-app","version":"1.0.0",...}`
+
+*   **业务接口**:
+    ```text
+    http://localhost:3000/demo-app/
+    ```
+    > **预期返回**: `{"message":"Hello from demo-app!"}`
+
+---
+
+## 4. 详细配置指南 (Configuration)
+
+每个子应用的配置都由一个 YAML 文件管理，位于 `ai.apps.d/` 目录下。
+
+### 4.1 配置文件结构 (`ai.apps.d/*.yaml`)
+
+| 字段 | 类型 | 必填 | 说明 | 示例 |
+| :--- | :--- | :--- | :--- | :--- |
+| `name` | string | 是 | 应用唯一标识符，需与文件名一致。 | `demo-app` |
+| `version` | string | 是 | 语义化版本号 (x.y.z)。 | `1.0.0` |
+| `entry.backend` | string | 是 | 后端入口文件的**绝对路径**。 | `/abs/path/to/server/index.js` |
+| `entry.frontend` | string | 是 | 前端入口文件的**绝对路径**。 | `/abs/path/to/web/index.html` |
+| `deps` | array | 否 | 依赖的主系统模块白名单。 | `['react', 'lodash']` |
+| `envPrefix` | string | 否 | 环境变量注入前缀。 | `DEMO_APP_` |
+| `meta.label` | string | 否 | 菜单显示的名称。 | `演示应用` |
+| `meta.icon` | string | 否 | 菜单图标名称。 | `AppIcon` |
+| `meta.order` | number | 否 | 菜单排序权重。 | `100` |
+
+### 4.2 示例文件
+
+```yaml
+name: demo-app
+version: 1.0.0
+entry:
+  # 注意: 这里的路径由 CLI 自动生成，通常不需要手动修改
+  backend: c:/My_Project/account/apps/demo-app/server/index.js
+  frontend: c:/My_Project/account/apps/demo-app/web/dist/index.html
+deps: []
+envPrefix: DEMO_APP_
+meta:
+  label: "演示应用"
+  icon: "AppIcon"
+  order: 1000
+```
+
+---
+
+## 5. 开发指南 (Development)
+
+### 5.1 后端开发 (`apps/<name>/server/`)
+
+后端代码必须导出一个 `express.Router` 实例，并使用 `@ai-app/sdk` 进行封装。
+
+**文件**: `apps/<name>/server/index.js`
+
+```javascript
+import express from 'express';
+import { registerMicroApp } from '@ai-app/sdk/server.js';
+
+const router = express.Router();
+
+// 定义路由
+router.get('/hello', (req, res) => {
+  // 业务逻辑
+  res.json({ data: 'World' });
+});
+
+// 导出应用
+export default registerMicroApp({
+  name: 'demo-app',
+  version: '1.0.0',
+  router // 传入 Router 实例
+});
+```
+
+### 5.2 前端开发 (`apps/<name>/web/`)
+
+前端代码目前支持静态 HTML 或构建后的 SPA 资源。
+*   默认生成的 `index.html` 位于 `apps/<name>/web/dist/`。
+*   你可以修改此文件，或使用 React/Vue 构建项目后替换此文件。
+
+---
+
+## 6. 常见问题与故障排除 (Troubleshooting)
+
+### Q1: 执行 `init` 时提示 "Directory already exists"
+*   **原因**: `apps/` 目录下已经存在同名文件夹。
+*   **解决**: 请先手动删除旧文件夹，或更换一个新的应用名称。
+
+### Q2: 执行 `deploy` 后，访问接口报 404
+*   **原因**: 应用未成功加载，或路径错误。
+*   **解决**:
+    1.  检查主系统控制台日志，是否有 `[AppLoader] ... loaded successfully`。
+    2.  确认访问路径是否包含应用名前缀，例如 `/demo-app/health`。
+    3.  检查 YAML 文件中的 `entry.backend` 路径是否正确指向了 `index.js`。
+
+### Q3: 修改了代码，但没有生效
+*   **原因**: Node.js 缓存了旧模块。
+*   **解决**: 需要重新触发热更新。最简单的方法是再次执行 `deploy` 命令，或者手动修改一下 YAML 文件（加个空格再保存），触发 `chokidar` 监听。
+
+### Q4: 数据库报错 "relation 'public.applications' does not exist"
+*   **原因**: 数据库迁移脚本未执行。
+*   **解决**: 请在根目录执行 `node scripts/run_migration.js`。
+
+---
+
+## 7. 维护与支持
+
+如遇到无法解决的问题，请联系架构组或提交 Issue。
+
+*   **CLI 源码**: `packages/cli`
+*   **SDK 源码**: `packages/sdk`
+*   **加载器源码**: `src/core/AppLoader.js`
