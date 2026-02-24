@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { adminService, EmailTemplate } from '../../services/adminService';
+import { adminService, type EmailTemplate } from '../../services/adminService';
 import { Mail, Save, RefreshCw, Eye, Code, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function EmailManager() {
