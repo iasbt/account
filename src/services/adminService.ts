@@ -6,6 +6,7 @@ export interface AdminUser {
   email: string
   username: string
   created_at: string
+  is_admin?: boolean
 }
 
 export interface AdminUsersResponse {

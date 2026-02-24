@@ -2,6 +2,12 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.3] - 2026-02-25
+### Fixed
+- **Admin UI**: 修复前端管理员状态显示逻辑，现在能正确识别并显示 `is_admin` 字段。
+- **Data Recovery**: 完成 `legacy_users` 与 `applications` 数据的全量导入与清洗，自动处理了 ID 冲突与脏数据。
+- **Backend API**: `GET /api/admin/users` 接口现在显式返回 `is_admin` 字段。
+
 ## [1.8.2] - 2026-02-25
 ### Fixed
 - **Admin Permission Logic**: 修复 `roleCheck.js` 中对 `req.user.tokenType` 的错误判断，修正为 `req.user.isAdmin`。

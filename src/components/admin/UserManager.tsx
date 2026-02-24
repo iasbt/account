@@ -139,8 +139,8 @@ export default function UserManager() {
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-400 font-mono">
-                  {user.id}
+                <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-400 font-mono" title={user.id}>
+                  {user.id.substring(0, 8)}...
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
@@ -157,9 +157,15 @@ export default function UserManager() {
                   {new Date(user.created_at).toLocaleString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="px-3 py-1 inline-flex text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
-                    普通用户
-                  </span>
+                  {user.is_admin ? (
+                    <span className="px-3 py-1 inline-flex text-xs font-medium rounded-full bg-purple-50 text-purple-700 border border-purple-100">
+                      管理员
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 inline-flex text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
+                      普通用户
+                    </span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex items-center justify-end gap-3">

@@ -21,7 +21,7 @@ export const getAllUsers = async (req, res) => {
     // 查询 legacy_users 表获取用户列表
     // 待办: 如果需要，在 Phase 4 迁移到标准的 'users' 表
     const result = await pool.query(
-      "SELECT id, email, username, created_at FROM public.legacy_users ORDER BY created_at DESC"
+      "SELECT id, email, username, created_at, is_admin FROM public.legacy_users ORDER BY created_at DESC"
     );
     
     res.json({
