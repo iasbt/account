@@ -100,7 +100,11 @@ class AppLoader {
       // 1. Validate (Simple check)
       if (!entry.backend) throw new Error('Missing backend entry');
 
-const moduleUrl = new URL(pathToFileURL(entry.backend).href);
+      // Resolve path (support relative paths for Docker compatibility)
+      const backendPath = path.resolve(process.cwd(), entry.backend);
+
+      // 2. Load Module (Cache Busting)
+      const moduleUrl = new URL(pathToFileURL(backendPath).href);
       moduleUrl.searchParams.set('t', Date.now());
       const appModule = await import(moduleUrl.href);
       const appRouter = appModule.default;

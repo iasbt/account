@@ -79,9 +79,9 @@ export default registerMicroApp({
 name: ${name}
 version: 1.0.0
 entry:
-  backend: ${path.join(appDir, 'server', 'index.js').replace(/\\/g, '/')}
-  frontend: ${path.join(appDir, 'web', 'dist', 'index.html').replace(/\\/g, '/')}
-deps: []
+    backend: apps/${name}/server/index.js
+    frontend: apps/${name}/web/dist/index.html
+  deps: []
 envPrefix: ${name.toUpperCase().replace(/-/g, '_')}_
 meta:
   label: "${name} App"

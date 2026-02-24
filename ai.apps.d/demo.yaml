@@ -1,8 +1,8 @@
 name: demo
 version: 1.0.0
 entry:
-  backend: C:/My_Project/account/apps/demo/server/index.js
-  frontend: C:/My_Project/account/apps/demo/web/dist/index.html
+  backend: apps/demo/server/index.js
+  frontend: apps/demo/web/dist/index.html
 deps: []
 envPrefix: DEMO_
 meta:
