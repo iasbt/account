@@ -15,7 +15,7 @@ export default function UserManager() {
   const [actionLoading, setActionLoading] = useState(false)
 
   // Edit Form State
-  const [editForm, setEditForm] = useState({ username: '', email: '' })
+  const [editForm, setEditForm] = useState({ username: '', email: '', is_admin: false })
 
   const fetchUsers = () => {
     setLoading(true)
@@ -86,7 +86,7 @@ export default function UserManager() {
 
   const openEditModal = (user: AdminUser) => {
     setEditingUser(user)
-    setEditForm({ username: user.username, email: user.email })
+    setEditForm({ username: user.username, email: user.email, is_admin: user.is_admin || false })
   }
 
   if (loading) return (
@@ -225,6 +225,19 @@ export default function UserManager() {
                   onChange={e => setEditForm({...editForm, email: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                 />
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <input
+                  type="checkbox"
+                  id="isAdmin"
+                  checked={editForm.is_admin}
+                  onChange={e => setEditForm({...editForm, is_admin: e.target.checked})}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                />
+                <label htmlFor="isAdmin" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+                  管理员权限 (Admin Access)
+                </label>
               </div>
               
               <div className="pt-4 flex justify-end gap-3">

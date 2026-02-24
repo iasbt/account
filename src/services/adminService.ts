@@ -38,5 +38,13 @@ export const adminService = {
 
   resetUserPassword: async (id: string) => {
     return adminApiClient.post<{ success: boolean; message: string }>(`/admin/users/${id}/reset-password`, {})
+  },
+
+  getSystemStatus: async () => {
+    return adminApiClient.get<{ success: boolean; status: any }>('/admin/system/status')
+  },
+
+  sendTestEmail: async (email: string, type: string) => {
+    return adminApiClient.post<{ success: boolean; message: string }>('/admin/email/test', { email, type })
   }
 }

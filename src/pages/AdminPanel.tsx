@@ -4,6 +4,7 @@ import { LogOut, LayoutDashboard, Users, Settings, Box } from 'lucide-react'
 import { useAdminStore } from '../store/useAdminStore'
 import UserManager from '../components/admin/UserManager'
 import AppManager from '../components/admin/AppManager'
+import SystemManager from '../components/admin/SystemManager'
 
 type Tab = 'users' | 'apps' | 'settings'
 
@@ -92,15 +93,10 @@ export default function AdminPanel() {
         <div className="max-w-7xl mx-auto">
           {activeTab === 'users' && <UserManager />}
           {activeTab === 'apps' && <AppManager />}
-          {activeTab === 'settings' && (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-gray-400">
-              <Settings className="w-16 h-16 mb-4 opacity-20" />
-              <h3 className="text-lg font-medium text-gray-500">系统设置功能开发中...</h3>
-              <p className="text-sm mt-2">Coming Soon</p>
-            </div>
-          )}
+          {activeTab === 'settings' && <SystemManager />}
         </div>
       </main>
     </div>
   )
 }
+

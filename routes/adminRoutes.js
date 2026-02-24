@@ -7,7 +7,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/roleCheck.js";
-import { getAllUsers, deleteUser, updateUser, resetUserPassword } from "../controllers/adminController.js";
+import { getAllUsers, deleteUser, updateUser, resetUserPassword, getSystemStatus, sendTestEmail } from "../controllers/adminController.js";
 import { adminLogin } from "../controllers/authController.js";
 
 const router = Router();
@@ -19,6 +19,20 @@ router.post("/auth/login", adminLogin);
 // 2. 验证角色 (授权)
 router.use(requireAuth);
 router.use(requireAdmin);
+
+/**
+ * @route GET /admin/system/status
+ * @description 获取系统状态
+ * @access Admin
+ */
+router.get("/system/status", getSystemStatus);
+
+/**
+ * @route POST /admin/email/test
+ * @description 发送测试邮件
+ * @access Admin
+ */
+router.post("/email/test", sendTestEmail);
 
 /**
  * @route GET /admin/users
