@@ -5,6 +5,9 @@ WORKDIR /app
 # Copy dependency definitions
 COPY package*.json ./
 
+# Copy packages for workspaces
+COPY packages ./packages
+
 # Install production dependencies
 RUN npm install --omit=dev --legacy-peer-deps
 
