@@ -157,7 +157,9 @@ $DeployCmd = $DeployCmd.Replace("__PGADMIN_PASSWORD__", $PgAdminPassword)
 
 # 3. 执行远程命令
 Write-Host ">>> [3/3] Executing Remote Commands..." -ForegroundColor Cyan
-ssh -i $KeyPath -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "${User}@${ServerIP}" $DeployCmd
+
+# 使用管道传递脚本以避免 quoting 问题
+$DeployCmd | ssh -i $KeyPath -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "${User}@${ServerIP}" "bash -s"
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`nDeployment Complete & Verified!" -ForegroundColor Green
