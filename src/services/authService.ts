@@ -31,8 +31,8 @@ export const authService = {
     });
   },
 
-  async sendVerificationCode(email: string): Promise<void> {
-    return apiClient.post<void>('/auth/send-code', { email });
+  async sendVerificationCode(email: string, type: 'register' | 'reset_password' | 'login' = 'register'): Promise<void> {
+    return apiClient.post<void>('/auth/send-code', { email, type });
   },
 
   async getSsoToken(): Promise<SsoTokenResponse> {

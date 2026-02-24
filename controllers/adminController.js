@@ -5,6 +5,7 @@
 
 import pool from "../db.js";
 import { sendEmail } from "../utils/email.js";
+import { getPasswordResetLinkTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode } from "../utils/verificationStore.js";
 
 /**
@@ -119,18 +120,7 @@ export const resetUserPassword = async (req, res) => {
     // 假设 ResetPasswordPage 路由为 /reset-password
     const resetLink = `https://account.iasbt.com/reset-password?email=${encodeURIComponent(user.email)}&code=${code}`;
     
-    const html = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2>密码重置通知</h2>
-        <p>亲爱的 ${user.username},</p>
-        <p>管理员已为您发起了密码重置请求。</p>
-        <p>请点击下方链接设置新密码：</p>
-        <p><a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #0071e3; color: white; text-decoration: none; border-radius: 5px;">重置密码</a></p>
-        <p>或复制以下链接到浏览器：</p>
-        <p>${resetLink}</p>
-        <p>该链接5分钟内有效。</p>
-      </div>
-    `;
+    const html = getPasswordResetLinkTemplate(resetLink);
     
     await sendEmail(user.email, "IASBT 账号密码重置", html);
     

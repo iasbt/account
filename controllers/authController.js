@@ -2,10 +2,11 @@ import pool from "../db.js";
 import bcryptjs from "bcryptjs";
 import { generateToken, generateSsoToken } from "../utils/token.js";
 import { sendEmail } from "../utils/email.js";
+import { getVerificationCodeTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode, getVerificationCode, deleteVerificationCode } from "../utils/verificationStore.js";
 
 export const sendVerificationCode = async (req, res) => {
-  const { email } = req.body;
+  const { email, type = 'general' } = req.body;
   if (!email) {
     return res.status(400).json({ message: "邮箱不能为空", success: false });
   }
@@ -13,8 +14,11 @@ export const sendVerificationCode = async (req, res) => {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   await setVerificationCode(email, code);
 
-  const subject = "IASBT 账号验证码";
-  const html = `<p>您的验证码是：<strong>${code}</strong></p><p>该验证码5分钟内有效。</p>`;
+  const html = getVerificationCodeTemplate(code, type);
+  // Extract title from HTML (hacky but works) or use a map
+  let subject = "IASBT 账号验证码";
+  if (type === 'register') subject = "欢迎注册 IASBT Account - 验证码";
+  if (type === 'reset_password') subject = "重置密码验证 - IASBT Account";
   
   const success = await sendEmail(email, subject, html);
   
