@@ -7,8 +7,20 @@ export const parseOrigins = (value) =>
 export const defaultAllowlist = [
   "https://account.iasbt.com",
   "*.vercel.app",
+  "http://localhost:5170",
+  "http://127.0.0.1:5170",
+  "http://localhost:5171",
+  "http://127.0.0.1:5171",
+  "http://localhost:5172",
+  "http://127.0.0.1:5172",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5174",
+  "http://localhost:5175",
+  "http://127.0.0.1:5175",
+  "http://localhost:5176",
+  "http://127.0.0.1:5176",
   "https://account.iasbt.com/login",
 ];
 

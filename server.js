@@ -2,6 +2,8 @@ import { config } from "./config/index.js";
 import app from "./app.js";
 import { appLoader } from "./src/core/AppLoader.js";
 import { initEmailTemplates } from "./scripts/init_email_templates.js";
+// Start Email Worker
+import "./services/emailWorker.js";
 
 // Initialize Services
 Promise.all([

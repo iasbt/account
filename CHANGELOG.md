@@ -2,6 +2,20 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.4] - 2026-02-25
+### Added
+- **Email Service V2**: 全新重构邮件服务模块，支持更稳定的邮件发送与管理。
+    - **Infrastructure**: 引入 Redis + BullMQ 实现异步邮件队列，支持指数退避重试机制。
+    - **Admin UI**: 全新的邮件服务中心 (`/admin` -> 邮件服务)，包含概览、配置、模板、日志四个标签页。
+    - **Dynamic Config**: 支持在线配置 SMTP 服务商信息 (Host/Port/Auth)，不再依赖硬编码的环境变量。
+    - **Templates**: 可视化邮件模板编辑器，支持变量替换与实时预览。
+    - **Logs**: 完整的邮件发送日志记录，包含发送状态、错误信息与重试次数。
+### Fixed
+- **Auth**: 修复 `authController.js` 中因重复用户数据导致的“全部密码错误”问题，现在会自动遍历所有匹配记录。
+- **CORS**: 修复 Admin 登录页面的 "Origin not allowed" 错误，将 `localhost:5174` 等端口加入白名单。
+- **TypeScript**: 修复 `EmailTemplates.tsx` 与 `EmailManager.tsx` 中的类型定义错误与 Lint 警告。
+- **Workspace**: 修复 `pnpm` workspace 警告，添加 `pnpm-workspace.yaml` 配置文件。
+
 ## [1.8.3] - 2026-02-25
 ### Fixed
 - **Admin UI**: 修复前端管理员状态显示逻辑，现在能正确识别并显示 `is_admin` 字段。

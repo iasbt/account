@@ -1,5 +1,6 @@
 
 import pool from '../db.js';
+import { fileURLToPath } from 'url';
 
 const DEFAULTS = {
   register: {
