@@ -30,7 +30,12 @@ export default function AppManager() {
     setLoading(true);
     try {
       const data = await appService.getApps();
-      setApps(data);
+      if (Array.isArray(data)) {
+        setApps(data);
+      } else {
+        console.error('Invalid apps data:', data);
+        setError('数据格式错误');
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '加载应用列表失败');
     } finally {
@@ -42,6 +47,17 @@ export default function AppManager() {
     fetchApps();
   }, []);
 
+  // Safe random UUID generator
+  const generateSecret = () => {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID().replace(/-/g, '');
+    }
+    return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
   const handleOpenCreate = () => {
     setEditingApp(null);
     setFormData({
@@ -49,7 +65,7 @@ export default function AppManager() {
       appId: '',
       allowedOrigins: [],
       tokenType: 'standard',
-      secret: crypto.randomUUID().replace(/-/g, '') // Auto-generate secret
+      secret: generateSecret()
     });
     setOriginsInput('');
     setIsModalOpen(true);
@@ -64,7 +80,7 @@ export default function AppManager() {
       tokenType: app.token_type,
       secret: app.secret
     });
-    setOriginsInput(app.allowed_origins.join('\n'));
+    setOriginsInput(Array.isArray(app.allowed_origins) ? app.allowed_origins.join('\n') : '');
     setIsModalOpen(true);
   };
 
@@ -156,9 +172,9 @@ export default function AppManager() {
                       {app.token_type}
                     </span>
                   </td>
-                  <td className="p-4 text-sm text-gray-500 max-w-xs truncate" title={app.allowed_origins.join('\n')}>
-                    {app.allowed_origins.length > 0 ? app.allowed_origins[0] : '-'}
-                    {app.allowed_origins.length > 1 && ` (+${app.allowed_origins.length - 1})`}
+                  <td className="p-4 text-sm text-gray-500 max-w-xs truncate" title={Array.isArray(app.allowed_origins) ? app.allowed_origins.join('\n') : ''}>
+                    {Array.isArray(app.allowed_origins) && app.allowed_origins.length > 0 ? app.allowed_origins[0] : '-'}
+                    {Array.isArray(app.allowed_origins) && app.allowed_origins.length > 1 && ` (+${app.allowed_origins.length - 1})`}
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex justify-end gap-2">
