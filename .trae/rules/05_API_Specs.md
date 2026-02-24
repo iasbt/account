@@ -45,3 +45,12 @@
 *   **GET** `/api/apps/:id`: 获取特定应用详情。
 *   **PUT** `/api/apps/:id`: 更新应用配置。
 *   **DELETE** `/api/apps/:id`: 删除应用 (软删除或物理删除取决于实现)。
+
+### 6.3 邮件服务 (Email Service) - V1.8.4
+*   **GET** `/api/admin/email/providers`: 获取所有邮件服务商配置。
+*   **POST** `/api/admin/email/providers`: 创建新服务商。
+*   **POST** `/api/admin/email/providers/:id/enable`: 启用指定服务商。
+*   **GET** `/api/admin/email/templates`: 获取邮件模板列表。
+*   **PUT** `/api/admin/email/templates/:type`: 更新特定类型模板。
+*   **GET** `/api/admin/email/logs`: 获取邮件发送日志。
+*   **GET** `/api/admin/email/stats`: 获取邮件发送统计 (含 24h 趋势)。

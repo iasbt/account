@@ -2,6 +2,13 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.5] - 2026-02-25
+
+### Enhanced
+- **Email Service V2**: Added 24h trend chart to dashboard, visual template editor with variable insertion, and improved stats API.
+- **Documentation**: Synchronized all project documentation (API Specs, README) with latest implementation.
+- **File Management**: Reorganized `docs/` folder structure per Trae rules (Support/Archive).
+
 ## [1.8.4] - 2026-02-25
 ### Added
 - **Email Service V2**: 全新重构邮件服务模块，支持更稳定的邮件发送与管理。

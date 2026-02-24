@@ -291,13 +291,27 @@ export const getEmailStats = async (req, res) => {
 
     const success_rate = total > 0 ? Math.round((sent / total) * 100) : 0;
 
+    // 24h Trend
+    const trendQuery = `
+      SELECT 
+        to_char(created_at, 'HH24:00') as hour,
+        count(*) filter (where status = 'sent') as sent,
+        count(*) filter (where status = 'failed') as failed
+      FROM email_logs
+      WHERE created_at > NOW() - INTERVAL '24 hours'
+      GROUP BY 1
+      ORDER BY 1
+    `;
+    const trendRes = await pool.query(trendQuery);
+
     res.json({
       stats: {
         total,
         sent,
         failed,
         pending,
-        success_rate
+        success_rate,
+        trend: trendRes.rows
       }
     });
   } catch (error) {

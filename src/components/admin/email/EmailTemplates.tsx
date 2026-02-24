@@ -1,16 +1,18 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { adminService, type EmailTemplate } from '../../../services/adminService';
-import { Loader2, Save, RefreshCw, Code, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, Save, RefreshCw, Code, Send, AlertCircle, CheckCircle2, Eye, Layout } from 'lucide-react';
 
 export const EmailTemplates: React.FC = () => {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [selectedType, setSelectedType] = useState<string>('register');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   
   // Editor State
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   // Test Email State
   const [testEmail, setTestEmail] = useState('');
@@ -56,6 +58,7 @@ export const EmailTemplates: React.FC = () => {
       setSubject(template.subject);
       setContent(template.content);
       setTestResult(null);
+      setMode('edit');
     }
   };
 
@@ -95,6 +98,30 @@ export const EmailTemplates: React.FC = () => {
     }
   };
 
+  const insertVariable = (variable: string) => {
+    if (textareaRef.current) {
+      const start = textareaRef.current.selectionStart;
+      const end = textareaRef.current.selectionEnd;
+      const text = content;
+      const before = text.substring(0, start);
+      const after = text.substring(end, text.length);
+      const newText = before + `{{${variable}}}` + after;
+      setContent(newText);
+      
+      // Restore focus and cursor
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          const newCursorPos = start + variable.length + 4; // {{}} is 4 chars
+          textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+        }
+      }, 0);
+    } else {
+      // Fallback if ref is not available (e.g. in preview mode)
+      setContent(prev => prev + `{{${variable}}}`);
+    }
+  };
+
   const currentTemplate = templates.find(t => t.type === selectedType);
 
   if (loading) {
@@ -109,12 +136,32 @@ export const EmailTemplates: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">邮件模板编辑器</h2>
-        <button 
-          onClick={fetchTemplates} 
-          className="flex items-center gap-2 px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-        >
-          <RefreshCw className="w-4 h-4" /> 刷新
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setMode('edit')}
+              className={`px-3 py-1 text-sm rounded-md transition-all ${mode === 'edit' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+            >
+              <div className="flex items-center gap-2">
+                <Code className="w-4 h-4" /> 编辑
+              </div>
+            </button>
+            <button
+              onClick={() => setMode('preview')}
+              className={`px-3 py-1 text-sm rounded-md transition-all ${mode === 'preview' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+            >
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4" /> 预览
+              </div>
+            </button>
+          </div>
+          <button 
+            onClick={fetchTemplates} 
+            className="flex items-center gap-2 px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" /> 刷新
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -136,10 +183,17 @@ export const EmailTemplates: React.FC = () => {
             
             {currentTemplate && (
               <div className="mt-4 p-3 bg-blue-50 text-blue-800 text-xs rounded-md">
-                <p className="font-semibold mb-1">可用变量:</p>
+                <p className="font-semibold mb-2">点击插入变量:</p>
                 <div className="flex flex-wrap gap-2">
                   {currentTemplate.variables.map(v => (
-                    <span key={v} className="bg-blue-100 px-2 py-0.5 rounded border border-blue-200">{v}</span>
+                    <button 
+                      key={v} 
+                      onClick={() => insertVariable(v)}
+                      className="bg-white px-2 py-1 rounded border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer shadow-sm"
+                      title={`Insert {{${v}}}`}
+                    >
+                      {v}
+                    </button>
                   ))}
                 </div>
               </div>
@@ -183,7 +237,7 @@ export const EmailTemplates: React.FC = () => {
 
         {/* Right Column: Editor */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white p-6 rounded-lg border shadow-sm h-full flex flex-col">
+          <div className="bg-white p-6 rounded-lg border shadow-sm h-full flex flex-col min-h-[600px]">
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">邮件主题</label>
               <input
@@ -194,19 +248,30 @@ export const EmailTemplates: React.FC = () => {
               />
             </div>
 
-            <div className="flex-1 flex flex-col min-h-[400px]">
+            <div className="flex-1 flex flex-col">
               <label className="block text-sm font-medium text-gray-700 mb-1 flex justify-between">
-                <span>HTML 内容</span>
-                <span className="text-xs text-gray-500 flex items-center gap-1">
-                  <Code className="w-3 h-3" /> 支持 HTML 标签
-                </span>
+                <span>{mode === 'edit' ? 'HTML 代码' : '实时预览'}</span>
+                {mode === 'edit' && (
+                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                    <Code className="w-3 h-3" /> 支持 HTML 标签
+                  </span>
+                )}
               </label>
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full flex-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm p-3 border resize-none"
-                spellCheck={false}
-              />
+              
+              {mode === 'edit' ? (
+                <textarea
+                  ref={textareaRef}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full flex-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono text-sm p-3 border resize-none"
+                  spellCheck={false}
+                />
+              ) : (
+                <div className="w-full flex-1 border border-gray-200 rounded-md p-4 bg-gray-50 overflow-auto prose prose-sm max-w-none">
+                  {/* Safe Preview */}
+                  <div dangerouslySetInnerHTML={{ __html: content }} />
+                </div>
+              )}
             </div>
 
             <div className="mt-4 flex justify-end">

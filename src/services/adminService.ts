@@ -58,6 +58,7 @@ export interface EmailStats {
   failed: number
   pending: number
   success_rate: number
+  trend: { hour: string; sent: number; failed: number }[]
 }
 
 interface LoginResponse {
