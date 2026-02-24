@@ -13,6 +13,7 @@
     *   接入 Cloudflare R2 对象存储（已接入待确认）。
     *   实现图片缩放与优化。
 *   **SSO 扩展**:
+    *   接入指南：Account ↔ Gallery SSO 接入说明 (已完成).
     *   打通 `Gallery` (免登)。
     *   打通 `Toolbox` 与 `Life OS`。
 

@@ -1,9 +1,14 @@
-# Account System (IAM / SSO) - V1.7.7
+# Account System (IAM / SSO) - V1.8.1
 
-> **Status**: ✅ Active (V1.7.7)
+> **Status**: ✅ Active (V1.8.1)
 > **Docs**: [ACCOUNT_SYSTEM_DEV_DOC_V1.6.md](deployment_docs/ACCOUNT_SYSTEM_DEV_DOC_V1.6.md)
 
 统一账户中心，作为“四合院”项目矩阵的数字基座，负责统一身份认证 (SSO)、权限控制 (RBAC) 和数据中台服务。
+
+## 最新特性 (New Features v1.8.1)
+- **多应用 SSO (Multi-App SSO)**: 支持 Gallery, Toolbox 等子应用接入，提供动态 Token 生成策略 (Standard/Supabase)。
+- **可视化管理 (Visual Admin)**: 管理员后台新增“应用接入”模块，无需修改代码即可一键添加新应用。
+- **动态注册表 (Dynamic Registry)**: 应用配置存储于数据库，支持热更新与独立密钥管理。
 
 ## 技术栈 (Tech Stack)
 

@@ -1,0 +1,88 @@
+{
+  "snippets": [
+    {
+      "title": "列出数据库",
+      "category": "基础",
+      "sql": "SELECT datname FROM pg_database ORDER BY datname;"
+    },
+    {
+      "title": "列出所有表",
+      "category": "基础",
+      "sql": "SELECT table_schema, table_name\nFROM information_schema.tables\nWHERE table_type = 'BASE TABLE'\nORDER BY table_schema, table_name;"
+    },
+    {
+      "title": "用户列表（最近50）",
+      "category": "用户",
+      "sql": "SELECT id, name, username, email, is_admin, created_at\nFROM public.legacy_users\nORDER BY created_at DESC\nLIMIT 50;"
+    },
+    {
+      "title": "用户总数",
+      "category": "用户",
+      "sql": "SELECT COUNT(*) AS total_users FROM public.legacy_users;"
+    },
+    {
+      "title": "按邮箱查用户",
+      "category": "用户",
+      "sql": "SELECT id, name, username, email, is_admin\nFROM public.legacy_users\nWHERE email = 'someone@example.com';"
+    },
+    {
+      "title": "按用户名查用户",
+      "category": "用户",
+      "sql": "SELECT id, name, username, email, is_admin\nFROM public.legacy_users\nWHERE username = 'someone';"
+    },
+    {
+      "title": "设为管理员",
+      "category": "用户",
+      "sql": "UPDATE public.legacy_users SET is_admin = TRUE WHERE email = 'someone@example.com';"
+    },
+    {
+      "title": "取消管理员",
+      "category": "用户",
+      "sql": "UPDATE public.legacy_users SET is_admin = FALSE WHERE email = 'someone@example.com';"
+    },
+    {
+      "title": "最近注册用户（20）",
+      "category": "用户",
+      "sql": "SELECT id, name, username, email, created_at\nFROM public.legacy_users\nORDER BY created_at DESC\nLIMIT 20;"
+    },
+    {
+      "title": "重置用户密码（哈希）",
+      "category": "用户",
+      "sql": "UPDATE public.legacy_users\nSET password = '请替换为已加密的哈希'\nWHERE email = 'someone@example.com';"
+    },
+    {
+      "title": "查看验证码表（如存在）",
+      "category": "运维",
+      "sql": "SELECT *\nFROM public.verification_codes\nORDER BY created_at DESC\nLIMIT 20;"
+    },
+    {
+      "title": "当前连接数与上限",
+      "category": "运维",
+      "sql": "SELECT COUNT(*) AS current_connections,\n       (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') AS max_connections\nFROM pg_stat_activity;"
+    },
+    {
+      "title": "当前活动连接",
+      "category": "运维",
+      "sql": "SELECT pid, usename, datname, client_addr, state, query_start, LEFT(query, 200) AS query\nFROM pg_stat_activity\nWHERE state <> 'idle'\nORDER BY query_start DESC;"
+    },
+    {
+      "title": "慢查询（超过5秒）",
+      "category": "运维",
+      "sql": "SELECT pid, now() - query_start AS duration, state, LEFT(query, 300) AS query\nFROM pg_stat_activity\nWHERE state = 'active' AND now() - query_start > interval '5 seconds'\nORDER BY duration DESC;"
+    },
+    {
+      "title": "锁等待",
+      "category": "运维",
+      "sql": "SELECT blocked.pid AS blocked_pid,\n       blocked.query AS blocked_query,\n       blocking.pid AS blocking_pid,\n       blocking.query AS blocking_query\nFROM pg_locks blocked_locks\nJOIN pg_stat_activity blocked ON blocked.pid = blocked_locks.pid\nJOIN pg_locks blocking_locks ON blocking_locks.locktype = blocked_locks.locktype\n  AND blocking_locks.database IS NOT DISTINCT FROM blocked_locks.database\n  AND blocking_locks.relation IS NOT DISTINCT FROM blocked_locks.relation\n  AND blocking_locks.page IS NOT DISTINCT FROM blocked_locks.page\n  AND blocking_locks.tuple IS NOT DISTINCT FROM blocked_locks.tuple\n  AND blocking_locks.virtualxid IS NOT DISTINCT FROM blocked_locks.virtualxid\n  AND blocking_locks.transactionid IS NOT DISTINCT FROM blocked_locks.transactionid\n  AND blocking_locks.classid IS NOT DISTINCT FROM blocked_locks.classid\n  AND blocking_locks.objid IS NOT DISTINCT FROM blocked_locks.objid\n  AND blocking_locks.objsubid IS NOT DISTINCT FROM blocked_locks.objsubid\nJOIN pg_stat_activity blocking ON blocking.pid = blocking_locks.pid\nWHERE NOT blocked_locks.granted;"
+    },
+    {
+      "title": "表大小排行（Top 20）",
+      "category": "运维",
+      "sql": "SELECT schemaname, relname, pg_size_pretty(pg_total_relation_size(relid)) AS total_size\nFROM pg_catalog.pg_statio_user_tables\nORDER BY pg_total_relation_size(relid) DESC\nLIMIT 20;"
+    },
+    {
+      "title": "索引使用情况",
+      "category": "运维",
+      "sql": "SELECT schemaname, relname, indexrelname, idx_scan, idx_tup_read, idx_tup_fetch\nFROM pg_stat_user_indexes\nORDER BY idx_scan DESC;"
+    }
+  ]

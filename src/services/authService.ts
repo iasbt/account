@@ -39,6 +39,10 @@ export const authService = {
     return apiClient.get<SsoTokenResponse>('/auth/sso-token');
   },
 
+  async issueSsoToken(target: string): Promise<{ url: string }> {
+    return apiClient.get<{ url: string }>(`/sso/issue?target=${encodeURIComponent(target)}`);
+  },
+
   async changePassword(oldPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {
     return apiClient.post<{ success: boolean; message: string }>('/auth/change-password', { oldPassword, newPassword });
   },

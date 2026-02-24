@@ -3,6 +3,6 @@ export const getHealth = (req, res) => {
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "account-backend",
-    version: "1.7.7"
+    version: "1.8.2"
   });
 };

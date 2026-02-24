@@ -1,7 +1,7 @@
 # API Contract & Versioning (API 契约与版本控制)
 
 > **Status**: Active
-> **Effective Date**: 2026-02-22
+> **Effective Date**: 2026-02-24
 > **Enforcement**: 📝 **Stable (稳定)**
 > **Prefix**: `/api`
 
@@ -18,9 +18,10 @@
 ## 3. SSO 契约
 *   **GET** `/api/auth/sso-token`: 返回一次性 Token。
 *   **目标**: 外部应用通过回调验证此 Token。
+*   **GET** `/api/sso/issue`: 根据 `target` URL 颁发 Access Token (Redirect 模式)。
 
 ## 4. 版本策略
-*   **格式**: `Major.Minor.Patch` (如 1.6.1)。
+*   **格式**: `Major.Minor.Patch` (如 1.8.1)。
 *   **规则**: 后端逻辑变更必须触发 Patch 版本递增。
 *   **基准**: 以 `package.json` 为唯一真理来源 (Source of Truth)。
 
@@ -30,10 +31,17 @@
 *   **原因**: 防止 DNS 解析延迟或调试期间的直接 IP 访问被 CORS 拦截。
 
 ## 6. 管理员接口 (Admin APIs)
-*   **GET** `/api/admin/users`
-*   **权限**: `Bearer Token` + `isAdmin=true`
-*   **响应**: `[{ "id": 1, "email": "...", "created_at": "..." }, ...]`
-*   **错误码**:
-    *   `401 Unauthorized`: 未提供 Token 或 Token 无效。
-    *   `403 Forbidden`: 用户不是管理员。
-*   **作用**: 获取所有注册用户列表（仅限管理员）。
+*   **权限**: 所有接口需携带 `Bearer Token` 且用户 `is_admin=true`。
+
+### 6.1 用户管理
+*   **GET** `/api/admin/users`: 获取用户列表。
+*   **DELETE** `/api/admin/users/:id`: 删除用户。
+*   **PUT** `/api/admin/users/:id`: 更新用户信息。
+
+### 6.2 应用接入 (App Management) - V1.8.1
+*   **GET** `/api/apps`: 获取所有已注册应用。
+*   **POST** `/api/apps`: 注册新应用。
+    *   Body: `{ name, app_id, allowed_origins, token_type, secret }`
+*   **GET** `/api/apps/:id`: 获取特定应用详情。
+*   **PUT** `/api/apps/:id`: 更新应用配置。
+*   **DELETE** `/api/apps/:id`: 删除应用 (软删除或物理删除取决于实现)。

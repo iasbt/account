@@ -1,16 +1,21 @@
+
 import { Router } from "express";
-import healthRoutes from "./healthRoutes.js";
 import authRoutes from "./authRoutes.js";
-import ssoRoutes from "./ssoRoutes.js";
+import healthRoutes from "./healthRoutes.js";
 import dashboardRoutes from "./dashboardRoutes.js";
 import adminRoutes from "./adminRoutes.js";
+import ssoRoutes from "./ssoRoutes.js";
+import appRoutes from "./appRoutes.js";
 
 const router = Router();
 
-router.use("/", healthRoutes);
-router.use("/", authRoutes);
-router.use("/", ssoRoutes);
-router.use("/", dashboardRoutes);
-router.use("/admin", adminRoutes);
+// Mount routes
+// Note: Nginx rewrites /api/xxx to /xxx, so we mount at root or specific paths without /api prefix.
+router.use("/", healthRoutes); // /health
+router.use("/", authRoutes);   // /auth/register, etc.
+router.use("/", dashboardRoutes); // /dashboard/...
+router.use("/admin", adminRoutes); // /admin/...
+router.use("/", ssoRoutes);    // /sso/... (if defined in ssoRoutes)
+router.use("/apps", appRoutes); // /apps/... (Admin App Management)
 
 export default router;

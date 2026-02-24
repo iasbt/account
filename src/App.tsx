@@ -14,6 +14,7 @@ import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import SsoPage from './pages/SsoPage'
 
 // --- 路由守卫 ---
 
@@ -99,7 +100,18 @@ export default function App() {
           </PublicOnlyAdmin>
         }
       />
-      
+
+      <Route
+        path="/sso/issue"
+        element={
+          <RequireAuth>
+            <UserLayout>
+              <SsoPage />
+            </UserLayout>
+          </RequireAuth>
+        }
+      />
+
       <Route
         path="/register"
         element={

@@ -2,6 +2,38 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.2] - 2026-02-25
+### Fixed
+- **Admin Permission Logic**: 修复 `roleCheck.js` 中对 `req.user.tokenType` 的错误判断，修正为 `req.user.isAdmin`。
+- **Server Crash**: 修复 `appController.js` 中引入未安装的 `uuid` 包导致服务启动失败的问题。
+- **Data Integrity**: 重置超级管理员账号 (`admin`) 并清理其他非法管理员权限。
+
+## [1.8.1] - 2026-02-24
+### Added
+- **Visual App Management**: 在管理员后台 (`/admin`) 新增“应用接入”模块，支持可视化管理 SSO 子应用。
+    - **UI**: `AppManager` 组件支持查看、创建、编辑、删除应用。
+    - **Features**: 自动生成 Secret、一键复制、多行域名输入。
+- **Database Registry**: SSO 应用注册表从 `config/apps.js` 迁移至 PostgreSQL `applications` 表，实现动态配置。
+- **Admin API**: 新增 `/api/apps` 系列接口 (CRUD)，由 `appController` 处理。
+- **Security**: 
+    - **Role Check**: 应用管理接口强制要求 `requireAdmin` 权限。
+    - **Active Check**: SSO 认证流程增加 `is_active` 状态校验。
+
+## [1.8.0] - 2026-02-24
+### Added
+- **Application Registry (V2.0)**: 引入 `config/apps.js` 注册表机制 (已在 v1.8.1 迁移至 DB)，支持多应用 (Gallery, Toolbox) 的动态 SSO 配置。
+- **Flexible Token Strategy**: 支持针对不同子应用生成不同格式的 Token (Supabase JWT / Standard JWT)。
+- **Secret Isolation**: 支持为每个子应用配置独立的 `SSO_SECRET`，增强安全性。
+- **Documentation**: 更新 `LOG/ACCOUNT_GALLERY_SSO_INTEGRATION_GUIDE.md` 至 V2.0。
+
+## [1.7.8] - 2026-02-24
+### Added
+- **SSO Bridge**: 新增 Supabase 兼容的 SSO 认证流程。
+    - 前端：新增 `/sso/issue` 页面，处理跳转逻辑。
+    - 后端：新增 `generateSupabaseToken` 工具函数，生成符合 Supabase 标准的 JWT。
+    - 接口：`/api/sso/issue` 支持返回带有 Hash Fragment 的 URL。
+- **Documentation**: 新增 `LOG/ACCOUNT_GALLERY_SSO_INTEGRATION_GUIDE.md`。
+
 ## [1.7.7] - 2026-02-24
 ### Added
 - 增加 pgAdmin4 服务编排，提供 Web 数据库管理界面。
