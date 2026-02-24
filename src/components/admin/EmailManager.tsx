@@ -83,7 +83,7 @@ export default function EmailManager() {
       // So let's warn user or auto-save?
       // For now, assume it uses the saved version.
       
-      const res = await adminService.sendTestEmail(testEmail, selectedType);
+      await adminService.sendTestEmail(testEmail, selectedType);
       setTestResult({ success: true, message: '邮件发送成功' });
     } catch (err: unknown) {
       setTestResult({ 
