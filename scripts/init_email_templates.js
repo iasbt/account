@@ -90,7 +90,7 @@ const DEFAULTS = {
   }
 };
 
-const run = async () => {
+export const initEmailTemplates = async () => {
   try {
     console.log("Initializing Email Templates Table...");
 
@@ -124,10 +124,11 @@ const run = async () => {
 
     console.log("Initialization complete.");
   } catch (err) {
-    console.error("Error:", err);
-  } finally {
-    setTimeout(() => process.exit(0), 1000);
+    console.error("Error initializing email templates:", err);
   }
 };
 
-run();
+// Only run if called directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  initEmailTemplates().then(() => process.exit(0));
+}
