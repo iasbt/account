@@ -100,10 +100,19 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "账号或密码错误", success: false });
     }
 
-    const user = result.rows[0];
-    const isValid = await bcryptjs.compare(password, user.password_hash || "");
+    // Iterate through all matches to find a valid password
+    // This handles cases where multiple users exist with same email (e.g. legacy migration duplicates)
+    let user = null;
+    for (const row of result.rows) {
+      if (!row.password_hash || row.password_hash.startsWith('managed_by')) continue;
+      const isValid = await bcryptjs.compare(password, row.password_hash);
+      if (isValid) {
+        user = row;
+        break;
+      }
+    }
 
-    if (!isValid) {
+    if (!user) {
       return res.status(401).json({ message: "账号或密码错误", success: false });
     }
 
@@ -139,17 +148,20 @@ export const adminLogin = async (req, res) => {
       return res.status(401).json({ message: "账号或密码错误", success: false });
     }
 
-    const user = result.rows[0];
-    
-    // 检查管理员权限 (假设 is_admin 字段存在，或者硬编码某些账号)
-    // 这里假设数据库有 is_admin 字段
-    if (!user.is_admin) {
-        return res.status(403).json({ message: "非管理员账号", success: false });
+    // Iterate through all matches to find a valid admin user with valid password
+    let user = null;
+    for (const row of result.rows) {
+      if (!row.is_admin) continue;
+      if (!row.password_hash || row.password_hash.startsWith('managed_by')) continue;
+      
+      const isValid = await bcryptjs.compare(password, row.password_hash);
+      if (isValid) {
+        user = row;
+        break;
+      }
     }
 
-    const isValid = await bcryptjs.compare(password, user.password_hash || "");
-
-    if (!isValid) {
+    if (!user) {
       return res.status(401).json({ message: "账号或密码错误", success: false });
     }
 
