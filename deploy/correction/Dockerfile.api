@@ -13,7 +13,7 @@ RUN npm install --omit=dev --legacy-peer-deps
 
 # Copy source code (Incremental Copy to optimize cache)
 # 1. Core Files
-COPY server.js app.js ./
+COPY server.js app.js db.js ./
 COPY .env.example ./
 
 # 2. Backend Modules
