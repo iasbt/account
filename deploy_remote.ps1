@@ -105,13 +105,13 @@ $DeployCmd = @'
     sudo docker rm -f nginx-gateway postgres-business postgrest 2>/dev/null || true
     
     # 4. 启动新服务 (Docker Compose)
-    echo '>>> Starting services...'
-    # 停止旧服务（如果存在）
-    sudo docker compose down --remove-orphans
-    sudo docker volume rm correction_pgadmin_data 2>/dev/null || true
+    echo '>>> Starting services (Incremental Update)...'
+    # 停止旧服务（不再完全销毁，保留容器以利用缓存）
+    # sudo docker compose down --remove-orphans
+    # sudo docker volume rm correction_pgadmin_data 2>/dev/null || true
     
-    # 启动新服务 (构建)
-    sudo docker compose up -d --build
+    # 启动新服务 (构建 - 仅重建变更部分)
+    sudo docker compose up -d --build --remove-orphans
     
     # 5. 网络对齐 (Network Alignment)
     echo '>>> Aligning Networks...'
