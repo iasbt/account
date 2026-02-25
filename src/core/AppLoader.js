@@ -28,6 +28,16 @@ class AppLoader {
 
     await fs.ensureDir(this.configDir);
     
+    // Auto-Evolution: Ensure schema
+    try {
+      await pool.query(`
+        ALTER TABLE public.applications 
+        ADD COLUMN IF NOT EXISTS version VARCHAR(50) DEFAULT '1.0.0';
+      `);
+    } catch (dbErr) {
+      console.error('[AppLoader] Schema migration failed:', dbErr);
+    }
+    
     // Initial Load
     await this.loadAll();
 
