@@ -155,7 +155,7 @@ export default function LoginPage() {
             >
               忘记密码？
             </Link>
-          </div>
+          </form>
         </div>
 
         {/* Footer */}
