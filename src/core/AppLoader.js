@@ -32,7 +32,10 @@ class AppLoader {
     try {
       await pool.query(`
         ALTER TABLE public.applications 
-        ADD COLUMN IF NOT EXISTS version VARCHAR(50) DEFAULT '1.0.0';
+        ADD COLUMN IF NOT EXISTS version VARCHAR(50) DEFAULT '1.0.0',
+        ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'unknown',
+        ADD COLUMN IF NOT EXISTS config JSONB DEFAULT '{}',
+        ADD COLUMN IF NOT EXISTS last_reload_at TIMESTAMP DEFAULT NOW();
       `);
     } catch (dbErr) {
       console.error('[AppLoader] Schema migration failed:', dbErr);
