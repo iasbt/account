@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, ExternalLink, UserCircle, Database, Server, LayoutGrid, Image, Hammer, Activity } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { dashboardService, DashboardStats, AppInfo } from '../services/dashboardService'
+import { dashboardService, type DashboardStats } from '../services/dashboardService'
 import { authService } from '../services/authService'
 
 // Local metadata mapping for known apps to enhance the display
