@@ -11,27 +11,8 @@ COPY packages ./packages
 # Install production dependencies
 RUN npm install --omit=dev --legacy-peer-deps
 
-# Copy source code (Incremental Copy to optimize cache)
-# 1. Core Files
-COPY server.js app.js db.js ./
-COPY .env.example ./
-
-# 2. Backend Modules
-COPY config ./config
-COPY controllers ./controllers
-COPY middlewares ./middlewares
-COPY routes ./routes
-COPY utils ./utils
-COPY services ./services
-COPY scripts ./scripts
-
-# 3. App Modules & Extensions
-COPY api ./api
-COPY apps ./apps
-COPY ai.apps.d ./ai.apps.d
-
-# 4. Shared/Mixed Modules (Specific)
-COPY src/core ./src/core
+# Copy source code (Full Copy to ensure nothing is missing)
+COPY . .
 
 # Expose port
 EXPOSE 3000
