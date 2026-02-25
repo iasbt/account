@@ -60,6 +60,17 @@ $DeployCmd = @'
     mkdir -p ~/.ssh
     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts 2>/dev/null || true
     
+    # [Auto-Fix] Configure SSH over 443 for GitHub (Bypass Port 22 Block)
+    if [ ! -f ~/.ssh/config ] || ! grep -q "Host github.com" ~/.ssh/config; then
+        echo ">>> Configuring GitHub SSH over Port 443..."
+        echo "Host github.com" >> ~/.ssh/config
+        echo "  Hostname ssh.github.com" >> ~/.ssh/config
+        echo "  Port 443" >> ~/.ssh/config
+        echo "  User git" >> ~/.ssh/config
+        # Update known_hosts for ssh.github.com
+        ssh-keyscan -p 443 -t rsa ssh.github.com >> ~/.ssh/known_hosts 2>/dev/null || true
+    fi
+    
     git fetch origin main
     git reset --hard origin/main
     
