@@ -44,6 +44,8 @@
     *   Body: `{ name, app_id, allowed_origins, token_type, secret }`
 *   **GET** `/api/apps/:id`: 获取特定应用详情。
 *   **PUT** `/api/apps/:id`: 更新应用配置。
+*   **POST** `/api/apps/:id/rotate-secret`: 重置应用密钥 (V1.8.6)。
+    *   Response: `{ secret: "new_secret..." }`
 *   **DELETE** `/api/apps/:id`: 删除应用 (软删除或物理删除取决于实现)。
 
 ### 6.3 邮件服务 (Email Service) - V1.8.4

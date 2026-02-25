@@ -1,3 +1,6 @@
+---
+alwaysApply: true
+---
 # Critical Red Lines (核心红线) - 违规即回滚
 
 > **Status**: Active

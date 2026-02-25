@@ -12,6 +12,21 @@ vi.mock("../../../db.js", () => ({
   },
 }));
 
+// Mock Redis
+vi.mock("../../../utils/verificationStore.js", () => ({
+  setVerificationCode: vi.fn(),
+  getVerificationCode: vi.fn(),
+  deleteVerificationCode: vi.fn(),
+}));
+
+// Mock Email Queue (BullMQ)
+vi.mock("../../../utils/emailQueue.js", () => ({
+  emailQueue: {
+    add: vi.fn(),
+  },
+  addEmailJob: vi.fn(),
+}));
+
 let app: unknown;
 
 beforeAll(async () => {
@@ -27,15 +42,16 @@ describe("auth login", () => {
     const password = "UserPass123!";
     const passwordHash = await bcryptjs.hash(password, 10);
     mockQuery.mockImplementation((text: string) => {
-      if (text.includes("FROM public.legacy_users")) {
+      if (text.includes("FROM public.users WHERE email = $1 OR name = $1")) {
         return Promise.resolve({
           rowCount: 1,
           rows: [
             {
               id: "user-1",
               email: "user@test.com",
-              username: "user",
-              password_hash: passwordHash,
+              name: "user",
+              password: passwordHash,
+              is_admin: false,
             },
           ],
         });
@@ -56,15 +72,15 @@ describe("auth login", () => {
     const password = "AdminPass123!";
     const passwordHash = await bcryptjs.hash(password, 10);
     mockQuery.mockImplementation((text: string) => {
-      if (text.includes("FROM public.legacy_users")) {
+      if (text.includes("FROM public.users WHERE email = $1 OR name = $1")) {
         return Promise.resolve({
           rowCount: 1,
           rows: [
             {
               id: "admin-1",
               email: "admin@test.com",
-              username: "admin",
-              password_hash: passwordHash,
+              name: "admin",
+              password: passwordHash,
               is_admin: true,
             },
           ],

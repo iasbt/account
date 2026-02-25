@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { appService, type App, type CreateAppDto, type UpdateAppDto } from '../../services/appService';
-import { Plus, Edit2, Trash2, X, Eye, EyeOff, Copy, RefreshCw } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Eye, EyeOff, Copy, RefreshCw, Lock } from 'lucide-react';
 
 export default function AppManager() {
   const [apps, setApps] = useState<App[]>([]);
@@ -47,17 +46,6 @@ export default function AppManager() {
     fetchApps();
   }, []);
 
-  // Safe random UUID generator
-  const generateSecret = () => {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID().replace(/-/g, '');
-    }
-    return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  };
-
   const handleOpenCreate = () => {
     setEditingApp(null);
     setFormData({
@@ -65,7 +53,7 @@ export default function AppManager() {
       appId: '',
       allowedOrigins: [],
       tokenType: 'standard',
-      secret: generateSecret()
+      secret: ''
     });
     setOriginsInput('');
     setIsModalOpen(true);
@@ -107,23 +95,57 @@ export default function AppManager() {
           name: formData.name,
           allowedOrigins: origins,
           tokenType: formData.tokenType,
-          secret: formData.secret
+          // Secret is updated via rotate, not here
         };
         const updated = await appService.updateApp(editingApp.id, updateData);
         setApps(apps.map(a => a.id === editingApp.id ? updated : a));
       } else {
         const createData: CreateAppDto = {
-          ...formData,
-          allowedOrigins: origins
+          name: formData.name,
+          appId: formData.appId,
+          allowedOrigins: origins,
+          tokenType: formData.tokenType,
+          secret: '' // Backend will generate it
         };
         const created = await appService.createApp(createData);
-        setApps([...apps, created]);
+        setApps([created, ...apps]);
       }
       setIsModalOpen(false);
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : '保存失败');
     } finally {
       setFormLoading(false);
+    }
+  };
+
+  const slugify = (text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')     // Replace spaces with -
+      .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+      .replace(/\-\-+/g, '-');  // Replace multiple - with single -
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    if (!editingApp) {
+      setFormData(prev => ({ ...prev, name, appId: slugify(name) }));
+    } else {
+      setFormData(prev => ({ ...prev, name }));
+    }
+  };
+
+  const handleRotateSecret = async () => {
+    if (!editingApp || !window.confirm('确定要重置密钥吗？旧密钥将立即失效，相关应用可能无法连接。')) return;
+    try {
+      const { secret } = await appService.rotateSecret(editingApp.id);
+      setFormData(prev => ({ ...prev, secret }));
+      setApps(apps.map(a => a.id === editingApp.id ? { ...a, secret } : a));
+      alert('密钥已重置');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '重置失败');
     }
   };
 
@@ -232,7 +254,7 @@ export default function AppManager() {
                     type="text"
                     required
                     value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    onChange={handleNameChange}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                     placeholder="例如: Image Gallery"
                   />
@@ -277,43 +299,56 @@ export default function AppManager() {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">SSO Secret (密钥)</label>
-                <div className="relative">
-                  <input
-                    type={showSecret ? "text" : "password"}
-                    required
-                    value={formData.secret}
-                    onChange={e => setFormData({ ...formData, secret: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-mono pr-20"
-                  />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setShowSecret(!showSecret)}
-                      className="p-1 text-gray-400 hover:text-gray-600"
-                    >
-                      {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, secret: crypto.randomUUID().replace(/-/g, '') })}
-                      className="p-1 text-gray-400 hover:text-blue-600"
-                      title="生成新密钥"
-                    >
-                      <RefreshCw size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(formData.secret)}
-                      className="p-1 text-gray-400 hover:text-green-600"
-                      title="复制"
-                    >
-                      <Copy size={16} />
-                    </button>
+              {editingApp ? (
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700">SSO Secret (密钥)</label>
+                  <div className="relative">
+                    <input
+                      type={showSecret ? "text" : "password"}
+                      readOnly
+                      value={formData.secret}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 font-mono pr-24"
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowSecret(!showSecret)}
+                        className="p-1 text-gray-400 hover:text-gray-600"
+                      >
+                        {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleRotateSecret}
+                        className="p-1 text-gray-400 hover:text-blue-600"
+                        title="重置密钥"
+                      >
+                        <RefreshCw size={16} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(formData.secret)}
+                        className="p-1 text-gray-400 hover:text-green-600"
+                        title="复制"
+                      >
+                        <Copy size={16} />
+                      </button>
+                    </div>
                   </div>
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <Lock size={12} />
+                    重置密钥将导致旧密钥立即失效
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <div className="p-4 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-start gap-2">
+                   <Lock className="mt-0.5" size={16} />
+                   <div>
+                     <p className="font-medium">密钥将自动生成</p>
+                     <p className="opacity-80">应用创建成功后，您可以在详情页查看和复制密钥。</p>
+                   </div>
+                </div>
+              )}
 
               <div className="pt-4 flex justify-end gap-3">
                 <button

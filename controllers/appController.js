@@ -1,12 +1,26 @@
 
 import pool from '../db.js';
+import crypto from 'crypto';
+
+// Helper: Generate secure secret
+const generateSecret = () => crypto.randomBytes(32).toString('hex');
 
 // Create
 export const createApp = async (req, res) => {
-  const { name, appId, allowedOrigins, tokenType, secret } = req.body;
+  let { name, appId, allowedOrigins, tokenType, secret } = req.body;
   
-  if (!name || !appId || !allowedOrigins || !tokenType || !secret) {
-    return res.status(400).json({ message: "All fields are required" });
+  if (!name || !appId || !allowedOrigins || !tokenType) {
+    return res.status(400).json({ message: "Name, App ID, Allowed Origins, and Token Type are required" });
+  }
+
+  // Auto-generate secret if not provided
+  if (!secret) {
+    secret = generateSecret();
+  }
+
+  // Validate App ID format (lowercase, numbers, hyphens, underscores)
+  if (!/^[a-z0-9-_]+$/.test(appId)) {
+    return res.status(400).json({ message: "App ID must contain only lowercase letters, numbers, hyphens, and underscores" });
   }
 
   try {
@@ -75,6 +89,30 @@ export const updateApp = async (req, res) => {
       return res.status(409).json({ message: "App ID already exists" });
     }
     console.error("Update app error", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Rotate Secret
+export const rotateSecret = async (req, res) => {
+  const { id } = req.params;
+  const newSecret = generateSecret();
+
+  try {
+    const result = await pool.query(
+      `UPDATE public.applications
+       SET secret = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING secret`,
+      [newSecret, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "App not found" });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Rotate secret error", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };

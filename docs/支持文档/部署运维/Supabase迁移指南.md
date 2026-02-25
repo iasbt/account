@@ -4,7 +4,7 @@
 
 ## 1. 架构变更
 
-我们在 `deploy/docker-compose.yml` 中新增了一个 PostgreSQL 服务 (`postgres-business`)，专门用于承载原 Supabase 的数据。
+我们使用容器化 PostgreSQL（`iasbt-postgres`）承载 Supabase 数据。
 
 - **原架构**: 应用 -> Supabase (Cloud Postgres)
 - **新架构**: 应用 -> 自建服务器 Postgres (Docker 容器)
@@ -37,10 +37,10 @@
 ```
 这将生成一个 `supabase_full_backup.sql` 文件。
 
-### 第二步：上传并部署
-确保您的服务器已经更新了最新的 `docker-compose.yml` (包含 postgres 服务)。
+### 第二步：部署最新服务
+确保服务端已拉取最新代码并重建容器：
 ```powershell
-.\deploy_to_remote.ps1
+.\deploy_remote.ps1 "v1.8.6: Deploy"
 ```
 
 ### 第三步：恢复数据到服务器
@@ -48,22 +48,18 @@
 
 ```bash
 # 1. 进入部署目录
-cd /root/account-deploy
+cd /home/ubuntu/account/deploy/correction
 
 # 2. 确保数据库已启动
-docker-compose up -d postgres
+docker compose up -d iasbt-postgres
 
-# 3. 拷贝备份文件到容器 (假设您已将 sql 文件上传到服务器)
-# 如果您使用 deploy_to_remote.ps1，它会自动同步文件，您可以手动上传 sql 文件：
-# scp supabase_full_backup.sql root@119.91.71.30:/root/account-deploy/
-
-# 4. 执行恢复
-cat supabase_full_backup.sql | docker exec -i postgres-business psql -U postgres -d supabase_backup
+# 3. 将备份文件上传到服务器后执行恢复
+cat supabase_full_backup.sql | docker exec -i iasbt-postgres psql -U postgres -d supabase_backup
 ```
 
 ## 4. 验证
 恢复完成后，您可以进入容器验证数据：
 ```bash
-docker exec -it postgres-business psql -U postgres -d supabase_backup
+docker exec -it iasbt-postgres psql -U postgres -d supabase_backup
 # 在 psql 中执行 \dt 查看表
 ```

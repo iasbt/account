@@ -18,7 +18,7 @@ export const EmailStatsView: React.FC = () => {
       const data = await adminService.getEmailStats();
       setStats(data.stats);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load email statistics');
     } finally {
       setLoading(false);

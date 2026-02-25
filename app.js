@@ -1,20 +1,21 @@
 import express from "express";
 import { corsMiddleware } from "./middlewares/cors.js";
 import { loggerMiddleware } from "./middlewares/logger.js";
+import { metricsMiddleware, getMetrics } from "./middlewares/metrics.js";
 import { appLoader } from "./src/core/AppLoader.js";
 import routes from "./routes/index.js";
 
 const app = express();
 
-// Trust the reverse proxy (Nginx)
 app.set("trust proxy", 1);
-console.log("[Debug] Trust proxy set to:", app.get("trust proxy"));
 
+app.use(metricsMiddleware); // Measure all requests
 app.use(express.json());
 app.use(corsMiddleware);
 app.use(loggerMiddleware);
 
-// Mount micro-apps
+app.get("/metrics", getMetrics); // Expose metrics endpoint
+
 appLoader.mount(app);
 
 app.use(routes);

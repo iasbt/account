@@ -31,7 +31,7 @@ export const EmailConfig: React.FC = () => {
       const data = await adminService.getEmailProviders();
       setProviders(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load email providers');
     } finally {
       setLoading(false);
@@ -49,7 +49,7 @@ export const EmailConfig: React.FC = () => {
       setIsDialogOpen(false);
       fetchProviders();
       alert('保存成功');
-    } catch (err) {
+    } catch {
       alert('保存失败');
     }
   };
@@ -59,7 +59,7 @@ export const EmailConfig: React.FC = () => {
     try {
       await adminService.deleteEmailProvider(id);
       fetchProviders();
-    } catch (err) {
+    } catch {
       alert('删除失败');
     }
   };
@@ -69,7 +69,7 @@ export const EmailConfig: React.FC = () => {
       await adminService.setActiveProvider(id);
       fetchProviders();
       alert('已切换当前邮件服务配置');
-    } catch (err) {
+    } catch {
       alert('切换失败');
     }
   };
@@ -81,7 +81,7 @@ export const EmailConfig: React.FC = () => {
       await adminService.testProvider(testingId, testEmail);
       alert('测试邮件发送成功');
       setIsTestDialogOpen(false);
-    } catch (err) {
+    } catch {
       alert('测试邮件发送失败');
     }
   };
@@ -229,7 +229,7 @@ export const EmailConfig: React.FC = () => {
                   <select 
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
                     value={currentProvider.type}
-                    onChange={e => setCurrentProvider({...currentProvider, type: e.target.value as any})}
+                  onChange={e => setCurrentProvider({...currentProvider, type: e.target.value as EmailProvider['type']})}
                   >
                     <option value="smtp">SMTP</option>
                     <option value="ses">AWS SES</option>

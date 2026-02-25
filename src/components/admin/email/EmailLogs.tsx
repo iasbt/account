@@ -21,7 +21,7 @@ export const EmailLogs: React.FC = () => {
       setTotalPages(data.totalPages);
       setPage(data.page);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load email logs');
     } finally {
       setLoading(false);

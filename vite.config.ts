@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     test: {
       environment: "node",
-      include: ["src/lib/__tests__/**/*.test.ts"],
+      include: ["src/lib/__tests__/**/*.test.ts", "tests/**/*.test.{js,ts}"],
       coverage: {
         provider: "v8",
         reporter: ["text", "json", "html"]

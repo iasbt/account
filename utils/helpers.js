@@ -33,7 +33,7 @@ export const isOriginAllowed = (origin, allowlist) => {
     return effectiveAllowlist.some((allowed) => {
       if (!allowed) return false;
       if (allowed.includes("*")) {
-        const escaped = allowed.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+        const escaped = allowed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         const regex = new RegExp(`^${escaped.replace(/\\\*/g, ".*")}$`);
         if (allowed.includes("://")) {
           return regex.test(origin);

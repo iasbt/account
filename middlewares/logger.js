@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { config } from "../config/index.js";
 import { redactHeaders } from "../utils/helpers.js";
+import { logger } from "../utils/logger.js";
 
 export const loggerMiddleware = (req, res, next) => {
   if (!req.path.startsWith("/api/")) return next();
@@ -19,28 +20,24 @@ export const loggerMiddleware = (req, res, next) => {
   if (config.logLevel === "debug") {
     entry.headers = redactHeaders(req.headers);
   }
-  console.log(JSON.stringify({ level: "info", event: "api_request_start", ...entry }));
+  
+  logger.info({ event: "api_request_start", ...entry });
+
   res.on("finish", () => {
     const durationMs = Date.now() - start;
-    console.log(
-      JSON.stringify({
-        level: "info",
-        event: "api_request_end",
-        requestId,
-        status: res.statusCode,
-        durationMs,
-      })
-    );
+    logger.info({
+      event: "api_request_end",
+      requestId,
+      status: res.statusCode,
+      durationMs,
+    });
   });
   next();
 };
 
 export const logAudit = (entry) => {
-  console.log(
-    JSON.stringify({
-      level: "info",
-      event: "admin_login_audit",
-      ...entry,
-    })
-  );
+  logger.info({
+    event: "admin_login_audit",
+    ...entry,
+  });
 };

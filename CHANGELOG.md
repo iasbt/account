@@ -13,6 +13,17 @@
 - **Database**: 完成从 `legacy_users` 到标准 `users` 表的迁移，统一使用 UUID (Text) 作为主键。
 - **Cleanup**: 移除过时的内存验证码存储，全面转向 Redis 存储。
 
+### Observability
+- **Logging**: 集成 `winston` 日志库，实现结构化 JSON 日志输出，包含 `requestId` 全链路追踪。
+- **Metrics**: 集成 `prom-client`，新增 `/metrics` 端点，暴露 HTTP 请求耗时与 Node.js 运行时指标。
+
+### Documentation
+- **API Specs**: 发布 OpenAPI 3.0 定义文件 `docs/openapi.yaml`，完整覆盖 Auth/Admin/Apps 接口。
+
+### Tests
+- **Coverage**: 新增 `tests/unit` 单元测试套件，覆盖 `token.js` 与 `helpers.js` 核心逻辑。
+- **Fix**: 修复 `isOriginAllowed` 工具函数中对通配符域名的转义缺陷 (Found via tests)。
+
 ## [1.8.5] - 2026-02-25
 
 ### Enhanced

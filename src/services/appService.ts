@@ -46,6 +46,10 @@ export const appService = {
     return adminApiClient.put<App>(`/apps/${id}`, data);
   },
 
+  rotateSecret: async (id: string): Promise<{ secret: string }> => {
+    return adminApiClient.post<{ secret: string }>(`/apps/${id}/rotate-secret`, {});
+  },
+
   deleteApp: async (id: string): Promise<{ message: string }> => {
     return adminApiClient.delete<{ message: string }>(`/apps/${id}`);
   }
