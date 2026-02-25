@@ -10,8 +10,8 @@ export const APPLICATIONS = {
     id: "gallery",
     // 允许的回调域名 (支持本地调试与生产环境)
     allowedOrigins: [
-      "https://gallery.iasbt.com",
       "https://img.iasbt.com",
+      "http://119.91.71.30:5173",
       "http://localhost:5173"
     ],
     // Token 类型: supabase (JWT with specific claims) | standard (Simple JWT)

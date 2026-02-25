@@ -2,6 +2,12 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.8] - 2026-02-26
+### Fixed
+- **SSO**: 修复了登录后无法自动跳转回子应用的问题。`LoginPage` 现在支持白名单域名的跨域跳转，并通过 Hash Fragment 传递 Token。
+- **Domain**: 全局替换 `gallery.iasbt.com` 为 `img.iasbt.com`，并添加了 IP 地址 `119.91.71.30` 到允许源列表。
+- **Docs**: 更新了 Gallery 集成指南，明确了 Account-First 架构和 IP 访问配置。
+
 ## [1.8.7] - 2026-02-26
 ### Fixed
 - **Dashboard**: 修复仪表盘统计数据异常问题，后端改用 `public.legacy_users` 表进行总用户数统计，前端优化了应用列表的动态加载。

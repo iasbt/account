@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { UserCircle } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { apiClient } from '../services/apiClient'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -20,15 +21,10 @@ export default function LoginPage() {
     // 捕获来源 URL，以便登录后自动跳回
     const from = searchParams.get('from') || searchParams.get('redirect')
     let redirectUrl: string | null = null
+    
+    // 优先尝试 SSO 跳转 (支持跨域)
     if (from) {
-      try {
-        const url = new URL(from, window.location.origin)
-        if (url.origin === window.location.origin) {
-          redirectUrl = url.toString()
-        }
-      } catch {
-        redirectUrl = null
-      }
+      redirectUrl = from
     }
     
     try {
@@ -39,8 +35,36 @@ export default function LoginPage() {
 
       // 登录成功后的跳转逻辑
       if (redirectUrl) {
-        window.location.href = redirectUrl
-      } else if (user?.isAdmin) {
+        // 尝试通过 SSO 接口获取带 Token 的跳转链接
+        try {
+          // 注意：这里需要手动拼接到 URL，因为 apiClient.get 期望 endpoint 是 path
+          // 而 searchParams 可能包含特殊字符，最好通过 query string 传递
+          // 但是 apiClient.get 签名只接受 endpoint 和 options
+          // 我们可以这样构造 endpoint: `/sso/issue?target=${encodeURIComponent(redirectUrl)}`
+          
+          const endpoint = `/sso/issue?target=${encodeURIComponent(redirectUrl)}`
+          const res = await apiClient.get<{ url: string }>(endpoint)
+          
+          if (res.url) {
+            window.location.href = res.url
+            return
+          }
+        } catch (ssoErr) {
+          console.warn('SSO Redirect Failed, falling back to local redirect check:', ssoErr)
+          
+          // Fallback: 如果 SSO 失败，尝试本地跳转 (仅允许同源)
+          try {
+            const url = new URL(redirectUrl, window.location.origin)
+            if (url.origin === window.location.origin) {
+              window.location.href = url.toString()
+              return
+            }
+          } catch {}
+        }
+      } 
+      
+      // Default redirect if no external redirect happened
+      if (user?.isAdmin) {
         // 管理员默认进入后台管理系统 (Admin Box)
         navigate('/admin')
       } else {
@@ -100,37 +124,24 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-xs">
-                <div className="mt-0.5">⚠️</div>
-                <p>{error}</p>
+              <div className="text-[13px] text-red-500 bg-red-50 p-3 rounded-lg border border-red-100">
+                {error}
               </div>
             )}
 
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-[44px] flex items-center justify-center rounded-full bg-[#0071e3] text-white text-[15px] font-medium hover:bg-[#0077ed] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-              >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    登录中...
-                  </span>
-                ) : (
-                  '登录'
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* Links */}
-          <div className="mt-6 pt-6 border-t border-[#e5e5e5] flex flex-col items-center gap-4">
-            <div className="flex items-center gap-2 text-[13px]">
-              <span className="text-[#86868b]">还没有账号？</span>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-[44px] bg-[#0071e3] hover:bg-[#0077ed] text-white text-[15px] font-medium rounded-xl transition-all duration-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {isLoading ? (
+                <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                '登录'
+              )}
+            </button>
+            
+            <div className="flex items-center justify-between pt-1">
               <Link
                 to="/register"
                 className="text-[#0071e3] hover:underline font-medium"

@@ -24,8 +24,8 @@
 *   **App ID**: `gallery`
 *   **Name**: `Image Gallery`
 *   **Allowed Origins**:
-    *   `https://gallery.iasbt.com`
     *   `https://img.iasbt.com`
+    *   `http://119.91.71.30:5173`
     *   `http://localhost:5173`
 *   **Token Type**: `supabase` (保持兼容)
 *   **Secret**: `MvVh2XGOWu0axQJFoFYbocTvAXd9tZ9J3NQzAbfIz` (系统生成)

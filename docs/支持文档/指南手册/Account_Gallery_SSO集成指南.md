@@ -36,7 +36,7 @@ V2.1 废弃了静态配置文件，改为 **PostgreSQL 数据库驱动**。
 4.  填写表单:
     *   **Name**: 应用名称（如 "Image Gallery"）
     *   **App ID**: 唯一标识（如 "gallery"）
-    *   **Origins**: 允许的域名（如 `https://gallery.iasbt.com`），一行一个。
+    *   **Origins**: 允许的域名（如 `https://img.iasbt.com`），一行一个。
     *   **Token Type**: 选择 `Supabase Compatible`（若子应用使用 Supabase 客户端）或 `Standard JWT`。
 5.  **Secret**: 系统会自动生成高强度密钥，请复制并配置到子应用的 `.env` 中。
 
