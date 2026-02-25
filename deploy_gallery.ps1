@@ -26,16 +26,25 @@ if ((git status --porcelain) -ne "") {
 # 2. 远程部署
 Write-Host ">>> [2/3] Preparing Local Source Code..." -ForegroundColor Cyan
 
-# Use tar to compress local source (excluding heavy folders)
-# Note: Windows tar (bsdtar) supports --exclude
 $LocalImageDir = "C:\My_Project\image"
-$TarFile = "image.tar.gz"
+$TarFile = "image.tar.gz" # Created in current dir (account)
 
 if (Test-Path $TarFile) { Remove-Item $TarFile }
 
-Write-Host "Compressing $LocalImageDir (excluding node_modules)..." -ForegroundColor Yellow
-# Using relative paths to avoid full path in archive
-tar -czf $TarFile -C $LocalImageDir . --exclude node_modules --exclude .git --exclude .trae --exclude dist
+Write-Host "Creating archive from $LocalImageDir..." -ForegroundColor Yellow
+
+# Use git archive for speed and cleanliness (respects .gitignore)
+# First, ensure all changes are committed so git archive picks them up
+Push-Location $LocalImageDir
+if ((git status --porcelain) -ne "") {
+    Write-Host "Local changes detected in Gallery. Committing temporary snapshot..." -ForegroundColor Yellow
+    git add .
+    git commit -m "WIP: Auto-save for deployment $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+}
+# Create archive
+$TarOutput = "C:\My_Project\account\$TarFile"
+git archive --format=tar.gz -o "$TarOutput" HEAD
+Pop-Location
 
 Write-Host ">>> [2.5/3] Uploading to Remote Server..." -ForegroundColor Cyan
 scp -i $KeyPath -o StrictHostKeyChecking=no $TarFile "${User}@${ServerIP}:/home/ubuntu/"
