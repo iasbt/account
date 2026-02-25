@@ -2,6 +2,12 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.7] - 2026-02-26
+### Fixed
+- **Dashboard**: 修复仪表盘统计数据异常问题，后端改用 `public.legacy_users` 表进行总用户数统计，前端优化了应用列表的动态加载。
+- **Skills**: 将 `planning-with-files` 与 `uiuxpromax` 技能的输出语言强制配置为简体中文，并汉化了核心任务模板 (`task_plan.md`, `findings.md`, `progress.md`)。
+- **Documentation**: 更新 `Gallery_Project_Integration_Guide_Final.md`，移除已废弃的 Supabase 依赖，明确 Account-First SSO 架构，并适配 IP 访问模式。
+
 ## [1.8.6] - 2026-02-25
 ### Security
 - **Validation**: 引入 Zod Schema 对所有认证接口 (`/auth/*`) 进行严格的参数校验。

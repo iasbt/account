@@ -1,34 +1,45 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, ExternalLink, UserCircle, Database, Server, LayoutGrid } from 'lucide-react'
+import { LogOut, ExternalLink, UserCircle, Database, Server, LayoutGrid, Image, Hammer, Activity } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
-import { dashboardService } from '../services/dashboardService'
+import { dashboardService, DashboardStats, AppInfo } from '../services/dashboardService'
 import { authService } from '../services/authService'
+
+// Local metadata mapping for known apps to enhance the display
+const APP_METADATA: Record<string, { icon: any, description: string }> = {
+  gallery: {
+    icon: <Image className="h-6 w-6 text-purple-500" />,
+    description: 'Store, organize and share your photos securely.'
+  },
+  toolbox: {
+    icon: <Hammer className="h-6 w-6 text-orange-500" />,
+    description: 'Developer utilities and productivity tools.'
+  },
+  lifeos: {
+    icon: <Activity className="h-6 w-6 text-green-500" />,
+    description: 'Personal management system for your daily life.'
+  },
+  // Default fallback
+  default: {
+    icon: <LayoutGrid className="h-6 w-6 text-blue-500" />,
+    description: 'Connected application.'
+  }
+}
 
 export default function DashboardPage() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const [loading, setLoading] = useState(false)
-  const [dbStats, setDbStats] = useState<{ userCount: number } | null>(null)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
 
   useEffect(() => {
-    // 获取数据库状态
-    dashboardService.getStats().then(stats => {
-      setDbStats(stats)
+    // 获取数据库状态和应用列表
+    dashboardService.getStats().then(data => {
+      setStats(data)
     }).catch(err => {
-      console.error('Failed to fetch DB stats:', err)
+      console.error('Failed to fetch dashboard stats:', err)
     })
   }, [])
-
-  const apps = [
-    {
-      id: 'account',
-      name: '个人中心',
-      description: '管理您的个人信息和安全设置。',
-      icon: <UserCircle className="h-6 w-6 text-accent-blue" />,
-      url: '/profile'
-    }
-  ]
 
   const handleSignOut = () => {
     setLoading(true)
@@ -37,6 +48,7 @@ export default function DashboardPage() {
   }
 
   const handleLaunch = async (app: { url: string; sso?: boolean }) => {
+    // Legacy SSO logic (Token Injection) - Only use if explicitly enabled
     if (app.sso && app.url.startsWith('http')) {
       try {
         const data = await authService.getSsoToken()
@@ -51,12 +63,35 @@ export default function DashboardPage() {
         console.error('SSO Token Error:', error)
       }
     }
+    
+    // Standard Launch (Open URL)
     if (app.url.startsWith('http')) {
       window.open(app.url, '_blank')
     } else {
       navigate(app.url)
     }
   }
+
+  // Merge static "Account" app with dynamic apps from DB
+  const displayApps = [
+    {
+      id: 'account',
+      name: '个人中心',
+      description: '管理您的个人信息和安全设置。',
+      icon: <UserCircle className="h-6 w-6 text-accent-blue" />,
+      url: '/profile',
+      sso: false
+    },
+    ...(stats?.apps.map(app => {
+      const meta = APP_METADATA[app.id] || APP_METADATA.default
+      return {
+        ...app,
+        icon: meta.icon,
+        description: meta.description || app.description, // Prefer local desc if available, else DB
+        sso: false // Default to standard redirect flow
+      }
+    }) || [])
+  ]
 
   return (
     <div className="min-h-screen bg-background-light font-sans text-text-primary">
@@ -114,7 +149,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {apps.map((app) => (
+          {displayApps.map((app) => (
             <div
               key={app.id}
               onClick={() => handleLaunch(app)}
@@ -131,7 +166,7 @@ export default function DashboardPage() {
               
               <div>
                 <h3 className="text-xl font-semibold text-text-primary mb-2">{app.name}</h3>
-                <p className="text-sm leading-relaxed text-text-secondary">
+                <p className="text-sm leading-relaxed text-text-secondary line-clamp-2">
                   {app.description}
                 </p>
               </div>
@@ -162,16 +197,16 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">数据库</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className={`h-2 w-2 rounded-full ${dbStats ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`}></div>
+                      <div className={`h-2 w-2 rounded-full ${stats ? 'bg-green-500' : 'bg-yellow-500 animate-pulse'}`}></div>
                       <p className="text-lg font-semibold text-text-primary">
-                        {dbStats ? '运行正常' : '检查中...'}
+                        {stats ? '运行正常' : '检查中...'}
                       </p>
                     </div>
                   </div>
                 </div>
              </div>
              
-             {dbStats && (
+             {stats && (
                <div className="rounded-2xl bg-white p-6 border border-border-subtle shadow-sm">
                   <div className="flex items-center gap-4">
                     <div className="p-3 rounded-xl bg-blue-50">
@@ -180,7 +215,7 @@ export default function DashboardPage() {
                     <div>
                       <p className="text-xs font-medium text-text-secondary uppercase tracking-wider">总用户数</p>
                       <p className="text-lg font-semibold text-text-primary mt-1">
-                        {dbStats.userCount?.toLocaleString() ?? '-'}
+                        {stats.userCount?.toLocaleString() ?? '-'}
                       </p>
                     </div>
                   </div>

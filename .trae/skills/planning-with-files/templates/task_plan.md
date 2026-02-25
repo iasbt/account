@@ -1,132 +1,104 @@
-# Task Plan: [Brief Description]
+# 任务计划: [简短描述]
 <!-- 
-  WHAT: This is your roadmap for the entire task. Think of it as your "working memory on disk."
-  WHY: After 50+ tool calls, your original goals can get forgotten. This file keeps them fresh.
-  WHEN: Create this FIRST, before starting any work. Update after each phase completes.
+  内容: 这是整个任务的路线图。将其视为磁盘上的“工作记忆”。
+  原因: 经过 50+ 次工具调用后，最初的目标容易被遗忘。此文件能保持目标清晰。
+  时机: 在开始任何工作之前，首先创建此文件。每个阶段完成后更新。
 -->
 
-## Goal
+## 目标
 <!-- 
-  WHAT: One clear sentence describing what you're trying to achieve.
-  WHY: This is your north star. Re-reading this keeps you focused on the end state.
-  EXAMPLE: "Create a Python CLI todo app with add, list, and delete functionality."
+  内容: 一句话清晰描述你要实现的目标。
+  原因: 这是你的北极星。重读此内容可让你专注于最终状态。
+  示例: "创建一个具有添加、列表和删除功能的 Python CLI 待办事项应用。"
 -->
-[One sentence describing the end state]
+[一句话描述最终状态]
 
-## Current Phase
+## 当前阶段
 <!-- 
-  WHAT: Which phase you're currently working on (e.g., "Phase 1", "Phase 3").
-  WHY: Quick reference for where you are in the task. Update this as you progress.
+  内容: 你当前正在进行的阶段（例如，“第一阶段”，“第三阶段”）。
+  原因: 快速参考任务进度。随着进展更新此项。
 -->
-Phase 1
+第一阶段
 
-## Phases
+## 执行阶段
 <!-- 
-  WHAT: Break your task into 3-7 logical phases. Each phase should be completable.
-  WHY: Breaking work into phases prevents overwhelm and makes progress visible.
-  WHEN: Update status after completing each phase: pending → in_progress → complete
--->
-
-### Phase 1: Requirements & Discovery
-<!-- 
-  WHAT: Understand what needs to be done and gather initial information.
-  WHY: Starting without understanding leads to wasted effort. This phase prevents that.
--->
-- [ ] Understand user intent
-- [ ] Identify constraints and requirements
-- [ ] Document findings in findings.md
-- **Status:** in_progress
-<!-- 
-  STATUS VALUES:
-  - pending: Not started yet
-  - in_progress: Currently working on this
-  - complete: Finished this phase
+  内容: 将任务分解为 3-7 个逻辑阶段。每个阶段都应该是可完成的。
+  原因: 将工作分解为阶段可以防止不知所措，并使进度可见。
+  时机: 完成每个阶段后更新状态: pending (待定) → in_progress (进行中) → complete (完成)
 -->
 
-### Phase 2: Planning & Structure
+### 第一阶段: 需求分析与探索
 <!-- 
-  WHAT: Decide how you'll approach the problem and what structure you'll use.
-  WHY: Good planning prevents rework. Document decisions so you remember why you chose them.
+  内容: 理解需要做什么并收集初始信息。
+  原因: 不理解就开始会导致白费力气。此阶段可防止这种情况。
 -->
-- [ ] Define technical approach
-- [ ] Create project structure if needed
-- [ ] Document decisions with rationale
-- **Status:** pending
+- [ ] 理解用户意图
+- [ ] 确定约束和需求
+- [ ] 在 findings.md 中记录发现
+- **状态:** in_progress
+<!-- 
+  状态值:
+  - pending: 尚未开始
+  - in_progress: 当前正在进行
+  - complete: 已完成此阶段
+-->
 
-### Phase 3: Implementation
+### 第二阶段: 规划与设计
 <!-- 
-  WHAT: Actually build/create/write the solution.
-  WHY: This is where the work happens. Break into smaller sub-tasks if needed.
+  内容: 决定如何解决问题以及使用什么结构。
+  原因: 良好的规划可防止返工。记录决策以便记住选择它们的原因。
 -->
-- [ ] Execute the plan step by step
-- [ ] Write code to files before executing
-- [ ] Test incrementally
-- **Status:** pending
+- [ ] 定义技术方案
+- [ ] 创建项目结构（如果需要）
+- [ ] 记录决策及其理由
+- **状态:** pending
 
-### Phase 4: Testing & Verification
+### 第三阶段: 代码实现
 <!-- 
-  WHAT: Verify everything works and meets requirements.
-  WHY: Catching issues early saves time. Document test results in progress.md.
+  内容: 实际构建/创建/编写解决方案。
+  原因: 这是工作发生的地方。如果需要，分解为更小的子任务。
 -->
-- [ ] Verify all requirements met
-- [ ] Document test results in progress.md
-- [ ] Fix any issues found
-- **Status:** pending
+- [ ] 逐步执行计划
+- [ ] 执行前先将代码写入文件
+- [ ] 增量测试
+- **状态:** pending
 
-### Phase 5: Delivery
+### 第四阶段: 测试与验证
 <!-- 
-  WHAT: Final review and handoff to user.
-  WHY: Ensures nothing is forgotten and deliverables are complete.
+  内容: 验证一切工作正常并满足需求。
+  原因:及早发现问题可以节省时间。在 progress.md 中记录测试结果。
 -->
-- [ ] Review all output files
-- [ ] Ensure deliverables are complete
-- [ ] Deliver to user
-- **Status:** pending
+- [ ] 验证所有需求已满足
+- [ ] 在 progress.md 中记录测试结果
+- [ ] 修复发现的任何问题
+- **状态:** pending
 
-## Key Questions
+### 第五阶段: 交付与验收
 <!-- 
-  WHAT: Important questions you need to answer during the task.
-  WHY: These guide your research and decision-making. Answer them as you go.
-  EXAMPLE: 
-    1. Should tasks persist between sessions? (Yes - need file storage)
-    2. What format for storing tasks? (JSON file)
+  内容: 最终审查并移交给用户。
+  原因: 确保没有遗漏且交付物完整。
 -->
-1. [Question to answer]
-2. [Question to answer]
+- [ ] 审查所有输出文件
+- [ ] 确保交付物完整
+- [ ] 交付给用户
+- **状态:** pending
 
-## Decisions Made
+## 关键问题
 <!-- 
-  WHAT: Technical and design decisions you've made, with the reasoning behind them.
-  WHY: You'll forget why you made choices. This table helps you remember and justify decisions.
-  WHEN: Update whenever you make a significant choice (technology, approach, structure).
-  EXAMPLE:
-    | Use JSON for storage | Simple, human-readable, built-in Python support |
+  内容: 任务期间你需要回答的重要问题。
+  原因: 这些指导你的研究和决策。随手回答它们。
+  示例: 
+    1. 任务是否需要在会话之间持久化？（是 - 需要文件存储）
+    2. 存储任务的格式是什么？（JSON 文件）
 -->
-| Decision | Rationale |
-|----------|-----------|
-|          |           |
+1. [需要回答的问题]
+2. [需要回答的问题]
 
-## Errors Encountered
+## 决策记录
 <!-- 
-  WHAT: Every error you encounter, what attempt number it was, and how you resolved it.
-  WHY: Logging errors prevents repeating the same mistakes. This is critical for learning.
-  WHEN: Add immediately when an error occurs, even if you fix it quickly.
-  EXAMPLE:
-    | FileNotFoundError | 1 | Check if file exists, create empty list if not |
-    | JSONDecodeError | 2 | Handle empty file case explicitly |
+  内容: 你做出的技术和设计决策，以及背后的理由。
+  原因: 你会忘记为什么做出某些选择。此表有助于记忆和证明决策的合理性。
 -->
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-|       | 1       |            |
-
-## Notes
-<!-- 
-  REMINDERS:
-  - Update phase status as you progress: pending → in_progress → complete
-  - Re-read this plan before major decisions (attention manipulation)
-  - Log ALL errors - they help avoid repetition
-  - Never repeat a failed action - mutate your approach instead
--->
-- Update phase status as you progress: pending → in_progress → complete
-- Re-read this plan before major decisions (attention manipulation)
-- Log ALL errors - they help avoid repetition
+| 决策 | 理由 |
+|------|------|
+|      |      |

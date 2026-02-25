@@ -1,7 +1,16 @@
 import { apiClient } from './apiClient';
 
-interface DashboardStats {
+export interface AppInfo {
+  id: string;
+  name: string;
+  url: string;
+  description: string;
+  icon: string;
+}
+
+export interface DashboardStats {
   userCount: number;
+  apps: AppInfo[];
 }
 
 export const dashboardService = {

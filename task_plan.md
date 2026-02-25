@@ -10,14 +10,14 @@
   WHAT: One clear sentence describing what you're trying to achieve.
   WHY: This is your north star. Re-reading this keeps you focused on the end state.
 -->
-Complete Phase 3 of the Account System roadmap, including Admin Portal, Album Integration, SSO Extension, and Technical Debt resolution.
+Complete Phase 3 of the Account System roadmap, focusing on Gallery SSO Integration, Dashboard improvements, and future app readiness.
 
 ## Current Phase
 <!-- 
   WHAT: Which phase you're currently working on (e.g., "Phase 1", "Phase 3").
   WHY: Quick reference for where you are in the task. Update this as you progress.
 -->
-Phase 4
+Phase 3
 
 ## Phases
 <!-- 
@@ -50,16 +50,17 @@ Phase 4
 - [ ] Frontend Integration for Album
 - **Status:** pending (HOLD per user request)
 
-### Phase 3: SSO Extension
+### Phase 3: SSO Extension & Ecosystem
 <!-- 
   WHAT: Extend SSO to other apps (Gallery, Toolbox, Life OS).
   WHY: Enable seamless login across the ecosystem.
 -->
-- [ ] Finalize Account ↔ Gallery SSO
-- [ ] Implement SSO for Toolbox
-- [ ] Implement SSO for Life OS
-- [ ] Verify Cross-Domain Auth
-- **Status:** pending (HOLD per user request)
+- [x] Fix Account Dashboard (Stats & Apps Launchpad)
+- [x] Create Final Account-Gallery SSO Integration Guide (v1.1 Corrected)
+- [ ] Verify Cross-Domain Auth (Gallery Integration)
+- [ ] Implement SSO for Toolbox (Future)
+- [ ] Implement SSO for Life OS (Future)
+- **Status:** in_progress
 
 ### Phase 4: Technical Debt & Documentation
 <!-- 
@@ -76,10 +77,10 @@ Phase 4
   WHAT: Final review and deployment.
   WHY: Ensure production readiness.
 -->
-- [ ] Full Regression Test
-- [ ] Deploy to Production
-- [ ] Verify Production Health
-- **Status:** pending
+- [x] Full Regression Test (21/21 Unit Tests Passed)
+- [x] Deploy to Production (Release v1.8.6)
+- [x] Verify Production Health (Confirmed via /api/health)
+- **Status:** complete
 
 ## Key Questions
 <!-- 
@@ -97,3 +98,5 @@ Phase 4
 | Decision | Rationale |
 |----------|-----------|
 | Use `sharp` for images | Standard Node.js library for high-performance image processing. |
+| Account-First SSO | Supabase backend deprecated; Account System becomes sole IdP and Key Source. |
+| Dashboard Apps Source | Fetch active apps from DB + local metadata enrichment. |
