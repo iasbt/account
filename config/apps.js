@@ -11,8 +11,8 @@ export const APPLICATIONS = {
     secret: process.env.SSO_SECRET_GALLERY || "MvVh2XGOWu0axQJFoFYbocTvAXd9tZ9J3NQzAbfIz",
     // 允许的跳转域名 (Token 接收方)
     allowedOrigins: [
-      "http://119.91.71.30",           // 生产环境 (IP 访问)
-      "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口)
+      "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口 - 主入口)
+      "http://119.91.71.30",           // 生产环境 (IP 访问 - 兼容)
       "http://119.91.71.30:3000",      // 生产环境 (Node 默认端口)
       "http://119.91.71.30:8080",      // 生产环境 (备用端口)
       "http://localhost:5173",         // 本地开发
@@ -26,7 +26,8 @@ export const APPLICATIONS = {
     name: "Developer Toolbox",
     id: "toolbox",
     allowedOrigins: [
-      "https://toolbox.iasbt.com",
+      "http://119.91.71.30:3001",      // 生产环境 (IP 访问)
+      "https://toolbox.iasbt.com",     // 预留域名
       "http://localhost:3001"
     ],
     tokenType: "standard",
@@ -40,7 +41,9 @@ export const APPLICATIONS = {
     name: "Life OS",
     id: "lifeos",
     allowedOrigins: [
-      "https://life.iasbt.com"
+      "http://119.91.71.30:3002",      // 生产环境 (IP 访问)
+      "https://life.iasbt.com",        // 预留域名
+      "http://localhost:3002"
     ],
     tokenType: "standard",
     get secret() {
