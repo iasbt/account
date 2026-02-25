@@ -1,4 +1,4 @@
-import { pool } from "../config/db.js";
+import pool from "../db.js";
 import { verifyToken } from "../utils/token.js";
 
 export const getUsers = async (req, res) => {
