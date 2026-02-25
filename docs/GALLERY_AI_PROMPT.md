@@ -25,11 +25,11 @@ Ensure the callback page handles the `access_token` from the URL hash.
 *   Supabase Client `supabase.auth.getSession()` or `setSession()` should handle this automatically if `VITE_SUPABASE_URL` points correctly.
 
 #### 3. Update Allowed Origins in Account System
-Make sure your Gallery URL (e.g., `https://img.iasbt.com` or `http://localhost:5173`) is added to the **Application Registry** in the Account System Admin Panel.
+Make sure your Gallery URL (e.g., `http://119.91.71.30:5173` or `http://localhost:5173`) is added to the **Application Registry** in the Account System Admin Panel.
 
 #### 4. Check for Mixed Content
 If Gallery is HTTPS (Vercel), Account System MUST be HTTPS.
 Current Status: Account System is HTTP (`119.91.71.30`).
-**Action**: Deploy Gallery to the same server, or configure SSL for Account System.
+**Action**: Deploy Gallery to the same server using IP (recommended for now), or configure SSL for Account System.
 
 ---

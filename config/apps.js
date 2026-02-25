@@ -6,21 +6,19 @@ export const APPLICATIONS = {
   // 1. Image Gallery (图库)
   // 采用 Supabase 架构，需要标准的 GoTrue JWT
   gallery: {
+    appId: "gallery",
     name: "Image Gallery",
-    id: "gallery",
-    // 允许的回调域名 (支持本地调试与生产环境)
+    secret: process.env.SSO_SECRET_GALLERY || "MvVh2XGOWu0axQJFoFYbocTvAXd9tZ9J3NQzAbfIz",
+    // 允许的跳转域名 (Token 接收方)
     allowedOrigins: [
-      "https://img.iasbt.com",
-      "http://119.91.71.30:5173",
-      "http://localhost:5173"
+      "http://119.91.71.30",           // 生产环境 (IP 访问)
+      "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口)
+      "http://119.91.71.30:3000",      // 生产环境 (Node 默认端口)
+      "http://119.91.71.30:8080",      // 生产环境 (备用端口)
+      "http://localhost:5173",         // 本地开发
+      "http://localhost:3000"          // 本地开发
     ],
-    // Token 类型: supabase (JWT with specific claims) | standard (Simple JWT)
-    tokenType: "supabase",
-    // 密钥: 优先使用应用专属密钥，否则回退到全局密钥
-    // 注意：生产环境中 Gallery 的 JWT Secret 必须与此处一致
-    get secret() {
-      return process.env.SSO_SECRET_GALLERY || config.ssoSecret;
-    }
+    tokenType: "supabase", // 兼容 Supabase JWT 结构
   },
 
   // 2. Developer Toolbox (工具箱) - 预留

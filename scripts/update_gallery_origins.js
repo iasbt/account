@@ -19,7 +19,7 @@ async function updateGalleryOrigins() {
       `, [
         'gallery',
         'Image Gallery',
-        ['https://img.iasbt.com', 'http://119.91.71.30:5173', 'http://localhost:5173'],
+        ['http://119.91.71.30', 'http://119.91.71.30:5173', 'http://119.91.71.30:3000', 'http://119.91.71.30:8080', 'http://localhost:5173'],
         'supabase',
         process.env.SSO_SECRET_GALLERY || config.ssoSecret, // Fallback to global secret if env not set
         true
@@ -32,7 +32,7 @@ async function updateGalleryOrigins() {
         SET allowed_origins = $1
         WHERE app_id = 'gallery'
       `, [
-        ['https://img.iasbt.com', 'http://119.91.71.30:5173', 'http://localhost:5173']
+        ['http://119.91.71.30', 'http://119.91.71.30:5173', 'http://119.91.71.30:3000', 'http://119.91.71.30:8080', 'http://localhost:5173']
       ]);
       console.log('Gallery origins updated.');
     }

@@ -4,9 +4,9 @@
 
 ## [1.8.8] - 2026-02-26
 ### Fixed
-- **SSO**: 修复了登录后无法自动跳转回子应用的问题。`LoginPage` 现在支持白名单域名的跨域跳转，并通过 Hash Fragment 传递 Token。
-- **Domain**: 全局替换 `gallery.iasbt.com` 为 `img.iasbt.com`，并添加了 IP 地址 `119.91.71.30` 到允许源列表。
-- **Docs**: 更新了 Gallery 集成指南，明确了 Account-First 架构和 IP 访问配置。
+- **SSO**: 修复了登录后无法自动跳转回子应用的问题。`LoginPage` 现在支持跨域跳转，并通过 Hash Fragment 传递 Token。
+- **Domain**: 暂时移除 `img.iasbt.com` 域名配置，全面转向 IP 访问 (`119.91.71.30`) 以解决备案拦截问题。
+- **Docs**: 更新了 Gallery 集成指南，移除了域名引用，强调使用 IP 地址。
 
 ## [1.8.7] - 2026-02-26
 ### Fixed
