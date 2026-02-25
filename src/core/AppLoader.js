@@ -105,9 +105,11 @@ class AppLoader {
   async loadApp(filePath) {
     const content = await fs.readFile(filePath, 'utf8');
     const config = yaml.parse(content);
-    const { name, version, entry } = config;
+    const { name, version, entry, meta } = config;
+    const appId = name; // YAML name maps to DB app_id
+    const displayName = meta?.label || name; // YAML meta.label maps to DB name
 
-    console.log(`[AppLoader] Loading ${name} v${version}...`);
+    console.log(`[AppLoader] Loading ${appId} (v${version})...`);
 
     try {
       // 1. Validate (Simple check)
@@ -127,38 +129,39 @@ class AppLoader {
       }
 
       // 3. Register
-      this.registry.set(name, {
+      this.registry.set(appId, {
         config,
         router: appRouter,
         status: 'active'
       });
 
       // 4. Update DB
-      await this.updateStatus(name, 'active', config);
+      await this.updateStatus(appId, displayName, 'active', config);
 
-      console.log(`[AppLoader] ${name} loaded successfully.`);
+      console.log(`[AppLoader] ${appId} loaded successfully.`);
     } catch (err) {
-      console.error(`[AppLoader] Failed to load ${name}:`, err);
-      this.registry.set(name, {
+      console.error(`[AppLoader] Failed to load ${appId}:`, err);
+      this.registry.set(appId, {
         config,
         router: null,
         status: 'degraded'
       });
-      await this.updateStatus(name, 'degraded', config);
+      await this.updateStatus(appId, displayName, 'degraded', config);
     }
   }
 
-  async updateStatus(name, status, config) {
+  async updateStatus(appId, name, status, config) {
     try {
       await pool.query(
-        `INSERT INTO applications (name, version, status, config, last_reload_at)
-         VALUES ($1, $2, $3, $4, NOW())
-         ON CONFLICT (name) DO UPDATE 
+        `INSERT INTO applications (app_id, name, version, status, config, last_reload_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())
+         ON CONFLICT (app_id) DO UPDATE 
          SET version = EXCLUDED.version, 
              status = EXCLUDED.status,
              config = EXCLUDED.config,
-             last_reload_at = NOW()`,
-        [name, config.version, status, JSON.stringify(config)]
+             last_reload_at = NOW(),
+             name = COALESCE(EXCLUDED.name, applications.name)`,
+        [appId, name, config.version, status, JSON.stringify(config)]
       );
     } catch (e) {
       console.error('[AppLoader] DB Update Failed:', e);
