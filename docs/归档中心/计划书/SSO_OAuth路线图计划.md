@@ -1,8 +1,8 @@
-> **当前状态**: ⏸️ **已搁置 (Suspended)**
+> **当前状态**: 🛑 **已搁置 (Suspended)**
 > **最后复盘**: 2026-02-25
-> **说明**: 项目实际采用了更轻量级的 "Multi-App SSO" (Custom JWT/Supabase Token) 方案，由 Admin UI + Database Registry 管理，未引入重型的 Supabase OAuth Server。
+> **说明**: 项目实际采用了更轻量级的 "Multi-App SSO" (Custom JWT/Supabase Token) 方案，由 Admin UI + Database Registry 管理，未引入重型的 Supabase OAuth Server。V1.8.6 已实现基于 `applications` 表的动态 SSO。
 
-# SSO 与 OAuth Server 融合路线计划书（≥4000字）
+# SSO 与 OAuth Server 融合路线计划书（≈2000字）
 
 ## 0. 前言与目标摘要
 

@@ -6,7 +6,10 @@ import routes from "./routes/index.js";
 
 const app = express();
 
-app.set("trust proxy", true);
+// Trust the reverse proxy (Nginx)
+app.set("trust proxy", 1);
+console.log("[Debug] Trust proxy set to:", app.get("trust proxy"));
+
 app.use(express.json());
 app.use(corsMiddleware);
 app.use(loggerMiddleware);
