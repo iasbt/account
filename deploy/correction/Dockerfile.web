@@ -10,7 +10,7 @@ RUN npm install --legacy-peer-deps
 # Copy source and build (Incremental Copy)
 COPY tsconfig*.json ./
 COPY vite.config.ts ./
-COPY tailwind.config.js ./
+# COPY tailwind.config.js ./ (File not found, maybe using v4?)
 COPY postcss.config.js ./
 COPY index.html ./
 COPY public ./public
