@@ -105,7 +105,7 @@ class AppLoader {
   async loadApp(filePath) {
     const content = await fs.readFile(filePath, 'utf8');
     const config = yaml.parse(content);
-    const { name, version, entry, meta } = config;
+    const { name, version, entry, meta, allowedOrigins } = config;
     const appId = name; // YAML name maps to DB app_id
     const displayName = meta?.label || name; // YAML meta.label maps to DB name
 
@@ -136,7 +136,7 @@ class AppLoader {
       });
 
       // 4. Update DB
-      await this.updateStatus(appId, displayName, 'active', config);
+      await this.updateStatus(appId, displayName, 'active', config, allowedOrigins || []);
 
       console.log(`[AppLoader] ${appId} loaded successfully.`);
     } catch (err) {
@@ -146,22 +146,23 @@ class AppLoader {
         router: null,
         status: 'degraded'
       });
-      await this.updateStatus(appId, displayName, 'degraded', config);
+      await this.updateStatus(appId, displayName, 'degraded', config, allowedOrigins || []);
     }
   }
 
-  async updateStatus(appId, name, status, config) {
+  async updateStatus(appId, name, status, config, allowedOrigins) {
     try {
       await pool.query(
-        `INSERT INTO applications (app_id, name, version, status, config, last_reload_at)
-         VALUES ($1, $2, $3, $4, $5, NOW())
+        `INSERT INTO applications (app_id, name, version, status, config, allowed_origins, last_reload_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
          ON CONFLICT (app_id) DO UPDATE 
          SET version = EXCLUDED.version, 
              status = EXCLUDED.status,
              config = EXCLUDED.config,
+             allowed_origins = EXCLUDED.allowed_origins,
              last_reload_at = NOW(),
              name = COALESCE(EXCLUDED.name, applications.name)`,
-        [appId, name, config.version, status, JSON.stringify(config)]
+        [appId, name, config.version, status, JSON.stringify(config), allowedOrigins]
       );
     } catch (e) {
       console.error('[AppLoader] DB Update Failed:', e);
