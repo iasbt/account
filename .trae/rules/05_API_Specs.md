@@ -52,5 +52,8 @@
 *   **POST** `/api/admin/email/providers/:id/enable`: 启用指定服务商。
 *   **GET** `/api/admin/email/templates`: 获取邮件模板列表。
 *   **PUT** `/api/admin/email/templates/:type`: 更新特定类型模板。
+    *   Body: `{ subject, content, variables }`
 *   **GET** `/api/admin/email/logs`: 获取邮件发送日志。
+    *   Query: `page`, `limit`
 *   **GET** `/api/admin/email/stats`: 获取邮件发送统计 (含 24h 趋势)。
+    *   Response: `{ total_sent, success_rate, trend: [{ hour, count }] }`

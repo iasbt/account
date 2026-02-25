@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 import { adminService, type EmailTemplate } from '../../../services/adminService';
 import { Loader2, Save, RefreshCw, Code, Send, AlertCircle, CheckCircle2, Eye } from 'lucide-react';
 
@@ -267,10 +268,10 @@ export const EmailTemplates: React.FC = () => {
                   spellCheck={false}
                 />
               ) : (
-                <div className="w-full flex-1 border border-gray-200 rounded-md p-4 bg-gray-50 overflow-auto prose prose-sm max-w-none">
-                  {/* Safe Preview */}
-                  <div dangerouslySetInnerHTML={{ __html: content }} />
-                </div>
+                <div 
+                  className="w-full flex-1 border border-gray-200 rounded-md p-4 bg-gray-50 overflow-auto prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+                />
               )}
             </div>
 

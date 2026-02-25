@@ -1,3 +1,7 @@
+> **当前状态**: ✅ **已实现 (Implemented)**
+> **最后复盘**: 2026-02-25
+> **说明**: V1.8.0 引入了 `ssoToken` 机制，支持 Supabase 格式与 Standard JWT 格式的 Token 交付。
+
 # SSO 阶段 2（令牌与交付）
 
 ## 目标

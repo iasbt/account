@@ -2,6 +2,17 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.6] - 2026-02-25
+### Security
+- **Validation**: 引入 Zod Schema 对所有认证接口 (`/auth/*`) 进行严格的参数校验。
+- **Rate Limiting**: 集成 `express-rate-limit` 防止暴力破解与短信轰炸 (全局 50次/15分, 验证码 3次/1分)。
+- **XSS Protection**: 管理后台邮件模板预览引入 `DOMPurify`，彻底阻断 XSS 攻击路径。
+
+### Architecture
+- **Service Layer**: 重构认证模块，将 `authController` 中的业务逻辑剥离至 `authService`，实现关注点分离。
+- **Database**: 完成从 `legacy_users` 到标准 `users` 表的迁移，统一使用 UUID (Text) 作为主键。
+- **Cleanup**: 移除过时的内存验证码存储，全面转向 Redis 存储。
+
 ## [1.8.5] - 2026-02-25
 
 ### Enhanced
