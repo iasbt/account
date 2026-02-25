@@ -47,6 +47,9 @@ git archive --format=tar.gz -o "$TarOutput" HEAD
 Pop-Location
 
 Write-Host ">>> [2.5/3] Uploading to Remote Server..." -ForegroundColor Cyan
+$Size = (Get-Item $TarOutput).Length / 1MB
+Write-Host "Archive size: $([math]::Round($Size, 2)) MB. This may take 1-2 minutes depending on your network." -ForegroundColor Yellow
+Write-Host "Please ignore any QR code banners from the server." -ForegroundColor Yellow
 scp -i $KeyPath -o StrictHostKeyChecking=no $TarFile "${User}@${ServerIP}:/home/ubuntu/"
 
 Remove-Item $TarFile
