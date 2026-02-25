@@ -25,3 +25,5 @@ deploy_remote.ps1.bak
 *.njsproj
 *.sln
 *.sw?
+
+image.tar.gz

@@ -24,6 +24,11 @@
 *   `clean_house.sh`
 *   `servers.json`
 
+## 4.1 图库部署 (`deploy/gallery/`)
+*   `Dockerfile`
+*   `nginx.conf`
+*   `deploy_gallery.ps1`
+
 ## 5. 自动化
 *   `deploy_remote.ps1`
 

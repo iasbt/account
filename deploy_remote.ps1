@@ -2,17 +2,23 @@
 # 使用方法: .\deploy_remote.ps1 "Commit Message"
 
 param(
-    [string]$Message = "Auto deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+    [string]$Message = "Auto deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')",
+    [string]$Servers = $env:DEPLOY_SERVERS
 )
 
-$ServerIP = "119.91.71.30"
 $User = "ubuntu"
 $KeyPath = "D:\OneDrive\Desktop\trae.pem"
-# 强制指定正确路径
 $RepoDir = "/home/ubuntu/account" 
 $DeployDir = "/home/ubuntu/account/deploy/correction"
 $PgAdminEmail = $env:PGADMIN_DEFAULT_EMAIL
 $PgAdminPassword = $env:PGADMIN_DEFAULT_PASSWORD
+$ServerList = @()
+if ($Servers) {
+    $ServerList = $Servers.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+}
+if (-not $ServerList -or $ServerList.Count -eq 0) {
+    $ServerList = @("119.91.71.30")
+}
 
 # 0. 读取本地版本 (Source of Truth)
 $PackageJson = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -37,7 +43,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # 2. 远程执行部署
-Write-Host ">>> [2/3] Deploying on Remote Server ($ServerIP)..." -ForegroundColor Cyan
+Write-Host ">>> [2/3] Deploying on Remote Servers: $($ServerList -join ', ')" -ForegroundColor Cyan
 
 $DeployCmd = @'
     set -e
@@ -76,7 +82,7 @@ $DeployCmd = @'
     
     # 1.5 Update .env for CORS (Auto Evolution)
     echo '>>> Updating .env CORS configuration...'
-    CORS_VALUE="https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+    CORS_VALUE="https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,http://119.91.71.30:5173,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
     if [ -f .env ]; then
         if grep -q "^CORS_ALLOWLIST=" .env; then
             awk -v v="$CORS_VALUE" 'BEGIN{FS=OFS="="} $1=="CORS_ALLOWLIST"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
@@ -167,13 +173,17 @@ $DeployCmd = $DeployCmd.Replace("__PGADMIN_EMAIL__", $PgAdminEmail)
 $DeployCmd = $DeployCmd.Replace("__PGADMIN_PASSWORD__", $PgAdminPassword)
 
 # 3. 执行远程命令
-Write-Host ">>> [3/3] Executing Remote Commands..." -ForegroundColor Cyan
+$Failures = @()
+foreach ($ServerIP in $ServerList) {
+    Write-Host ">>> [3/3] Executing Remote Commands on $ServerIP..." -ForegroundColor Cyan
+    $DeployCmd | ssh -i $KeyPath -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "${User}@${ServerIP}" "bash -s"
+    if ($LASTEXITCODE -ne 0) {
+        $Failures += $ServerIP
+    }
+}
 
-# 使用管道传递脚本以避免 quoting 问题
-$DeployCmd | ssh -i $KeyPath -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 "${User}@${ServerIP}" "bash -s"
-
-if ($LASTEXITCODE -eq 0) {
+if ($Failures.Count -eq 0) {
     Write-Host "`nDeployment Complete & Verified!" -ForegroundColor Green
 } else {
-    Write-Error "`nDeployment FAILED or Verification Failed!"
+    Write-Error "`nDeployment FAILED on: $($Failures -join ', ')"
 }
