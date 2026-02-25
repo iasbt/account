@@ -24,7 +24,23 @@ if ((git status --porcelain) -ne "") {
 }
 
 # 2. 远程部署
-Write-Host ">>> [2/3] Deploying Gallery on Remote Server..." -ForegroundColor Cyan
+Write-Host ">>> [2/3] Preparing Local Source Code..." -ForegroundColor Cyan
+
+# Use tar to compress local source (excluding heavy folders)
+# Note: Windows tar (bsdtar) supports --exclude
+$LocalImageDir = "C:\My_Project\image"
+$TarFile = "image.tar.gz"
+
+if (Test-Path $TarFile) { Remove-Item $TarFile }
+
+Write-Host "Compressing $LocalImageDir (excluding node_modules)..." -ForegroundColor Yellow
+# Using relative paths to avoid full path in archive
+tar -czf $TarFile -C $LocalImageDir . --exclude node_modules --exclude .git --exclude .trae --exclude dist
+
+Write-Host ">>> [2.5/3] Uploading to Remote Server..." -ForegroundColor Cyan
+scp -i $KeyPath -o StrictHostKeyChecking=no $TarFile "${User}@${ServerIP}:/home/ubuntu/"
+
+Remove-Item $TarFile
 
 $DeployCmd = @"
     set -e
@@ -33,15 +49,13 @@ $DeployCmd = @"
     cd $RemoteAccountDir
     git pull origin main
 
-    # 1. Ensure Gallery Repo exists
-    if [ ! -d "$RemoteGalleryDir" ]; then
-        echo ">>> Cloning Gallery repository..."
-        git clone $GalleryRepo $RemoteGalleryDir
-    else
-        echo ">>> Updating Gallery Code..."
-        cd $RemoteGalleryDir
-        git pull origin main
-    fi
+    # 1. Extract Source Code
+    echo ">>> Extracting Source Code..."
+    mkdir -p $RemoteGalleryDir
+    # Clear old code to avoid artifacts, but keep .env if exists
+    # Or just overwrite. tar overwrites by default.
+    tar -xzf /home/ubuntu/image.tar.gz -C $RemoteGalleryDir
+    rm /home/ubuntu/image.tar.gz
 
     cd $RemoteGalleryDir
 
