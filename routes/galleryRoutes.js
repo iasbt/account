@@ -38,4 +38,21 @@ router.get("/user/onboarding", async (req, res) => {
   }
 });
 
+router.post("/user/onboarding", async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await pool.query(
+      `INSERT INTO user_preferences (user_id, has_seen_onboarding, updated_at)
+       VALUES ($1, true, NOW())
+       ON CONFLICT (user_id) 
+       DO UPDATE SET has_seen_onboarding = true, updated_at = NOW()`,
+      [userId]
+    );
+    res.json({ completed: true });
+  } catch (error) {
+    console.error("Onboarding update error:", error);
+    res.status(500).json({ error: "Failed to update onboarding status" });
+  }
+});
+
 export default router;
