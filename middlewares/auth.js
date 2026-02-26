@@ -13,6 +13,12 @@ export const requireAuth = async (req, res, next) => {
   if (!user) {
     return res.status(401).json({ message: "未登录或凭证已过期" });
   }
+  
+  // Normalize user ID from token subject
+  if (user.sub && !user.id) {
+    user.id = user.sub;
+  }
+  
   req.user = user;
   next();
 };
