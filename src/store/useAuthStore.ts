@@ -20,8 +20,14 @@ interface AuthState {
   handleCallback: (code: string) => Promise<void>
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
+interface AuthStatePersisted {
+  token: string | null
+  user: AuthUser | null
+  isAuthenticated: boolean
+}
+
+export const useAuthStore = create(
+  persist<AuthState, [], [], AuthStatePersisted>(
     (set, get) => ({
       token: null,
       user: null,

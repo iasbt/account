@@ -145,3 +145,23 @@ export const updatePreferences = async (req, res) => {
     res.status(500).json({ message: "更新偏好设置失败" });
   }
 };
+
+export const updateOnboarding = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { seen } = req.body; // Frontend sends: { seen: boolean }
+
+    await pool.query(
+      `INSERT INTO user_preferences (user_id, has_seen_onboarding, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (user_id) 
+       DO UPDATE SET has_seen_onboarding = $2, updated_at = NOW()`,
+      [userId, seen]
+    );
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Update onboarding error:", error);
+    res.status(500).json({ message: "更新引导状态失败" });
+  }
+};

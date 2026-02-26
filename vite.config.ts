@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const authTarget = env.VITE_AUTH_PROXY_TARGET || 'http://localhost:3000'
 
   return {
-    plugins: [react()],
+    plugins: [react() as any],
     test: {
       environment: "node",
       include: ["src/lib/__tests__/**/*.test.ts", "tests/**/*.test.{js,ts}"],
