@@ -4,11 +4,13 @@
 
 ## [1.8.16] - 2026-02-27
 ### Added
+- **SSO**: Implemented OAuth 2.0 Authorization Code Flow (`/oauth/authorize`, `/oauth/token`) for secure token exchange.
 - **Gallery Integration**: 实现了 Image Gallery 后端逻辑 (`/images`, `/categories`)，支持 CRUD 操作。
-- **Database**: 新增 Gallery 相关数据表 (`images`, `categories`, `tags`)。
+- **Database**: 新增 Gallery 相关数据表 (`images`, `categories`, `tags`) 与 OAuth 授权码表 (`oauth_codes`)。
 - **Auth**: 增强 `verifyToken` 支持 App-specific Secret (通过 `aud` 字段识别应用 ID)，解决 Gallery 401 错误。
+- **Admin**: 集成邮件模板管理 API (`/admin/email/templates`) 与统计接口 (`/admin/email/stats`)。
 - **Nginx**: 配置 `/images`, `/categories`, `/user` 的反向代理规则，解决 404 错误。
-- **Migration**: 新增 `npm run migrate:gallery` 脚本用于执行数据库变更。
+- **Migration**: 新增 `npm run migrate:gallery` 与 `npm run migrate:oauth` 脚本。
 
 ## [1.8.15] - 2026-02-27
 ### Security

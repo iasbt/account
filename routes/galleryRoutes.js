@@ -1,6 +1,14 @@
 import { Router } from "express";
+import pool from "../db.js";
 import { requireAuth } from "../middlewares/auth.js";
-import { getImages, createImage, getCategories, createCategory } from "../controllers/galleryController.js";
+import { 
+  getImages, 
+  createImage, 
+  getCategories, 
+  createCategory,
+  getPreferences,
+  updatePreferences
+} from "../controllers/galleryController.js";
 
 const router = Router();
 
@@ -14,9 +22,20 @@ router.post("/images", createImage);
 router.get("/categories", getCategories);
 router.post("/categories", createCategory);
 
-// User Onboarding (Mock for now to fix 404)
-router.get("/user/onboarding", (req, res) => {
-  res.json({ completed: true });
+// User Preferences
+router.get("/user/preferences", getPreferences);
+router.post("/user/preferences", updatePreferences);
+
+// User Onboarding (Legacy/Specific check)
+router.get("/user/onboarding", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT has_seen_onboarding FROM user_preferences WHERE user_id = $1", [req.user.id]);
+    const completed = result.rows[0]?.has_seen_onboarding || false;
+    res.json({ completed });
+  } catch (error) {
+    console.error("Onboarding check error:", error);
+    res.status(500).json({ completed: false });
+  }
 });
 
 export default router;

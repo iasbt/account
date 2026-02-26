@@ -11,6 +11,22 @@ const connection = new Redis({
   port: config.redis.port,
   password: config.redis.password,
   maxRetriesPerRequest: null,
+  retryStrategy: (times) => {
+    // If we can't connect, don't spam.
+    // Return null to stop retrying? No, BullMQ needs retry.
+    // But we can backoff aggressively.
+    return Math.min(times * 2000, 60000); 
+  },
+  // Suppress connection errors in dev
+  reconnectOnError: (err) => {
+    return false;
+  }
+});
+
+connection.on('error', (err) => {
+  // Suppress ECONNREFUSED logs in console to avoid flooding
+  if (err.code === 'ECONNREFUSED') return;
+  console.error('Redis Queue Error:', err);
 });
 
 export const emailQueue = new Queue('email-queue', { connection });

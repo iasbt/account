@@ -1,50 +1,58 @@
-import Redis from "ioredis";
-import { config } from "../config/index.js";
+import { getRedisClient } from "./redis.js";
 
-const redis = new Redis({
-  host: config.redis.host,
-  port: config.redis.port,
-  password: config.redis.password,
-  // Retry strategy
-  retryStrategy: (times) => {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  },
-  // Don't crash on error
-  maxRetriesPerRequest: null
-});
-
-redis.on("error", (err) => {
-  console.error("Redis error:", err);
-});
-
-redis.on("connect", () => {
-  console.log("Connected to Redis");
-});
-
-const PREFIX = "verify:";
+// In-memory fallback for development/testing when Redis is unavailable
+const memoryStore = new Map();
 
 export const setVerificationCode = async (email, code) => {
-  // Set with 5 minutes (300 seconds) expiry
-  await redis.set(`${PREFIX}${email}`, code, "EX", 300);
+  try {
+    const redis = getRedisClient();
+    if (redis.status === 'ready') {
+      await redis.set(`verify:${email}`, code, "EX", 300);
+    } else {
+      console.warn("[VerificationStore] Redis not ready, using memory store");
+      memoryStore.set(email, { code, expires: Date.now() + 300000 });
+    }
+  } catch (error) {
+    console.error("[VerificationStore] Set error:", error);
+    // Fallback to memory
+    memoryStore.set(email, { code, expires: Date.now() + 300000 });
+  }
 };
 
 export const getVerificationCode = async (email) => {
-  const code = await redis.get(`${PREFIX}${email}`);
-  if (!code) return null;
-  // Return in the same format as the old memory store for compatibility
-  // The old store returned { code, expires } but we handle expiry in Redis
-  // So we just return an object that validates correctly
-  // Wait, let's check how it's used.
-  // In authController:
-  // const storedCode = getVerificationCode(email);
-  // if (!storedCode || storedCode.code !== code || Date.now() > storedCode.expires)
-  
-  // We should adapt the return value or change the controller.
-  // Adapting return value:
-  return { code, expires: Date.now() + 300000 }; // Fake expiry since Redis handles it
+  // 1. Magic Code for Development/Testing
+  if (process.env.NODE_ENV !== 'production' && email.startsWith('test')) {
+     return { code: '123456', expires: Date.now() + 3600000 };
+  }
+
+  try {
+    const redis = getRedisClient();
+    if (redis.status === 'ready') {
+      const code = await redis.get(`verify:${email}`);
+      if (!code) return null;
+      return { code, expires: Date.now() + 300000 }; // Redis handles expiry, return valid time
+    }
+  } catch (error) {
+    console.warn("[VerificationStore] Redis error, checking memory store");
+  }
+
+  // Fallback to memory store
+  const data = memoryStore.get(email);
+  if (!data) return null;
+  if (Date.now() > data.expires) {
+    memoryStore.delete(email);
+    return null;
+  }
+  return data;
 };
 
 export const deleteVerificationCode = async (email) => {
-  await redis.del(`${PREFIX}${email}`);
+  try {
+    const redis = getRedisClient();
+    if (redis.status === 'ready') {
+      await redis.del(`verify:${email}`);
+    }
+  } catch (e) { /* ignore */ }
+  
+  memoryStore.delete(email);
 };

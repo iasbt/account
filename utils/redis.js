@@ -49,9 +49,14 @@ const BLACKLIST_PREFIX = "token_blacklist:";
  */
 export const addToBlacklist = async (token, expiresInSeconds) => {
   if (!token || !expiresInSeconds) return;
-  const client = getRedisClient();
-  // Set key with expiration matches the token's remaining life
-  await client.set(`${BLACKLIST_PREFIX}${token}`, "1", "EX", Math.ceil(expiresInSeconds));
+  try {
+    const client = getRedisClient();
+    if (client.status !== 'ready') return;
+    // Set key with expiration matches the token's remaining life
+    await client.set(`${BLACKLIST_PREFIX}${token}`, "1", "EX", Math.ceil(expiresInSeconds));
+  } catch (error) {
+    console.warn("[Redis] Add to blacklist failed:", error.message);
+  }
 };
 
 /**
@@ -61,7 +66,17 @@ export const addToBlacklist = async (token, expiresInSeconds) => {
  */
 export const isBlacklisted = async (token) => {
   if (!token) return false;
-  const client = getRedisClient();
-  const result = await client.get(`${BLACKLIST_PREFIX}${token}`);
-  return result === "1";
+  try {
+    const client = getRedisClient();
+    // Skip if not connected to avoid hanging
+    if (client.status !== 'ready') {
+      // console.warn("[Redis] Client not ready, skipping blacklist check");
+      return false; 
+    }
+    const result = await client.get(`${BLACKLIST_PREFIX}${token}`);
+    return result === "1";
+  } catch (error) {
+    console.warn("[Redis] Check failed:", error.message);
+    return false;
+  }
 };

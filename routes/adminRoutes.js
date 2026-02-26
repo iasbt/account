@@ -8,7 +8,6 @@ import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/roleCheck.js";
 import { getAllUsers, deleteUser, updateUser, resetUserPassword, getSystemStatus, sendTestEmail } from "../controllers/adminController.js";
-import { getTemplates, updateTemplate } from "../controllers/emailTemplateController.js";
 import { adminLogin } from "../controllers/authController.js";
 import { 
   getProviders, 
@@ -18,7 +17,9 @@ import {
   setActiveProvider, 
   testProvider,
   getEmailLogs,
-  getEmailStats
+  getEmailStats,
+  getTemplates,
+  updateTemplate
 } from "../controllers/emailConfigController.js";
 
 const router = Router();

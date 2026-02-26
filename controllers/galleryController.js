@@ -78,3 +78,70 @@ export const createCategory = async (req, res) => {
     res.status(500).json({ message: "创建分类失败" });
   }
 };
+
+// Preferences
+export const getPreferences = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool.query("SELECT * FROM user_preferences WHERE user_id = $1", [userId]);
+    
+    if (result.rowCount === 0) {
+      // Default
+      return res.json({
+        hasAcceptedTerms: false,
+        hasSeenOnboarding: false,
+        categoryOrder: [],
+        hiddenCategoryIds: []
+      });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      hasAcceptedTerms: row.has_accepted_terms,
+      hasSeenOnboarding: row.has_seen_onboarding,
+      categoryOrder: row.category_order,
+      hiddenCategoryIds: row.hidden_category_ids
+    });
+  } catch (error) {
+    console.error("Get preferences error:", error);
+    res.status(500).json({ message: "获取偏好设置失败" });
+  }
+};
+
+export const updatePreferences = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { hasAcceptedTerms, hasSeenOnboarding, categoryOrder, hiddenCategoryIds } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO user_preferences (user_id, has_accepted_terms, has_seen_onboarding, category_order, hidden_category_ids, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (user_id) 
+       DO UPDATE SET 
+         has_accepted_terms = COALESCE(EXCLUDED.has_accepted_terms, user_preferences.has_accepted_terms),
+         has_seen_onboarding = COALESCE(EXCLUDED.has_seen_onboarding, user_preferences.has_seen_onboarding),
+         category_order = COALESCE(EXCLUDED.category_order, user_preferences.category_order),
+         hidden_category_ids = COALESCE(EXCLUDED.hidden_category_ids, user_preferences.hidden_category_ids),
+         updated_at = NOW()
+       RETURNING *`,
+      [
+        userId, 
+        hasAcceptedTerms !== undefined ? hasAcceptedTerms : null, 
+        hasSeenOnboarding !== undefined ? hasSeenOnboarding : null, 
+        categoryOrder ? JSON.stringify(categoryOrder) : null, 
+        hiddenCategoryIds ? JSON.stringify(hiddenCategoryIds) : null
+      ]
+    );
+
+    const row = result.rows[0];
+    res.json({
+      hasAcceptedTerms: row.has_accepted_terms,
+      hasSeenOnboarding: row.has_seen_onboarding,
+      categoryOrder: row.category_order,
+      hiddenCategoryIds: row.hidden_category_ids
+    });
+  } catch (error) {
+    console.error("Update preferences error:", error);
+    res.status(500).json({ message: "更新偏好设置失败" });
+  }
+};
