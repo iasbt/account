@@ -140,7 +140,7 @@ $DeployCmd = @'
     sudo docker restart account-backend
     
     echo '>>> Waiting for services to initialize...'
-    sleep 10
+    sleep 20
     
     # 6. 版本强校验 (Strong Version Verification) - Simplest
     echo '>>> Verifying Health & Version (Expected: __LOCAL_VERSION__)...'
@@ -152,6 +152,8 @@ $DeployCmd = @'
         echo "✅ Version Verification PASSED: __LOCAL_VERSION__"
     else
         echo "❌ Version Verification FAILED!"
+        echo ">>> Debug Logs (Last 50 lines)..."
+        sudo docker logs account-backend --tail 50
         exit 1
     fi
     
