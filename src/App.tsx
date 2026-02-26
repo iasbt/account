@@ -15,6 +15,7 @@ import PrivacyPage from './pages/PrivacyPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SsoPage from './pages/SsoPage'
+import LogoutPage from './pages/LogoutPage'
 
 // --- 路由守卫 ---
 
