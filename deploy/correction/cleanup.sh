@@ -1,7 +1,7 @@
 #!/bin/bash
 # 1. Force stop and remove the wrong containers
 echo "Stopping and removing legacy/incorrect containers..."
-docker rm -f postgres-business postgrest nginx-gateway 2>/dev/null || true
+docker rm -f postgres-business nginx-gateway 2>/dev/null || true
 
 # 2. Remove the specific network if it exists (clean up old bridge)
 echo "Cleaning up networks..."

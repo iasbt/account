@@ -6,7 +6,6 @@ export interface App {
   app_id: string;
   name: string;
   allowed_origins: string[];
-  token_type: 'standard' | 'supabase';
   secret: string;
   is_active: boolean;
   created_at: string;
@@ -17,14 +16,12 @@ export interface CreateAppDto {
   name: string;
   appId: string;
   allowedOrigins: string[];
-  tokenType: 'standard' | 'supabase';
   secret: string;
 }
 
 export interface UpdateAppDto {
   name?: string;
   allowedOrigins?: string[];
-  tokenType?: 'standard' | 'supabase';
   secret?: string;
   isActive?: boolean;
 }

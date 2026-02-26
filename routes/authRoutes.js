@@ -1,6 +1,6 @@
 
 import { Router } from "express";
-import { sendVerificationCode, register, login, getSsoToken, changePassword, resetPassword, getMe, getSupabaseUser } from "../controllers/authController.js";
+import { sendVerificationCode, register, login, changePassword, resetPassword, getMe } from "../controllers/authController.js";
 import { requireAuth } from "../middlewares/auth.js";
 import { validate } from "../middlewares/validate.js";
 import { sendCodeSchema, registerSchema, loginSchema, resetPasswordSchema, changePasswordSchema } from "../validators/authSchema.js";
@@ -12,7 +12,6 @@ const router = Router();
 router.use(authLimiter);
 
 router.get("/auth/me", requireAuth, getMe);
-router.get("/auth/v1/user", getSupabaseUser);
 
 router.post(
   "/auth/send-code", 
@@ -38,8 +37,6 @@ router.post(
   validate(resetPasswordSchema), 
   resetPassword
 );
-
-router.get("/auth/sso-token", requireAuth, getSsoToken);
 
 router.post(
   "/auth/change-password", 

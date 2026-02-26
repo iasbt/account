@@ -1,7 +1,5 @@
 
-import pool from "../db.js";
 import { authService } from "../services/authService.js";
-import { verifyToken } from "../utils/token.js";
 
 export const sendVerificationCode = async (req, res) => {
   try {
@@ -91,61 +89,6 @@ export const getMe = async (req, res) => {
     success: true,
     user: req.user
   });
-};
-
-export const getSsoToken = async (req, res) => {
-  try {
-    const token = authService.getSsoToken(req.user);
-    res.json({ token, success: true });
-  } catch (error) {
-    console.error("SSO token error:", error);
-    res.status(500).json({ message: "获取SSO Token失败", success: false });
-  }
-};
-
-export const getSupabaseUser = async (req, res) => {
-  const header = req.headers.authorization || "";
-  const [type, token] = header.split(" ");
-  if (type !== "Bearer" || !token) {
-    return res.status(401).json({ message: "未登录" });
-  }
-
-  let payload = verifyToken(token);
-  if (!payload) {
-    try {
-      const result = await pool.query(
-        "SELECT secret FROM public.applications WHERE token_type = 'supabase' AND secret IS NOT NULL"
-      );
-      for (const row of result.rows) {
-        const candidate = verifyToken(token, row.secret);
-        if (candidate) {
-          payload = candidate;
-          break;
-        }
-      }
-    } catch (error) {
-      console.error("Supabase token verification error:", error);
-    }
-  }
-
-  if (!payload || !(payload.sub || payload.id)) {
-    return res.status(401).json({ message: "未登录" });
-  }
-
-  const now = new Date().toISOString();
-  const user = {
-    id: String(payload.sub || payload.id),
-    aud: payload.aud || "authenticated",
-    role: payload.role || "authenticated",
-    email: payload.email || null,
-    phone: payload.phone || "",
-    app_metadata: payload.app_metadata || {},
-    user_metadata: payload.user_metadata || {},
-    created_at: payload.created_at || now,
-    updated_at: payload.updated_at || now
-  };
-
-  return res.json(user);
 };
 
 export const resetPassword = async (req, res) => {

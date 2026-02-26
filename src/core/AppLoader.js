@@ -105,11 +105,10 @@ class AppLoader {
   async loadApp(filePath) {
     const content = await fs.readFile(filePath, 'utf8');
     const config = yaml.parse(content);
-    const { name, version, entry, meta, allowedOrigins, secret, tokenType } = config;
+    const { name, version, entry, meta, allowedOrigins, secret } = config;
     const appId = name; // YAML name maps to DB app_id
     const displayName = meta?.label || name; // YAML meta.label maps to DB name
     const appSecret = secret || `sec_${Math.random().toString(36).slice(2)}`;
-    const appTokenType = tokenType || 'standard';
 
     console.log(`[AppLoader] Loading ${appId} (v${version})...`);
 
@@ -138,7 +137,7 @@ class AppLoader {
       });
 
       // 4. Update DB
-      await this.updateStatus(appId, displayName, 'active', config, allowedOrigins || [], appSecret, appTokenType);
+      await this.updateStatus(appId, displayName, 'active', config, allowedOrigins || [], appSecret);
 
       console.log(`[AppLoader] ${appId} loaded successfully.`);
     } catch (err) {
@@ -148,25 +147,24 @@ class AppLoader {
         router: null,
         status: 'degraded'
       });
-      await this.updateStatus(appId, displayName, 'degraded', config, allowedOrigins || [], appSecret, appTokenType);
+      await this.updateStatus(appId, displayName, 'degraded', config, allowedOrigins || [], appSecret);
     }
   }
 
-  async updateStatus(appId, name, status, config, allowedOrigins, secret, tokenType) {
+  async updateStatus(appId, name, status, config, allowedOrigins, secret) {
     try {
       await pool.query(
-        `INSERT INTO applications (app_id, name, version, status, config, allowed_origins, secret, token_type, last_reload_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+        `INSERT INTO applications (app_id, name, version, status, config, allowed_origins, secret, last_reload_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
          ON CONFLICT (app_id) DO UPDATE 
          SET version = EXCLUDED.version, 
              status = EXCLUDED.status,
              config = EXCLUDED.config,
              allowed_origins = EXCLUDED.allowed_origins,
              secret = COALESCE(EXCLUDED.secret, applications.secret),
-             token_type = EXCLUDED.token_type,
              last_reload_at = NOW(),
              name = COALESCE(EXCLUDED.name, applications.name)`,
-        [appId, name, config.version, status, JSON.stringify(config), allowedOrigins, secret, tokenType]
+        [appId, name, config.version, status, JSON.stringify(config), allowedOrigins, secret]
       );
     } catch (e) {
       console.error('[AppLoader] DB Update Failed:', e);

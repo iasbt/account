@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, ExternalLink, UserCircle, Database, Server, LayoutGrid, Image, Hammer, Activity } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { dashboardService, type DashboardStats } from '../services/dashboardService'
-import { authService } from '../services/authService'
 
 // Local metadata mapping for known apps to enhance the display
-const APP_METADATA: Record<string, { icon: any, description: string }> = {
+const APP_METADATA: Record<string, { icon: ReactNode; description: string }> = {
   gallery: {
     icon: <Image className="h-6 w-6 text-purple-500" />,
     description: 'Store, organize and share your photos securely.'
@@ -48,22 +47,6 @@ export default function DashboardPage() {
   }
 
   const handleLaunch = async (app: { url: string; sso?: boolean }) => {
-    // Legacy SSO logic (Token Injection) - Only use if explicitly enabled
-    if (app.sso && app.url.startsWith('http')) {
-      try {
-        const data = await authService.getSsoToken()
-        if (data?.token) {
-          const email = encodeURIComponent(data.email || user?.email || '')
-          const tokenValue = encodeURIComponent(data.token)
-          const target = `${app.url}?token=${tokenValue}&email=${email}`
-          window.open(target, '_blank')
-          return
-        }
-      } catch (error) {
-        console.error('SSO Token Error:', error)
-      }
-    }
-    
     // Standard Launch (Open URL)
     if (app.url.startsWith('http')) {
       window.open(app.url, '_blank')

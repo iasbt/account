@@ -14,14 +14,13 @@ async function updateGalleryOrigins() {
       // Create it if not exists (using config as fallback)
       // This is a simplified insert
       await pool.query(`
-        INSERT INTO public.applications (app_id, name, allowed_origins, token_type, secret, is_active)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO public.applications (app_id, name, allowed_origins, secret, is_active)
+        VALUES ($1, $2, $3, $4, $5)
       `, [
         'gallery',
         'Image Gallery',
         ['http://119.91.71.30:5173', 'http://119.91.71.30', 'http://119.91.71.30:3000', 'http://119.91.71.30:8080', 'http://localhost:5173'],
-        'supabase',
-        process.env.SSO_SECRET_GALLERY || config.ssoSecret, // Fallback to global secret if env not set
+        process.env.SSO_SECRET_GALLERY || config.ssoSecret,
         true
       ]);
       console.log('Gallery app created.');

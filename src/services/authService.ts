@@ -12,11 +12,6 @@ interface RegisterResponse {
   message?: string;
 }
 
-interface SsoTokenResponse {
-  token: string;
-  email: string;
-}
-
 export const authService = {
   async login(account: string, password: string): Promise<LoginResponse> {
     return apiClient.post<LoginResponse>('/auth/login', { account, password });
@@ -33,10 +28,6 @@ export const authService = {
 
   async sendVerificationCode(email: string, type: 'register' | 'reset_password' | 'login' = 'register'): Promise<void> {
     return apiClient.post<void>('/auth/send-code', { email, type });
-  },
-
-  async getSsoToken(): Promise<SsoTokenResponse> {
-    return apiClient.get<SsoTokenResponse>('/auth/sso-token');
   },
 
   async issueSsoToken(target: string): Promise<{ url: string }> {

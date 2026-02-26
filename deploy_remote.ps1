@@ -119,7 +119,7 @@ $DeployCmd = @'
     
     # 3. 暴力清理废弃容器 (Legacy Ban)
     echo '>>> Cleaning up legacy containers...'
-    sudo docker rm -f nginx-gateway postgres-business postgrest 2>/dev/null || true
+    sudo docker rm -f nginx-gateway postgres-business 2>/dev/null || true
     
     # 4. 启动新服务 (Docker Compose)
     echo '>>> Starting services (Incremental Update)...'

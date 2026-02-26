@@ -2,6 +2,13 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.12] - 2026-02-26
+### Changed
+- **SSO**: 移除 Supabase 兼容逻辑，统一使用标准 JWT 发放。
+- **Apps**: 清理 `applications` 的 `token_type` 字段与前端配置入口。
+- **Infra**: 删除 PostgREST 相关路由、代理与容器清理逻辑。
+- **Docs**: 同步更新 OpenAPI、数据库附件与架构图，移除 Supabase 相关引用。
+
 ## [1.8.8] - 2026-02-26
 ### Fixed
 - **SSO**: 修复了登录后无法自动跳转回子应用的问题。`LoginPage` 现在支持跨域跳转，并通过 Hash Fragment 传递 Token。
@@ -12,7 +19,7 @@
 ### Fixed
 - **Dashboard**: 修复仪表盘统计数据异常问题，后端改用 `public.legacy_users` 表进行总用户数统计，前端优化了应用列表的动态加载。
 - **Skills**: 将 `planning-with-files` 与 `uiuxpromax` 技能的输出语言强制配置为简体中文，并汉化了核心任务模板 (`task_plan.md`, `findings.md`, `progress.md`)。
-- **Documentation**: 更新 `Gallery_Project_Integration_Guide_Final.md`，移除已废弃的 Supabase 依赖，明确 Account-First SSO 架构，并适配 IP 访问模式。
+- **Documentation**: 更新 `Gallery_Project_Integration_Guide_Final.md`，移除已废弃的外部依赖，明确 Account-First SSO 架构，并适配 IP 访问模式。
 
 ## [1.8.6] - 2026-02-25
 ### Security
@@ -83,15 +90,15 @@
 ## [1.8.0] - 2026-02-24
 ### Added
 - **Application Registry (V2.0)**: 引入 `config/apps.js` 注册表机制 (已在 v1.8.1 迁移至 DB)，支持多应用 (Gallery, Toolbox) 的动态 SSO 配置。
-- **Flexible Token Strategy**: 支持针对不同子应用生成不同格式的 Token (Supabase JWT / Standard JWT)。
+- **Flexible Token Strategy**: 支持针对不同子应用生成不同格式的 Token (外部兼容 JWT / Standard JWT)。
 - **Secret Isolation**: 支持为每个子应用配置独立的 `SSO_SECRET`，增强安全性。
 - **Documentation**: 更新 `LOG/ACCOUNT_GALLERY_SSO_INTEGRATION_GUIDE.md` 至 V2.0。
 
 ## [1.7.8] - 2026-02-24
 ### Added
-- **SSO Bridge**: 新增 Supabase 兼容的 SSO 认证流程。
+- **SSO Bridge**: 新增外部兼容的 SSO 认证流程。
     - 前端：新增 `/sso/issue` 页面，处理跳转逻辑。
-    - 后端：新增 `generateSupabaseToken` 工具函数，生成符合 Supabase 标准的 JWT。
+    - 后端：新增外部兼容 JWT 的生成工具函数。
     - 接口：`/api/sso/issue` 支持返回带有 Hash Fragment 的 URL。
 - **Documentation**: 新增 `LOG/ACCOUNT_GALLERY_SSO_INTEGRATION_GUIDE.md`。
 
@@ -178,19 +185,19 @@
 - **Security**: Strict whitelist for running containers.
 
 ### 🗑️ Removed (Legacy Cleanup)
-- **PostgREST**: Replaced with custom Node.js API logic.
+- **Legacy API**: Replaced with custom Node.js API logic.
 - **Nginx Gateway**: Merged into `account-frontend`.
 - **Postgres Business**: Removed redundant database instance.
-- **Supabase/MySQL**: Fully migrated to self-hosted PostgreSQL.
+- **外部 SaaS/MySQL**: Fully migrated to self-hosted PostgreSQL.
 
 ## [Unreleased] - 2026-02-11
 
 ### Added
-- **Docker Deployment**: Created `deploy/docker-compose.yml` for full stack deployment (Nginx, PostgREST, Postgres).
+- **Docker Deployment**: Created `deploy/docker-compose.yml` for full stack deployment (Nginx, Backend API, Postgres).
 - **Deployment Script**: Added `deploy_to_remote.ps1` for automated "one-click" deployment to Tencent Cloud via SSH.
 
 ### Changed
-- **Server Migration**: Migrated from Supabase (SaaS) to self-hosted architecture on Tencent Cloud (119.91.71.30).
+- **Server Migration**: Migrated from external SaaS to self-hosted architecture on Tencent Cloud (119.91.71.30).
 - **Domain Strategy**:
     - 相册域名统一为 **`img.iasbt.com`**。
 - **Deployment Logic**:

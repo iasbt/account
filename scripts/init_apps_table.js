@@ -17,7 +17,6 @@ const run = async () => {
         app_id VARCHAR(50) UNIQUE NOT NULL,
         name VARCHAR(100) NOT NULL,
         allowed_origins TEXT[] NOT NULL,
-        token_type VARCHAR(20) NOT NULL DEFAULT 'standard',
         secret VARCHAR(255) NOT NULL,
         is_active BOOLEAN DEFAULT TRUE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -36,13 +35,12 @@ const run = async () => {
       
       try {
         await pool.query(
-          `INSERT INTO public.applications (app_id, name, allowed_origins, token_type, secret)
-           VALUES ($1, $2, $3, $4, $5)`,
+          `INSERT INTO public.applications (app_id, name, allowed_origins, secret)
+           VALUES ($1, $2, $3, $4)`,
           [
             app.id,
             app.name,
             app.allowedOrigins,
-            app.tokenType,
             app.secret || "default_secret" // Fallback to avoid crash
           ]
         );

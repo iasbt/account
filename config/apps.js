@@ -1,10 +1,9 @@
 // 注册所有接入 Account 系统的子应用
-// 每个应用都有独立的配置，支持不同的 Token 格式和密钥
+// 每个应用都有独立的配置与密钥
 import { config } from "./index.js";
 
 export const APPLICATIONS = {
   // 1. Image Gallery (图库)
-  // 采用 Supabase 架构，需要标准的 GoTrue JWT
   gallery: {
     appId: "gallery",
     name: "Image Gallery",
@@ -18,7 +17,6 @@ export const APPLICATIONS = {
       "http://localhost:5173",         // 本地开发
       "http://localhost:3000"          // 本地开发
     ],
-    tokenType: "supabase", // 兼容 Supabase JWT 结构
   },
 
   // 2. Developer Toolbox (工具箱) - 预留
@@ -30,7 +28,6 @@ export const APPLICATIONS = {
       "https://toolbox.iasbt.com",     // 预留域名
       "http://localhost:3001"
     ],
-    tokenType: "standard",
     get secret() {
       return process.env.SSO_SECRET_TOOLBOX || config.ssoSecret;
     }
@@ -45,7 +42,6 @@ export const APPLICATIONS = {
       "https://life.iasbt.com",        // 预留域名
       "http://localhost:3002"
     ],
-    tokenType: "standard",
     get secret() {
       return process.env.SSO_SECRET_LIFEOS || config.ssoSecret;
     }

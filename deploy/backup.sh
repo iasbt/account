@@ -27,10 +27,9 @@ echo "[Step 1] 导出数据库..."
 echo "  - 正在导出 MySQL..."
 docker exec mysql mysqldump -u root -p"$DB_ROOT_PASSWORD" --all-databases > "$BACKUP_DIR/$MYSQL_DUMP_NAME"
 
-# 2.2 Postgres (Supabase 迁移数据)
+# 2.2 Postgres
 echo "  - 正在导出 Postgres..."
-# 注意：如果容器未启动或不存在，此步骤可能会报错，增加 || true 忽略错误
-docker exec postgres-business pg_dump -U postgres supabase_backup > "$BACKUP_DIR/$PG_DUMP_NAME" 2>/dev/null || echo "Warning: Postgres backup failed or container not running"
+docker exec iasbt-postgres pg_dump -U postgres postgres > "$BACKUP_DIR/$PG_DUMP_NAME" 2>/dev/null || echo "Warning: Postgres backup failed or container not running"
 
 if [ ! -f "$BACKUP_DIR/$MYSQL_DUMP_NAME" ]; then
     echo "[Error] 主要数据库(MySQL)导出失败！"

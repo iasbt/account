@@ -1,0 +1,12 @@
+flowchart TB
+  subgraph 接入层
+    Browser[用户浏览器]
+    Nginx[Nginx Gateway]
+  end
+  subgraph 服务层
+    AccountBackend[Account Backend API]
+  end
+  subgraph 数据层
+    Postgres[(PostgreSQL 15)]
+  end
+  Browser --> Nginx --> AccountBackend --> Postgres

@@ -1,7 +1,7 @@
 
 import pool from "../db.js";
 import bcryptjs from "bcryptjs";
-import { generateToken, generateSsoToken } from "../utils/token.js";
+import { generateToken } from "../utils/token.js";
 import { sendEmail } from "../utils/email.js";
 import { getVerificationCodeTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode, getVerificationCode, deleteVerificationCode } from "../utils/verificationStore.js";
@@ -116,10 +116,6 @@ export const authService = {
     };
 
     return { user: safeUser, token };
-  },
-
-  getSsoToken(user) {
-    return generateSsoToken(user);
   },
 
   async resetPassword({ email, password, code }) {

@@ -17,7 +17,6 @@ export default function AppManager() {
     name: '',
     appId: '',
     allowedOrigins: [],
-    tokenType: 'standard',
     secret: ''
   });
   
@@ -52,7 +51,6 @@ export default function AppManager() {
       name: '',
       appId: '',
       allowedOrigins: [],
-      tokenType: 'standard',
       secret: ''
     });
     setOriginsInput('');
@@ -65,7 +63,6 @@ export default function AppManager() {
       name: app.name,
       appId: app.app_id,
       allowedOrigins: app.allowed_origins,
-      tokenType: app.token_type,
       secret: app.secret
     });
     setOriginsInput(Array.isArray(app.allowed_origins) ? app.allowed_origins.join('\n') : '');
@@ -94,7 +91,6 @@ export default function AppManager() {
         const updateData: UpdateAppDto = {
           name: formData.name,
           allowedOrigins: origins,
-          tokenType: formData.tokenType,
           // Secret is updated via rotate, not here
         };
         const updated = await appService.updateApp(editingApp.id, updateData);
@@ -104,7 +100,6 @@ export default function AppManager() {
           name: formData.name,
           appId: formData.appId,
           allowedOrigins: origins,
-          tokenType: formData.tokenType,
           secret: '' // Backend will generate it
         };
         const created = await appService.createApp(createData);
@@ -124,8 +119,8 @@ export default function AppManager() {
       .toLowerCase()
       .trim()
       .replace(/\s+/g, '-')     // Replace spaces with -
-      .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-      .replace(/\-\-+/g, '-');  // Replace multiple - with single -
+      .replace(/[^\w-]+/g, '') // Remove all non-word chars
+      .replace(/--+/g, '-');  // Replace multiple - with single -
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +172,6 @@ export default function AppManager() {
               <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-sm">
                 <th className="p-4 font-medium">应用名称</th>
                 <th className="p-4 font-medium">App ID</th>
-                <th className="p-4 font-medium">Token 类型</th>
                 <th className="p-4 font-medium">允许的域名 (Origins)</th>
                 <th className="p-4 font-medium text-right">操作</th>
               </tr>
@@ -187,13 +181,6 @@ export default function AppManager() {
                 <tr key={app.id} className="hover:bg-gray-50 transition-colors">
                   <td className="p-4 font-medium text-gray-900">{app.name}</td>
                   <td className="p-4 font-mono text-sm text-blue-600">{app.app_id}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      app.token_type === 'supabase' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {app.token_type}
-                    </span>
-                  </td>
                   <td className="p-4 text-sm text-gray-500 max-w-xs truncate" title={Array.isArray(app.allowed_origins) ? app.allowed_origins.join('\n') : ''}>
                     {Array.isArray(app.allowed_origins) && app.allowed_origins.length > 0 ? app.allowed_origins[0] : '-'}
                     {Array.isArray(app.allowed_origins) && app.allowed_origins.length > 1 && ` (+${app.allowed_origins.length - 1})`}
@@ -220,7 +207,7 @@ export default function AppManager() {
               ))}
               {apps.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-gray-400">
+                  <td colSpan={4} className="p-8 text-center text-gray-400">
                     暂无应用，点击右上角创建
                   </td>
                 </tr>
@@ -271,21 +258,6 @@ export default function AppManager() {
                     placeholder="例如: gallery"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">Token 类型</label>
-                <select
-                  value={formData.tokenType}
-                  onChange={e => setFormData({ ...formData, tokenType: e.target.value as 'standard' | 'supabase' })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                >
-                  <option value="standard">Standard JWT (默认)</option>
-                  <option value="supabase">Supabase Compatible (GoTrue)</option>
-                </select>
-                <p className="text-xs text-gray-500">
-                  如果应用使用 Supabase 客户端，请选择 Supabase Compatible。
-                </p>
               </div>
 
               <div className="space-y-1.5">

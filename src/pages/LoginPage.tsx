@@ -59,7 +59,9 @@ export default function LoginPage() {
               window.location.href = url.toString()
               return
             }
-          } catch {}
+          } catch (fallbackErr) {
+            console.warn('本地跳转失败:', fallbackErr)
+          }
         }
       } 
       

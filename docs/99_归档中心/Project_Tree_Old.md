@@ -1,0 +1,342 @@
+账户系统项目结构树 (V1.8.6)
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000072 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\SRC
+|   App.tsx
+|   index.css
+|   main.tsx
+|   
++---assets
++---components
+|   \---admin
+|       |   AppManager.tsx
+|       |   EmailManager.tsx
+|       |   SystemManager.tsx
+|       |   UserManager.tsx
+|       |   
+|       \---email
+|               EmailConfig.tsx
+|               EmailLogs.tsx
+|               EmailStats.tsx
+|               EmailTemplates.tsx
+|               
++---core
+|       AppLoader.js
+|       
++---lib
+|   |   api.ts
+|   |   rbac.test.ts
+|   |   rbac.ts
+|   |   utils.ts
+|   |   
+|   \---__tests__
+|           auth-login.test.ts
+|           
++---pages
+|   |   .gitkeep
+|   |   AdminLoginPage.tsx
+|   |   AdminPanel.tsx
+|   |   DashboardPage.tsx
+|   |   ForgotPasswordPage.tsx
+|   |   LoginPage.tsx
+|   |   NotFoundPage.tsx
+|   |   PrivacyPage.tsx
+|   |   ProfilePage.tsx
+|   |   RegisterPage.tsx
+|   |   ResetPasswordPage.tsx
+|   |   SsoPage.tsx
+|   |   StyleGuide.tsx
+|   |   TermsPage.tsx
+|   |   
+|   +---admin
+|   \---entry
++---services
+|       adminService.ts
+|       apiClient.ts
+|       appService.ts
+|       authService.ts
+|       dashboardService.ts
+|       
++---store
+|       useAdminStore.ts
+|       useAuthStore.ts
+|       
++---types
+|       auth.ts
+|       
+\---__tests__
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000047 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\CONTROLLERS
+    adminController.js
+    appController.js
+    authController.js
+    dashboardController.js
+    emailConfigController.js
+    emailTemplateController.js
+    healthController.js
+    ssoController.js
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000011 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\ROUTES
+    adminRoutes.js
+    appRoutes.js
+    authRoutes.js
+    dashboardRoutes.js
+    healthRoutes.js
+    index.js
+    ssoRoutes.js
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 000000EC 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\SERVICES
+    authService.js
+    emailWorker.js
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 000000A4 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\MIDDLEWARES
+    auth.js
+    cors.js
+    logger.js
+    rateLimit.js
+    roleCheck.js
+    validate.js
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000006 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\VALIDATORS
+    authSchema.js
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000060 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\UTILS
+    email.js
+    emailQueue.js
+    emailTemplates.js
+    helpers.js
+    ssoStore.js
+    token.js
+    verificationStore.js
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000082 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\CONFIG
+    apps.js
+    index.js
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000065 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\SCRIPTS
+|   check_and_migrate_db.js
+|   check_apps.js
+|   check_email_tables.js
+|   check_users_debug.js
+|   debug_db_direct.js
+|   fix_users_schema_and_migrate.js
+|   generate_tree.js
+|   init_apps_table.js
+|   init_email_templates.js
+|   inspect_users_table.js
+|   migrate_email_v2.js
+|   run_migration.js
+|   verify_email_api.js
+|   
+\---migrations
+        001_create_apps_table.sql
+        002_ensure_legacy_users.sql
+        
+卷 C 的文件夹 PATH 列表
+卷序列号为 0000009C 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\DEPLOY
+|   .env
+|   backup.sh
+|   backup_supabase.ps1
+|   
++---correction
+|       cleanup.sh
+|       clean_house.sh
+|       docker-compose.yml
+|       Dockerfile.api
+|       Dockerfile.web
+|       nginx.conf
+|       servers.json
+|       
+\---data
+    +---gallery
+    |   +---config
+    |   \---upload
+    +---init-sql
+    +---mysql
+    \---nginx
+        +---certs
+        \---conf.d
+                gateway.conf
+                
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000014 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\DOCS
+|   文档索引.md
+|   
++---归档中心
+|   +---历史遗留
+|   |       归档列表.md
+|   |       归档记录.md
+|   |       评审签字.md
+|   |       详情_v1.0.md
+|   |       详情_v1.1.md
+|   |       详情_v1.2.md
+|   |       详情_v1.3.1.md
+|   |       详情_v1.3.md
+|   |       详情_v1.4.md
+|   |       详情_v2.0.md
+|   |       
+|   +---报告
+|   |       01_代码质量报告.md
+|   |       产品选型报告.md
+|   |       审计报告_V1.6.md
+|   |       账户健康报告.md
+|   |       账户健康报告.pdf
+|   |       项目报告_V1.7.0.md
+|   |       项目阶段性报告.md
+|   |       
+|   +---日志
+|   |       修复记录文档.md
+|   |       开发日志.md
+|   |       开发日志_1.0.md
+|   |       开发日志_1.1.md
+|   |       开发日志_1.2.md
+|   |       开发日志_1.3.1.md
+|   |       开发日志_1.3.md
+|   |       开发日志_1.4.md
+|   |       开发日志_2.0.md
+|   |       
+|   \---计划书
+|           04_最终总结计划.md
+|           SSO_OAuth路线图计划.md
+|           SSO_第一阶段_基础.md
+|           SSO_第三阶段_会话.md
+|           SSO_第二阶段_Token.md
+|           SSO_第四阶段_可观测性.md
+|           确认与计划.md
+|           计划分析_应用一键接入.md
+|           邮件服务计划书.md
+|           
+\---支持文档
+    |   文档索引.md
+    |   项目结构树.md
+    |   
+    +---指南手册
+    |       Account_Gallery_SSO集成指南.md
+    |       Gallery认证登录指南.md
+    |       应用接入代码映射.md
+    |       手动应用接入指南.md
+    |       
+    +---数据库
+    |       01_数据库架构.md
+    |       
+    +---架构设计
+    |       02_架构白皮书.md
+    |       04_优化与重构报告_V1.8.6.md
+    |       权限矩阵.md
+    |       设计系统.md
+    |       账户系统开发文档_V1.6.md
+    |       账户系统开发文档_V1.8.6.md
+    |       
+    +---测试验证
+    |       03_测试策略手册.md
+    |       
+    \---部署运维
+        |   Supabase迁移指南.md (已废弃/严禁使用)
+        |   安装指南.md
+        |   服务端部署手册.md
+        |   
+        \---附件
+                architecture.drawio
+                architecture.mmd
+                database.sql
+                dbdiagram.dbml
+                k6_login_order_pay.js
+                
+卷 C 的文件夹 PATH 列表
+卷序列号为 0000001E 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\PUBLIC
+    vite.svg
+    
+没有子文件夹 
+
+卷 C 的文件夹 PATH 列表
+卷序列号为 00000017 0CFB:8F26
+C:\MY_PROJECT\ACCOUNT\PACKAGES
++---cli
+|   |   package.json
+|   |   
+|   +---node_modules
+|   |   +---chokidar
+|   |   |   |   index.js
+|   |   |   |   LICENSE
+|   |   |   |   package.json
+|   |   |   |   README.md
+|   |   |   |   
+|   |   |   +---lib
+|   |   |   |       constants.js
+|   |   |   |       fsevents-handler.js
+|   |   |   |       nodefs-handler.js
+|   |   |   |       
+|   |   |   \---types
+|   |   |           index.d.ts
+|   |   |           
+|   |   +---glob-parent
+|   |   |       CHANGELOG.md
+|   |   |       index.js
+|   |   |       LICENSE
+|   |   |       package.json
+|   |   |       README.md
+|   |   |       
+|   |   +---picomatch
+|   |   |   |   CHANGELOG.md
+|   |   |   |   index.js
+|   |   |   |   LICENSE
+|   |   |   |   package.json
+|   |   |   |   README.md
+|   |   |   |   
+|   |   |   \---lib
+|   |   |           constants.js
+|   |   |           parse.js
+|   |   |           picomatch.js
+|   |   |           scan.js
+|   |   |           utils.js
+|   |   |           
+|   |   \---readdirp
+|   |           index.d.ts
+|   |           index.js
+|   |           LICENSE
+|   |           package.json
+|   |           README.md
+|   |           
+|   \---src
+|           index.js
+|           
+\---sdk
+    |   package.json
+    |   
+    \---src
+            client.jsx
+            index.js
+            server.js
+            

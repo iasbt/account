@@ -7,10 +7,10 @@ const generateSecret = () => crypto.randomBytes(32).toString('hex');
 
 // Create
 export const createApp = async (req, res) => {
-  let { name, appId, allowedOrigins, tokenType, secret } = req.body;
+  let { name, appId, allowedOrigins, secret } = req.body;
   
-  if (!name || !appId || !allowedOrigins || !tokenType) {
-    return res.status(400).json({ message: "Name, App ID, Allowed Origins, and Token Type are required" });
+  if (!name || !appId || !allowedOrigins) {
+    return res.status(400).json({ message: "Name, App ID, and Allowed Origins are required" });
   }
 
   // Auto-generate secret if not provided
@@ -25,10 +25,10 @@ export const createApp = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO public.applications (app_id, name, allowed_origins, token_type, secret)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO public.applications (app_id, name, allowed_origins, secret)
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [appId, name, allowedOrigins, tokenType, secret]
+      [appId, name, allowedOrigins, secret]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -69,15 +69,15 @@ export const getApp = async (req, res) => {
 // Update
 export const updateApp = async (req, res) => {
   const { id } = req.params;
-  const { name, appId, allowedOrigins, tokenType, secret, isActive } = req.body;
+  const { name, appId, allowedOrigins, secret, isActive } = req.body;
 
   try {
     const result = await pool.query(
       `UPDATE public.applications
-       SET name = $1, app_id = $2, allowed_origins = $3, token_type = $4, secret = $5, is_active = $6, updated_at = NOW()
-       WHERE id = $7
+       SET name = $1, app_id = $2, allowed_origins = $3, secret = $4, is_active = $5, updated_at = NOW()
+       WHERE id = $6
        RETURNING *`,
-      [name, appId, allowedOrigins, tokenType, secret, isActive, id]
+      [name, appId, allowedOrigins, secret, isActive, id]
     );
 
     if (result.rowCount === 0) {

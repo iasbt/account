@@ -1,0 +1,70 @@
+Table users {
+  id text [pk]
+  name varchar
+  email varchar [unique]
+  password varchar
+  avatar_url varchar
+  is_admin boolean
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table legacy_users {
+  id uuid [pk]
+  username varchar [unique]
+  email varchar [unique]
+  password_hash varchar
+  is_admin boolean
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table applications {
+  id uuid [pk]
+  app_id varchar [unique]
+  name varchar
+  allowed_origins text[]
+  secret varchar
+  is_active boolean
+  created_at timestamptz
+  updated_at timestamptz
+}
+
+Table email_providers {
+  id int [pk]
+  name varchar
+  host varchar
+  port int
+  secure boolean
+  auth_user varchar
+  auth_pass_encrypted text
+  from_name varchar
+  from_email varchar
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table email_templates {
+  id int [pk]
+  type varchar [unique]
+  subject varchar
+  content text
+  variables jsonb
+  updated_at timestamptz
+}
+
+Table email_logs {
+  id uuid [pk]
+  recipient varchar
+  template_type varchar
+  subject varchar
+  status varchar
+  error_message text
+  retry_count int
+  provider_id int
+  sent_at timestamp
+  created_at timestamp
+}
+
+Ref: email_logs.provider_id > email_providers.id

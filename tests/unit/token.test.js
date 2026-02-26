@@ -41,18 +41,4 @@ describe('Token Utility', () => {
     });
   });
 
-  describe('generateSupabaseToken', () => {
-    it('should generate a valid Supabase JWT', () => {
-      // Explicitly passing secret for this function as per implementation check
-      // generateSupabaseToken(user, secret) is supported? 
-      // Let's check implementation: export const generateSupabaseToken = (user, secret = config.ssoSecret) => ...
-      // Yes it is supported.
-      const token = tokenUtils.generateSupabaseToken(mockUser, secret);
-      const decoded = tokenUtils.verifyToken(token, secret);
-      
-      expect(decoded.aud).toBe('authenticated');
-      expect(decoded.role).toBe('authenticated');
-      expect(decoded.sub).toBe(mockUser.id);
-    });
-  });
 });
