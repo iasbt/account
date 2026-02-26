@@ -71,6 +71,7 @@ export const useAuthStore = create<AuthState>()(
         set({ user: { ...user, ...data } as AuthUser })
       },
       logout: () => {
+        authService.logout().catch(console.error)
         apiClient.setToken(null)
         set({ token: null, user: null, isAuthenticated: false })
       },

@@ -40,5 +40,9 @@ export const authService = {
 
   async resetPassword(email: string, code: string, newPassword: string): Promise<{ success: boolean; message: string }> {
     return apiClient.post<{ success: boolean; message: string }>('/auth/reset-password', { email, code, newPassword });
+  },
+
+  async logout(): Promise<void> {
+    return apiClient.post<void>('/auth/logout', {});
   }
 };
