@@ -1,11 +1,11 @@
-import { verifyToken } from "../utils/token.js";
+import { verifyAppToken } from "../utils/token.js";
 
 export const getAuthUser = async (req) => {
   const header = req.headers.authorization || "";
   if (!header.startsWith("Bearer ")) return null;
   const token = header.split(" ")[1];
   if (!token) return null;
-  return await verifyToken(token);
+  return await verifyAppToken(token);
 };
 
 export const requireAuth = async (req, res, next) => {

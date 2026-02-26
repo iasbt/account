@@ -113,6 +113,17 @@ export default function App() {
       />
 
       <Route
+        path="/oauth/authorize"
+        element={
+          <RequireAuth>
+            <UserLayout>
+              <SsoPage />
+            </UserLayout>
+          </RequireAuth>
+        }
+      />
+
+      <Route
         path="/register"
         element={
           <PublicOnlyUser>

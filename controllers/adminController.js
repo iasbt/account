@@ -8,6 +8,7 @@ import { sendEmail } from "../utils/email.js";
 import { getPasswordResetLinkTemplate, getVerificationCodeTemplate, getNotificationTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode } from "../utils/verificationStore.js";
 import { config } from "../config/index.js";
+import { randomInt } from "crypto";
 
 /**
  * @route GET /api/admin/system/status
@@ -192,7 +193,7 @@ export const resetUserPassword = async (req, res) => {
     }
     const user = userResult.rows[0];
     
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = randomInt(100000, 1000000).toString();
     await setVerificationCode(user.email, code);
     
     // 前端页面地址，需确保路由存在

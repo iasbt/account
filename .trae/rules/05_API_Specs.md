@@ -59,3 +59,21 @@
     *   Query: `page`, `limit`
 *   **GET** `/api/admin/email/stats`: 获取邮件发送统计 (含 24h 趋势)。
     *   Response: `{ total_sent, success_rate, trend: [{ hour, count }] }`
+
+## 7. 相册服务 (Gallery Service) - V1.8.16
+*   **前缀**: `/` (Nginx 直接反向代理，无 `/api` 前缀)。
+*   **Auth**: 支持 App Secret 验证 (通过 `aud` 字段)。
+
+### 7.1 图片管理
+*   **GET** `/images`: 获取图片列表。
+    *   Query: `category_id` (Optional)
+*   **POST** `/images`: 上传/创建图片记录。
+    *   Body: `{ title, file_url, file_path, width, height, category_id }`
+
+### 7.2 分类管理
+*   **GET** `/categories`: 获取分类列表。
+*   **POST** `/categories`: 创建分类。
+    *   Body: `{ name, color }`
+
+### 7.3 用户引导
+*   **GET** `/user/onboarding`: 获取用户引导状态 (目前 Mock 返回 `{completed: true}`)。

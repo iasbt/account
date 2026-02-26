@@ -2,6 +2,14 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.16] - 2026-02-27
+### Added
+- **Gallery Integration**: 实现了 Image Gallery 后端逻辑 (`/images`, `/categories`)，支持 CRUD 操作。
+- **Database**: 新增 Gallery 相关数据表 (`images`, `categories`, `tags`)。
+- **Auth**: 增强 `verifyToken` 支持 App-specific Secret (通过 `aud` 字段识别应用 ID)，解决 Gallery 401 错误。
+- **Nginx**: 配置 `/images`, `/categories`, `/user` 的反向代理规则，解决 404 错误。
+- **Migration**: 新增 `npm run migrate:gallery` 脚本用于执行数据库变更。
+
 ## [1.8.15] - 2026-02-27
 ### Security
 - **Randomness**: Replaced insecure `Math.random()` with `crypto.randomInt()` for verification code generation.

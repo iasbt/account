@@ -6,6 +6,7 @@ import dashboardRoutes from "./dashboardRoutes.js";
 import adminRoutes from "./adminRoutes.js";
 import ssoRoutes from "./ssoRoutes.js";
 import appRoutes from "./appRoutes.js";
+import galleryRoutes from "./galleryRoutes.js";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ router.use("/", dashboardRoutes); // /dashboard/...
 router.use("/admin", adminRoutes); // /admin/...
 router.use("/", ssoRoutes);    // /sso/... (if defined in ssoRoutes)
 router.use("/apps", appRoutes); // /apps/... (Admin App Management)
+router.use("/", galleryRoutes); // /images, /categories
 
 export default router;
