@@ -1,5 +1,6 @@
 
 import { authService } from "../services/authService.js";
+import { isValidRedirectTarget } from "../utils/redirectValidator.js";
 
 export const sendVerificationCode = async (req, res) => {
   try {
@@ -139,5 +140,34 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     console.error("Update profile error:", error);
     res.status(400).json({ message: error.message || "更新失败", success: false });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    // 1. 如果使用了 Cookie，清除它 (预留)
+    // res.clearCookie('token');
+
+    // 2. 处理 SSO 重定向
+    const { target } = req.query;
+    
+    if (target) {
+      // 验证 target 是否合法，防止 Open Redirect
+      if (isValidRedirectTarget(target)) {
+        return res.redirect(target);
+      } else {
+        console.warn(`Blocked invalid redirect attempt to: ${target}`);
+        // 如果 target 不合法，不重定向，而是返回 JSON 提示
+      }
+    }
+
+    // 3. 默认返回 JSON
+    res.json({
+      success: true,
+      message: "已安全退出"
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ message: "退出失败", success: false });
   }
 };

@@ -2,6 +2,12 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.14] - 2026-02-27
+### Added
+- **Logout Endpoint**: Added `GET/POST /auth/logout` to support SSO redirect and JSON response.
+- **Security**: implemented `isValidRedirectTarget` utility to prevent Open Redirect vulnerabilities on logout.
+- **Rate Limiting**: Applied global auth rate limiting to logout routes.
+
 ## [1.8.13] - 2026-02-26
 ### Critical
 - **Auth Architecture Fix**: 修复了核心账号系统数据源错位问题，现在 `public.users` 是唯一真理来源。

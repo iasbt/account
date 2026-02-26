@@ -52,4 +52,11 @@ router.patch(
   validate(updateProfileSchema), 
   updateProfile
 );
+
+// Logout routes (Support GET for redirect and POST for API calls)
+// Note: Inherits global authLimiter from line 12
+router.get("/auth/logout", logout);
+router.post("/auth/logout", logout);
+
 export default router;
+
