@@ -2,11 +2,18 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.15] - 2026-02-27
+### Security
+- **Randomness**: Replaced insecure `Math.random()` with `crypto.randomInt()` for verification code generation.
+- **Token Payload**: Fixed critical bug where `user.name` was missing from JWT payload (was incorrectly referencing `user.username`).
+
 ## [1.8.14] - 2026-02-27
 ### Added
 - **Logout Endpoint**: Added `GET/POST /auth/logout` to support SSO redirect and JSON response.
 - **Security**: implemented `isValidRedirectTarget` utility to prevent Open Redirect vulnerabilities on logout.
 - **Rate Limiting**: Applied global auth rate limiting to logout routes.
+- **Token Blacklist**: Introduced Redis-based token blacklist to invalidate tokens upon logout.
+- **Security Headers**: Integrated `helmet` for secure HTTP headers and refined CORS configuration.
 
 ## [1.8.13] - 2026-02-26
 ### Critical

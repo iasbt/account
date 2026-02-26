@@ -5,11 +5,11 @@ import { generateToken } from "../utils/token.js";
 import { sendEmail } from "../utils/email.js";
 import { getVerificationCodeTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode, getVerificationCode, deleteVerificationCode } from "../utils/verificationStore.js";
-import { randomUUID } from "crypto";
+import { randomUUID, randomInt } from "crypto";
 
 export const authService = {
   async sendVerificationCode(email, type = 'general') {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = randomInt(100000, 1000000).toString();
     await setVerificationCode(email, code);
 
     const html = getVerificationCodeTemplate(code, type);

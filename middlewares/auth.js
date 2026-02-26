@@ -1,16 +1,17 @@
 import { verifyToken } from "../utils/token.js";
 
-export const getAuthUser = (req) => {
+export const getAuthUser = async (req) => {
   const header = req.headers.authorization || "";
-  const [type, token] = header.split(" ");
-  if (type !== "Bearer" || !token) return null;
-  return verifyToken(token);
+  if (!header.startsWith("Bearer ")) return null;
+  const token = header.split(" ")[1];
+  if (!token) return null;
+  return await verifyToken(token);
 };
 
-export const requireAuth = (req, res, next) => {
-  const user = getAuthUser(req);
+export const requireAuth = async (req, res, next) => {
+  const user = await getAuthUser(req);
   if (!user) {
-    return res.status(401).json({ message: "未登录" });
+    return res.status(401).json({ message: "未登录或凭证已过期" });
   }
   req.user = user;
   next();

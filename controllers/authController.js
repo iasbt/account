@@ -1,6 +1,9 @@
 
 import { authService } from "../services/authService.js";
 import { isValidRedirectTarget } from "../utils/redirectValidator.js";
+import { addToBlacklist } from "../utils/redis.js";
+import jwt from "jsonwebtoken";
+import { config } from "../config/index.js";
 
 export const sendVerificationCode = async (req, res) => {
   try {
@@ -145,10 +148,29 @@ export const updateProfile = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    // 1. 如果使用了 Cookie，清除它 (预留)
+    // 1. 获取 Token 并加入黑名单
+    const token = req.headers.authorization?.split(" ")[1];
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, config.ssoSecret);
+        if (decoded && decoded.exp) {
+          const now = Math.floor(Date.now() / 1000);
+          const ttl = decoded.exp - now;
+          if (ttl > 0) {
+            await addToBlacklist(token, ttl);
+            console.log(`Token blacklisted for user ${decoded.id}, TTL: ${ttl}s`);
+          }
+        }
+      } catch (e) {
+        // Token 可能已经过期或无效，忽略错误
+        console.warn("Logout: Token validation failed (already expired?)", e.message);
+      }
+    }
+
+    // 2. 如果使用了 Cookie，清除它 (预留)
     // res.clearCookie('token');
 
-    // 2. 处理 SSO 重定向
+    // 3. 处理 SSO 重定向
     const { target } = req.query;
     
     if (target) {
@@ -161,7 +183,7 @@ export const logout = async (req, res) => {
       }
     }
 
-    // 3. 默认返回 JSON
+    // 4. 默认返回 JSON
     res.json({
       success: true,
       message: "已安全退出"
