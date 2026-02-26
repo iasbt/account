@@ -3,7 +3,7 @@
 -- Categories
 CREATE TABLE IF NOT EXISTS categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   color TEXT,
   sort_order INTEGER DEFAULT 0,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS categories (
 -- Images
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title TEXT,
   description TEXT,
   file_url TEXT NOT NULL,
