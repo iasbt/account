@@ -2,6 +2,12 @@
 
 本文件记录项目的重要变更。
 
+## [1.8.17] - 2026-02-27
+### Fixed
+- **SSO Logout Loop**: Fixed critical infinite loop where logging out from Gallery would immediately re-authenticate via SSO. Implemented a dedicated frontend `LogoutPage` to clear local state before redirecting.
+- **Security**: Updated `helmet` configuration to disable `Cross-Origin-Opener-Policy` (COOP), resolving browser console warnings during redirects.
+- **Backend**: Modified `authController` to redirect logout requests to the frontend logout route (`/logout`) instead of directly back to the target application, ensuring proper session cleanup.
+
 ## [1.8.16] - 2026-02-27
 ### Added
 - **SSO**: Implemented OAuth 2.0 Authorization Code Flow (`/oauth/authorize`, `/oauth/token`) for secure token exchange.

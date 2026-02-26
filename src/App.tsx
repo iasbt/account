@@ -193,6 +193,8 @@ export default function App() {
         }
       />
 
+      <Route path="/logout" element={<LogoutPage />} />
+
       {/* 404 处理 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

@@ -176,7 +176,10 @@ export const logout = async (req, res) => {
     if (target) {
       // 验证 target 是否合法，防止 Open Redirect
       if (isValidRedirectTarget(target)) {
-        return res.redirect(target);
+        // [Critical Fix] 
+        // 为了防止 SSO 循环登录 (Loop)，我们必须重定向到前端的 /logout 页面以清除前端状态 (LocalStorage)
+        // 假设前端与后端同域，或前端位于根路径
+        return res.redirect(`/logout?target=${encodeURIComponent(target)}`);
       } else {
         console.warn(`Blocked invalid redirect attempt to: ${target}`);
         // 如果 target 不合法，不重定向，而是返回 JSON 提示
