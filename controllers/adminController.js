@@ -89,20 +89,18 @@ export const sendTestEmail = async (req, res) => {
 
 
 /**
- * 从 legacy_users 表获取所有注册用户。
+ * 从 users 表获取所有注册用户。
  * 仅限管理员访问。
  * 
  * @route GET /api/admin/users
  * @access Private/Admin (私有/管理员)
- * @param {import('express').Request} req - Express 请求对象
- * @param {import('express').Response} res - Express 响应对象
  */
 export const getAllUsers = async (req, res) => {
   try {
-    // 查询 legacy_users 表获取用户列表
-    // 待办: 如果需要，在 Phase 4 迁移到标准的 'users' 表
+    // 查询 public.users 表 (V2 Standard)
+    // Alias name -> username specifically for frontend compatibility
     const result = await pool.query(
-      "SELECT id, email, username, created_at, is_admin FROM public.legacy_users ORDER BY created_at DESC"
+      "SELECT id, email, name as username, created_at, is_admin FROM public.users ORDER BY created_at DESC"
     );
     
     res.json({
@@ -126,7 +124,7 @@ export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      "DELETE FROM public.legacy_users WHERE id = $1 RETURNING id",
+      "DELETE FROM public.users WHERE id = $1 RETURNING id",
       [id]
     );
     
@@ -157,8 +155,9 @@ export const updateUser = async (req, res) => {
   const { username, email, is_admin } = req.body;
 
   try {
+    // Map username -> name
     const result = await pool.query(
-      "UPDATE public.legacy_users SET username = $1, email = $2, is_admin = COALESCE($4, is_admin) WHERE id = $3 RETURNING id, username, email, is_admin",
+      "UPDATE public.users SET name = $1, email = $2, is_admin = COALESCE($4, is_admin), updated_at = NOW() WHERE id = $3 RETURNING id, name as username, email, is_admin",
       [username, email, id, is_admin === undefined ? null : is_admin]
     );
 
@@ -187,7 +186,7 @@ export const updateUser = async (req, res) => {
 export const resetUserPassword = async (req, res) => {
   const { id } = req.params;
   try {
-    const userResult = await pool.query("SELECT email, username FROM public.legacy_users WHERE id = $1", [id]);
+    const userResult = await pool.query("SELECT email, name as username FROM public.users WHERE id = $1", [id]);
     if (userResult.rowCount === 0) {
       return res.status(404).json({ success: false, message: "用户不存在" });
     }

@@ -113,3 +113,31 @@ export const changePassword = async (req, res) => {
     res.status(400).json({ message: error.message || "修改失败", success: false });
   }
 };
+
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, avatar } = req.body;
+    const userId = req.user.id;
+    
+    const user = await authService.updateProfile(userId, { name, avatar });
+    
+    if (!user) {
+        return res.json({ success: true, message: "无变更" });
+    }
+
+    res.json({
+      success: true,
+      message: "更新成功",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.is_admin
+      }
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(400).json({ message: error.message || "更新失败", success: false });
+  }
+};

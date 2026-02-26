@@ -4,7 +4,7 @@ import request from "supertest";
 
 process.env.SSO_JWT_SECRET = "testsecret";
 
-const mockQuery = vi.fn();
+const mockQuery = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
 
 vi.mock("../../../db.js", () => ({
   default: {

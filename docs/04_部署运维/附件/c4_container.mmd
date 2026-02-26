@@ -1,0 +1,23 @@
+C4Container
+title Account System - C4 Level 2 (容器架构)
+
+Person(user, "终端用户")
+Person(admin, "管理员")
+
+System_Boundary(account, "Account System") {
+  Container(edge, "Nginx", "nginx:alpine", "静态资源与反向代理")
+  Container(web, "Web App", "React + Vite", "SPA 前端")
+  Container(api, "API App", "Node.js 20 + Express", "REST API + Email Worker")
+  ContainerDb(pg, "PostgreSQL", "postgres:14", "用户/应用/邮件数据")
+  Container(redis, "Redis", "redis:alpine", "队列/缓存")
+  Container(pgadmin, "PgAdmin", "dpage/pgadmin4", "数据库运维面板")
+}
+
+Rel(user, edge, "HTTPS 访问")
+Rel(admin, edge, "HTTPS 访问")
+Rel(edge, web, "静态资源", "HTTP")
+Rel(edge, api, "API 反代", "HTTP")
+Rel(web, api, "API 调用", "HTTP/JSON")
+Rel(api, pg, "SQL")
+Rel(api, redis, "BullMQ")
+Rel(admin, pgadmin, "数据库维护")

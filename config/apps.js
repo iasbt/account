@@ -11,9 +11,11 @@ export const APPLICATIONS = {
     // 允许的跳转域名 (Token 接收方)
     allowedOrigins: [
       "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口 - 主入口)
+      "http://119.91.71.30:5173/auth/callback", // 生产环境 (SSO Callback)
       "http://119.91.71.30",           // 生产环境 (IP 访问 - 兼容)
       "http://119.91.71.30:3000",      // 生产环境 (Node 默认端口)
       "http://119.91.71.30:8080",      // 生产环境 (备用端口)
+      "https://gallery.iasbt.com",     // 生产环境 (域名)
       "http://localhost:5173",         // 本地开发
       "http://localhost:3000"          // 本地开发
     ],

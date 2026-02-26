@@ -1,0 +1,23 @@
+C4Context
+title Account System - C4 Level 1 (系统上下文)
+
+Person(user, "终端用户", "浏览器/客户端用户")
+Person(admin, "管理员", "后台管理用户")
+System_Ext(edgeone, "EdgeOne/CDN", "公网入口与 TLS")
+System_Ext(subapps, "子系统", "Gallery/Toolbox/LifeOS")
+System_Ext(db, "PostgreSQL", "iasbt-postgres")
+System_Ext(redis, "Redis", "队列/缓存")
+
+System_Boundary(account, "Account System") {
+  System(frontend, "Account Frontend", "React SPA + Nginx")
+  System(backend, "Account Backend", "Node.js + Express")
+}
+
+Rel(edgeone, frontend, "HTTPS 访问")
+Rel(user, frontend, "登录/使用")
+Rel(admin, frontend, "管理操作")
+Rel(frontend, backend, "API 调用", "HTTP/JSON")
+Rel(backend, db, "读写数据", "TCP/5432")
+Rel(backend, redis, "队列/缓存", "TCP/6379")
+Rel(backend, subapps, "SSO Token 发放", "Redirect/JWT")
+Rel(subapps, backend, "Token 验证", "HTTP/JSON")

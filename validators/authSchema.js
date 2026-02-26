@@ -38,3 +38,10 @@ export const changePasswordSchema = z.object({
     newPassword: z.string().min(6, "新密码至少6位")
   })
 });
+
+export const updateProfileSchema = z.object({
+  body: z.object({
+    name: z.string().min(2, "用户名至少2个字符").max(50, "用户名过长").optional(),
+    avatar: z.string().optional()
+  })
+});

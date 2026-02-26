@@ -1,9 +1,9 @@
 
 import { Router } from "express";
-import { sendVerificationCode, register, login, changePassword, resetPassword, getMe } from "../controllers/authController.js";
+import { sendVerificationCode, register, login, changePassword, resetPassword, getMe, updateProfile } from "../controllers/authController.js";
 import { requireAuth } from "../middlewares/auth.js";
 import { validate } from "../middlewares/validate.js";
-import { sendCodeSchema, registerSchema, loginSchema, resetPasswordSchema, changePasswordSchema } from "../validators/authSchema.js";
+import { sendCodeSchema, registerSchema, loginSchema, resetPasswordSchema, changePasswordSchema, updateProfileSchema } from "../validators/authSchema.js";
 import { authLimiter, sendCodeLimiter } from "../middlewares/rateLimit.js";
 
 const router = Router();
@@ -45,4 +45,11 @@ router.post(
   changePassword
 );
 
+
+router.patch(
+  "/auth/me", 
+  requireAuth, 
+  validate(updateProfileSchema), 
+  updateProfile
+);
 export default router;

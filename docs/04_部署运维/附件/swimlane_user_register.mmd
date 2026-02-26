@@ -1,0 +1,26 @@
+flowchart LR
+  subgraph L1[用户]
+    U1[提交注册表单]
+    U2[输入验证码]
+    U3[完成注册]
+  end
+
+  subgraph L2[前端 Web]
+    W1[调用 /auth/send-code]
+    W2[调用 /auth/register]
+  end
+
+  subgraph L3[后端 API]
+    A1[校验参数与限流]
+    A2[发送验证码邮件]
+    A3[校验验证码]
+    A4[创建用户记录]
+  end
+
+  subgraph L4[数据库/队列]
+    D1[(users)]
+    Q1[(redis 邮件队列)]
+  end
+
+  U1 --> W1 --> A1 --> A2 --> Q1
+  U2 --> W2 --> A1 --> A3 --> A4 --> D1 --> U3

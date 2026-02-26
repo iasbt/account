@@ -152,4 +152,30 @@ export const authService = {
     await pool.query("UPDATE public.users SET password = $1, updated_at = NOW() WHERE id = $2", [hash, userId]);
     return true;
   }
+,
+
+  async updateProfile(userId, { name, avatar }) {
+    const updates = [];
+    const values = [];
+    let idx = 1;
+
+    if (name) {
+      updates.push(`name = $${idx++}`);
+      values.push(name);
+    }
+    if (avatar) {
+      updates.push(`avatar = $${idx++}`);
+      values.push(avatar);
+    }
+
+    if (updates.length === 0) return null;
+
+    values.push(userId);
+    const query = `UPDATE public.users SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${idx} RETURNING id, name, email, is_admin`;
+    
+    const result = await pool.query(query, values);
+    if (result.rowCount === 0) throw new Error("用户不存在");
+    
+    return result.rows[0];
+  }
 };

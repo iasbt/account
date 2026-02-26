@@ -3,8 +3,8 @@ import pool from "../db.js";
 export const getDashboardStats = async (req, res) => {
   try {
     const [userCountResult, appsResult] = await Promise.all([
-      // 1. Get total user count
-      pool.query("SELECT COUNT(*)::int AS count FROM public.legacy_users"),
+      // 1. Get total user count (V2 Standard: public.users)
+      pool.query("SELECT COUNT(*)::int AS count FROM public.users"),
       // 2. Get active applications
       pool.query("SELECT * FROM public.applications WHERE is_active = true ORDER BY created_at ASC")
     ]);
