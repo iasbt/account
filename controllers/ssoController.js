@@ -8,13 +8,61 @@ import { auditLogger, AuditEvent } from "../services/auditLogger.js";
 
 /**
  * @deprecated Legacy Implicit Flow (Use /oauth/authorize instead)
- * [Security V1.8.18] Disabled to prevent Token Leakage via URL Fragment.
+ * [Security V1.8.18] RESTORED temporarily to fix Gallery Login.
+ * MUST be removed after Gallery migrates to OAuth 2.0.
  */
 export const issueSsoToken = async (req, res) => {
-  return res.status(410).json({ 
-    error: "deprecated_endpoint", 
-    message: "Implicit Flow is deprecated due to security risks. Please migrate to OAuth 2.0 Authorization Code Flow (/oauth/authorize) with PKCE." 
-  });
+  const { target } = req.query;
+
+  if (!target) {
+    return res.status(400).json({ error: "missing_target" });
+  }
+
+  try {
+    // 1. Validate Target against Allowed Origins (Strict Match)
+    const result = await pool.query(
+      `SELECT * FROM public.applications WHERE $1 = ANY(allowed_origins) AND is_active = true LIMIT 1`,
+      [target]
+    );
+
+    if (result.rowCount === 0) {
+      console.warn(`[SSO-Legacy] Blocked invalid target: ${target}`);
+      return res.status(403).json({ 
+        error: "invalid_target", 
+        message: "Target URL not allowed by any active application" 
+      });
+    }
+
+    // 2. Generate Access Token (Implicit Flow)
+    const token = signToken({
+      sub: req.user.id || req.user.sub,
+      name: req.user.name,
+      email: req.user.email,
+      isAdmin: req.user.isAdmin || req.user.is_admin
+    }, 3600); // 1 hour
+
+    if (!token) {
+      return res.status(500).json({ error: "token_generation_failed" });
+    }
+
+    // 3. Construct Redirect URL with Fragment
+    const redirectUrl = new URL(target);
+    // Append token to fragment as per Implicit Flow standard
+    // Existing fragment is preserved and appended to? No, usually replaced or merged.
+    // We'll just set it.
+    const params = new URLSearchParams();
+    params.set('access_token', token);
+    params.set('token_type', 'Bearer');
+    params.set('expires_in', '3600');
+    
+    redirectUrl.hash = params.toString();
+
+    return res.json({ url: redirectUrl.toString() });
+
+  } catch (err) {
+    console.error("SSO Issue Error:", err);
+    return res.status(500).json({ error: "server_error" });
+  }
 };
 
 /**
