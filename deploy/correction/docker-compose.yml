@@ -28,6 +28,8 @@ services:
       - correction_default
     ports:
       - "3000:3000"
+    volumes:
+      - ./certs:/app/certs
 
   redis:
     image: redis:alpine

@@ -29,7 +29,12 @@ export const getRedisClient = () => {
     });
 
     redisClient.on("error", (err) => {
-      console.error("[Redis] Error:", err);
+      // Suppress connection errors to avoid flooding logs in dev
+      if (err.code === 'ECONNREFUSED') {
+         // console.warn("[Redis] Connection refused (Is Redis running?)");
+         return;
+      }
+      console.error("[Redis] Error:", err.message);
     });
 
     redisClient.on("connect", () => {

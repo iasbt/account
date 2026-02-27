@@ -1,35 +1,35 @@
-# Prompt for Gallery Project AI Agent
+# Gallery 项目 AI Agent 提示词 (Prompt for Gallery Project AI Agent)
 
-Please copy the following instructions and give them to the AI agent managing the **Image Gallery Project** (`C:\My_Project\image`).
+请复制以下指令并提供给负责管理 **Image Gallery Project** (`C:\My_Project\image`) 的 AI 助手。
 
 ---
 
-## 🤖 Role: Gallery Project Maintainer
+## 🤖 角色：Gallery 项目维护者 (Gallery Project Maintainer)
 
-**Objective**: Configure the Image Gallery project to integrate with the Central Account System for Single Sign-On (SSO).
+**目标 (Objective)**：配置 Image Gallery 项目以集成中央账户系统 (Central Account System) 实现单点登录 (SSO)。
 
-**Context**: 
-The **Account System** (deployed at `http://119.91.71.30`) now acts as the Identity Provider (IdP). The original Supabase backend is deprecated for auth purposes. We must configure the Gallery app to accept JWTs issued by the Account System.
+**背景 (Context)**：
+**账户系统 (Account System)**（部署在 `http://119.91.71.30`）现在作为身份提供商 (IdP)。原有的 Supabase 后端在认证方面已被废弃。我们必须配置 Gallery 应用以接受账户系统颁发的 JWT。
 
-### 📋 Task Checklist
+### 📋 任务清单 (Task Checklist)
 
-#### 1. Configure Environment Variables (`.env`)
-*   `VITE_ACCOUNT_URL`: `http://119.91.71.30` (or `https://account.iasbt.com`)
-*   `VITE_SUPABASE_URL`: `http://119.91.71.30` (Proxies to Account System)
-*   `VITE_SUPABASE_ANON_KEY`: `any-string-works` (Not verified by Account System, but required by client)
-*   `VITE_SUPABASE_JWT_SECRET`: The Secret from Account Admin Panel (Application Registry).
+#### 1. 配置环境变量 (`.env`)
+*   `VITE_ACCOUNT_URL`: `http://119.91.71.30` (或 `https://account.iasbt.com`)
+*   `VITE_SUPABASE_URL`: `http://119.91.71.30` (代理至账户系统)
+*   `VITE_SUPABASE_ANON_KEY`: `any-string-works` (账户系统不验证此项，但客户端需要)
+*   `VITE_SUPABASE_JWT_SECRET`: 来自账户管理面板 (Application Registry) 的密钥 (Secret)。
 
-#### 2. Update Auth Callback (`src/auth/AuthCallback.tsx` or similar)
-Ensure the callback page handles the `access_token` from the URL hash.
-*   The Account System redirects back to: `http://localhost:5173/auth/callback#access_token=...&refresh_token=...`
-*   Supabase Client `supabase.auth.getSession()` or `setSession()` should handle this automatically if `VITE_SUPABASE_URL` points correctly.
+#### 2. 更新认证回调 (`src/auth/AuthCallback.tsx` 或类似文件)
+确保回调页面能处理 URL 哈希 (Hash) 中的 `access_token`。
+*   账户系统重定向回：`http://localhost:5173/auth/callback#access_token=...&refresh_token=...`
+*   如果 `VITE_SUPABASE_URL` 指向正确，Supabase 客户端 `supabase.auth.getSession()` 或 `setSession()` 应能自动处理此情况。
 
-#### 3. Update Allowed Origins in Account System
-Make sure your Gallery URL (e.g., `http://119.91.71.30:5173` or `http://localhost:5173`) is added to the **Application Registry** in the Account System Admin Panel.
+#### 3. 更新账户系统中的允许来源 (Allowed Origins)
+确保您的 Gallery URL（例如 `http://119.91.71.30:5173` 或 `http://localhost:5173`）已添加到账户系统管理面板的 **应用注册表 (Application Registry)** 中。
 
-#### 4. Check for Mixed Content
-If Gallery is HTTPS (Vercel), Account System MUST be HTTPS.
-Current Status: Account System is HTTP (`119.91.71.30`).
-**Action**: Deploy Gallery to the same server using IP (recommended for now), or configure SSL for Account System.
+#### 4. 检查混合内容 (Mixed Content)
+如果 Gallery 使用 HTTPS (Vercel)，则账户系统必须也是 HTTPS。
+当前状态：账户系统是 HTTP (`119.91.71.30`)。
+**行动 (Action)**：建议将 Gallery 部署到同一服务器使用 IP 访问（当前推荐），或为账户系统配置 SSL。
 
 ---

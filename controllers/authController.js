@@ -1,7 +1,6 @@
 
 import { authService } from "../services/authService.js";
 import { isValidRedirectTarget } from "../utils/redirectValidator.js";
-import { addToBlacklist } from "../utils/redis.js";
 import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
 

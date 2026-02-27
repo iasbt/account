@@ -7,7 +7,7 @@ const run = async () => {
     console.log("Initializing Applications Table...");
 
     // 0. Drop Table if exists (RESET for V1.8.0)
-    await pool.query("DROP TABLE IF EXISTS public.applications");
+    await pool.query("DROP TABLE IF EXISTS public.applications CASCADE");
     console.log("Dropped existing 'applications' table.");
 
     // 1. Create Table

@@ -1,3 +1,4 @@
+
 # Logs
 logs
 *.log
@@ -27,3 +28,4 @@ deploy_remote.ps1.bak
 *.sw?
 
 image.tar.gz
+certs/

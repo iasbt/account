@@ -2,31 +2,21 @@ import { Queue } from 'bullmq';
 import { config } from '../config/index.js';
 import Redis from 'ioredis';
 
-// Reuse the Redis connection from config
-// Note: BullMQ requires a Redis connection. 
-// We use ioredis as recommended by BullMQ.
-
-const connection = new Redis({
+// Create a redis instance but don't panic if it fails
+const redisConfig = {
   host: config.redis.host,
   port: config.redis.port,
   password: config.redis.password,
   maxRetriesPerRequest: null,
-  retryStrategy: (times) => {
-    // If we can't connect, don't spam.
-    // Return null to stop retrying? No, BullMQ needs retry.
-    // But we can backoff aggressively.
-    return Math.min(times * 2000, 60000); 
-  },
-  // Suppress connection errors in dev
-  reconnectOnError: (err) => {
-    return false;
-  }
-});
+  retryStrategy: (times) => Math.min(times * 2000, 60000),
+};
+
+const connection = new Redis(redisConfig);
 
 connection.on('error', (err) => {
-  // Suppress ECONNREFUSED logs in console to avoid flooding
+  // Suppress ECONNREFUSED logs
   if (err.code === 'ECONNREFUSED') return;
-  console.error('Redis Queue Error:', err);
+  console.error('Redis Queue Error:', err.message);
 });
 
 export const emailQueue = new Queue('email-queue', { connection });
@@ -40,19 +30,30 @@ export const emailQueue = new Queue('email-queue', { connection });
  * @param {object} options - BullMQ job options
  */
 export const addEmailJob = async (to, subject, html, type = 'general', options = {}) => {
-  return emailQueue.add('send-email', {
-    to,
-    subject,
-    html,
-    type
-  }, {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 1000,
-    },
-    removeOnComplete: true,
-    removeOnFail: false, // Keep failed jobs for inspection
-    ...options
-  });
+  // Check if redis is ready
+  if (connection.status !== 'ready') {
+    console.warn(`[Email Skipped] Redis not ready. Subject: ${subject}`);
+    return null;
+  }
+  
+  try {
+    return await emailQueue.add('send-email', {
+      to,
+      subject,
+      html,
+      type
+    }, {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 1000,
+      },
+      removeOnComplete: true,
+      removeOnFail: false, // Keep failed jobs for inspection
+      ...options
+    });
+  } catch (error) {
+    console.error('Failed to add email job:', error.message);
+    return null;
+  }
 };

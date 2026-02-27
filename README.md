@@ -1,18 +1,18 @@
-# 账户系统 (Account System) - V2.0
+# 账户系统 (Account System) - V2.1
 
-> **Status**: ✅ Active (V1.8.6)
-> **Docs**: [📚 Documentation Index (文档索引)](docs/INDEX.md)
+> **状态 (Status)**: ✅ Active (V1.9.0)
+> **文档 (Docs)**: [📚 Documentation Index (文档索引)](docs/INDEX.md)
 
 统一账户中心，作为“四合院”项目矩阵的数字基座，负责统一身份认证 (SSO)、权限控制 (RBAC) 和数据中台服务。
 
-## 最新特性 (New Features v2.0)
-- **纯 JWT 架构 (Pure JWT)**: 彻底移除 Supabase 依赖，采用标准 RFC 7519 JWT 机制。
-- **安全加固 (Security Hardening)**: 全面引入 Zod 输入验证、Rate Limiting 频率限制与 XSS 防护。
-- **架构重构 (Architecture)**: 认证逻辑下沉至 Service 层，数据库迁移至标准 `users` 表。
-- **多应用 SSO (Multi-App SSO)**: 支持 Gallery, Toolbox 等子应用接入，提供动态 Token 生成策略。
-- **可视化管理 (Visual Admin)**: 管理员后台新增“应用接入”模块，无需修改代码即可一键添加新应用。
-- **动态注册表 (Dynamic Registry)**: 应用配置存储于数据库，支持热更新与独立密钥管理。
-- **邮件服务 V2 (Email Service V2)**: 全新重构的邮件系统，支持多服务商切换、可视化模板编辑、发送日志审计及实时统计图表 (Recharts)。
+## 最新特性 (New Features v2.1)
+
+- **OIDC/OAuth 2.0 架构**: 全面升级为标准的 OAuth 2.0 协议，支持 Authorization Code Flow + PKCE，彻底弃用隐式流。
+- **RS256 非对称加密**: 引入 JWKS (JSON Web Key Set) 公钥分发机制，客户端无需持有 Secret 即可验证 Token，安全性大幅提升。
+- **刷新令牌轮换 (Refresh Token Rotation)**: 替代旧版的 Redis 黑名单机制，通过令牌轮换检测盗用行为，解除性能瓶颈。
+- **安全加固 (Security Hardening)**: 严格的回调地址 (Redirect URI) 验证，全面引入 Zod 输入验证与 Rate Limiting 频率限制。
+- **可视化管理 (Visual Admin)**: 管理员后台支持应用接入管理、邮件模板编辑与发送日志审计。
+- **邮件服务 V2 (Email Service V2)**: 支持多服务商切换、可视化模板编辑及实时统计图表。
 
 ## 文档导航 (Documentation)
 
@@ -20,7 +20,7 @@
 
 ### 核心文档
 - **架构设计**: [01_系统概览.md](docs/01_架构设计/01_系统概览.md)
-- **开发指南**: [01_子系统接入手册.md](docs/02_开发指南/01_子系统接入手册.md)
+- **开发指南**: [03_单点登录指南.md](docs/02_开发指南/03_单点登录指南.md) (推荐)
 - **API 参考**: [03_API接口规范.yaml](docs/03_参考手册/03_API接口规范.yaml)
 - **部署运维**: [01_部署手册.md](docs/04_部署运维/01_部署手册.md)
 
@@ -78,11 +78,11 @@ node server.js
 - `src/`: 前端源代码
     - `pages/`: 页面组件 (含 `AdminPanel`, `DashboardPage`)
     - `store/`: Zustand 状态管理
-- `controllers/`: 后端业务逻辑 (`adminController`, `authController`)
+- `controllers/`: 后端业务逻辑 (`adminController`, `ssoController`)
 - `middlewares/`: 中间件 (`roleCheck`, `cors`)
 - `routes/`: 路由定义
 - `deploy/correction/`: **部署核心配置 (Docker/Nginx)** - *未经批准严禁修改*
-- `docs/`: 项目文档库 (V2.0 结构)
+- `docs/`: 项目文档库 (V2.1 结构)
     - `01_架构设计/`: 架构设计与系统白皮书
     - `02_开发指南/`: 开发指南与接入集成手册
     - `03_参考手册/`: 配置模板与 API 规范

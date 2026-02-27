@@ -5,13 +5,14 @@ import { config } from "./index.js";
 export const APPLICATIONS = {
   // 1. Image Gallery (图库)
   gallery: {
-    appId: "gallery",
+    id: "gallery",
     name: "Image Gallery",
     secret: process.env.SSO_SECRET_GALLERY || "MvVh2XGOWu0axQJFoFYbocTvAXd9tZ9J3NQzAbfIz",
     // 允许的跳转域名 (Token 接收方)
     allowedOrigins: [
-      "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口 - 主入口)
       "http://119.91.71.30:5173/auth/callback", // 生产环境 (SSO Callback)
+      "http://localhost:5173/auth/callback",    // 本地开发 (SSO Callback)
+      "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口 - 主入口)
       "http://119.91.71.30",           // 生产环境 (IP 访问 - 兼容)
       "http://119.91.71.30:3000",      // 生产环境 (Node 默认端口)
       "http://119.91.71.30:8080",      // 生产环境 (备用端口)

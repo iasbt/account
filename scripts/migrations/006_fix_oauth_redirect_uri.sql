@@ -1,0 +1,2 @@
+
+ALTER TABLE oauth_codes ADD COLUMN IF NOT EXISTS redirect_uri TEXT DEFAULT '';

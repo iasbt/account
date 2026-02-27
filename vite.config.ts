@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, PluginOption } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => {
@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const authTarget = env.VITE_AUTH_PROXY_TARGET || 'http://localhost:3000'
 
   return {
-    plugins: [react() as any],
+    plugins: [react() as unknown as PluginOption],
     test: {
       environment: "node",
       include: ["src/lib/__tests__/**/*.test.ts", "tests/**/*.test.{js,ts}"],

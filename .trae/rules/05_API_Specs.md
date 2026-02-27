@@ -15,10 +15,21 @@
 *   **POST** `/api/auth/login`: `{account, password}` -> `{token, user}`
 *   **GET** `/api/auth/me`: 验证 Token 有效性。
 
-## 3. SSO 契约
-*   **GET** `/api/auth/sso-token`: 返回一次性 Token。
-*   **目标**: 外部应用通过回调验证此 Token。
-*   **GET** `/api/sso/issue`: 根据 `target` URL 颁发 Access Token (Redirect 模式)。
+## 3. SSO 契约 (V1.9.0 Security Update)
+*   **Discovery**: `/.well-known/openid-configuration` (OIDC 兼容)
+*   **JWKS**: `/.well-known/jwks.json` (公钥分发)
+*   **POST** `/api/oauth/authorize`: 启动授权流程 (Auth Code Flow)。
+    *   Body: `{ client_id, redirect_uri, response_type='code', scope, state, code_challenge, code_challenge_method }`
+    *   **PKCE**: 推荐使用 S256 Challenge。
+    *   **Strict Match**: `redirect_uri` 必须与应用注册的 `allowed_origins` 完全一致。
+*   **POST** `/api/oauth/token`: 换取/刷新 Access Token。
+    *   Body (Exchange): `{ grant_type='authorization_code', code, redirect_uri, client_id, client_secret, code_verifier }`
+    *   Body (Refresh): `{ grant_type='refresh_token', refresh_token, client_id, client_secret }`
+    *   **PKCE**: 若 authorize 阶段使用了 PKCE，此处必须提供 `code_verifier`。
+    *   **Rotation**: 每次刷新都会颁发新的 Refresh Token，旧 Token 立即作废。
+*   **GET** `/api/sso/issue`: **已废弃 (Deprecated)**。
+    *   Status: 410 Gone.
+    *   Reason: Implicit Flow 存在 Token 泄露风险，且不支持 PKCE。
 
 ## 4. 版本策略
 *   **格式**: `Major.Minor.Patch` (如 1.8.1)。
