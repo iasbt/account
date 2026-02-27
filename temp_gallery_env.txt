@@ -1,0 +1,13 @@
+VITE_ACCOUNT_API_URL=http://localhost:3000
+VITE_ACCOUNT_SSO_URL=http://localhost:5174/sso/issue
+VITE_ACCOUNT_URL=http://localhost:5174
+VITE_API_URL=http://localhost:3000
+VITE_APP_ID=gallery
+VITE_CLIENT_ID=gallery-client
+VITE_AUTH_TOKEN_KEY=access_token
+APP_SECRET=MvVh2XGOWu0axQJFoFYbocTvAXd9tZ9J3NQzAbfIz
+VITE_AMAP_KEY=your_amap_key
+VITE_AMAP_SECURITY_CODE=your_amap_security_code
+VITE_IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/iasbt
+VITE_R2_WORKER_URL=https://img-upload.iasbt.com
+VITE_R2_TOKEN=your_r2_token

@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
       setupFiles: './src/setupTests.ts',
     },
     server: {
-      port: 5173,
+      port: 5174,
       proxy: {
         '/api': {
           target: authTarget,

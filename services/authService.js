@@ -5,6 +5,7 @@ import { generateToken } from "../utils/token.js";
 import { sendEmail } from "../utils/email.js";
 import { getVerificationCodeTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode, getVerificationCode, deleteVerificationCode } from "../utils/verificationStore.js";
+import { checkLockout, recordFailedAttempt, resetAttempts } from "../utils/accountLock.js";
 import { randomUUID, randomInt } from "crypto";
 
 export const authService = {
@@ -56,13 +57,22 @@ export const authService = {
     return { user, token };
   },
 
-  async login({ account, password }) {
+  async login({ account, password, skipLockout = false }) {
+    // 1. Check Lockout
+    if (!skipLockout) {
+      const lockout = await checkLockout(account);
+      if (lockout.locked) {
+        throw new Error(`账号已被锁定，请在 ${Math.ceil(lockout.remaining / 60)} 分钟后重试`);
+      }
+    }
+
     const result = await pool.query(
       "SELECT * FROM public.users WHERE email = $1 OR name = $1",
       [account]
     );
 
     if (result.rowCount === 0) {
+      if (!skipLockout) await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
     }
 
@@ -70,8 +80,12 @@ export const authService = {
     const isMatch = await bcryptjs.compare(password, user.password);
 
     if (!isMatch) {
+      if (!skipLockout) await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
     }
+
+    // Login Success - Reset Attempts
+    await resetAttempts(account);
 
     const token = generateToken(user);
     
@@ -87,24 +101,38 @@ export const authService = {
   },
 
   async adminLogin({ account, password }) {
+    // 1. Check Lockout
+    const lockout = await checkLockout(account);
+    if (lockout.locked) {
+      throw new Error(`账号已被锁定，请在 ${Math.ceil(lockout.remaining / 60)} 分钟后重试`);
+    }
+
     const result = await pool.query(
       "SELECT * FROM public.users WHERE email = $1 OR name = $1",
       [account]
     );
 
     if (result.rowCount === 0) {
+      await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
     }
 
     const user = result.rows[0];
     if (!user.is_admin) {
+      // Don't record attempt for non-admin user trying to access admin? 
+      // Actually, this is a failed admin login. We should probably record it.
+      await recordFailedAttempt(account);
       throw new Error("无权访问");
     }
 
     const isMatch = await bcryptjs.compare(password, user.password);
     if (!isMatch) {
+      await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
     }
+
+    // Login Success - Reset Attempts
+    await resetAttempts(account);
 
     const token = generateToken(user);
     

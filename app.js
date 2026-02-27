@@ -15,7 +15,15 @@ app.set("trust proxy", 1);
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resource sharing for static assets/API
   crossOriginOpenerPolicy: false, // Disable COOP to allow cross-origin redirects/popups without issues
-  contentSecurityPolicy: false // Disable CSP for now to avoid breaking existing scripts/styles if any
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for React (dev)
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Tailwind/React
+      imgSrc: ["'self'", "data:", "https:"], // Allow external images
+      connectSrc: ["'self'", "http://localhost:*", "https://*.iasbt.com"], // Allow API calls
+    },
+  }
 }));
 
 app.use(metricsMiddleware); // Measure all requests

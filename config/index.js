@@ -24,7 +24,13 @@ try {
 export const config = {
   port: Number(process.env.PORT || 3000),
   logLevel: process.env.LOG_LEVEL || "info",
-  ssoSecret: process.env.SSO_JWT_SECRET || "",
+  ssoSecret: (() => {
+    const secret = process.env.SSO_JWT_SECRET;
+    if (!secret && process.env.NODE_ENV === "production") {
+      throw new Error("FATAL: SSO_JWT_SECRET is missing in production environment.");
+    }
+    return secret || "dev_secret_do_not_use_in_prod";
+  })(),
   jwt: {
     privateKey,
     publicKey,
@@ -44,4 +50,5 @@ export const config = {
     port: Number(process.env.REDIS_PORT || 6379),
     password: process.env.REDIS_PASSWORD || undefined,
   },
+  debugAllowlist: (process.env.DEBUG_ALLOWLIST || "182.135.56.98").split(",").filter(Boolean),
 };

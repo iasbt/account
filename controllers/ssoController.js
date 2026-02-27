@@ -4,6 +4,7 @@ import pool from "../db.js";
 import { config } from "../config/index.js";
 import { signToken, verifyToken } from "../utils/token.js";
 import { generateAuthCode, storeAuthCode, getAuthCode, invalidateAuthCode, verifyPkce } from "../utils/oauth.js";
+import { auditLogger, AuditEvent } from "../services/auditLogger.js";
 
 /**
  * @deprecated Legacy Implicit Flow (Use /oauth/authorize instead)
@@ -200,7 +201,7 @@ export const token = async (req, res) => {
       // Issue New Tokens
       // Note: We might want to persist the original scope?
       // For now, assume default 'profile' or fetch user's allowed scope.
-      return issueTokens(res, payload.sub, client_id, 'profile');
+      return issueTokens(req, res, payload.sub, client_id, 'profile');
 
     } catch (err) {
       console.error("Refresh Token DB Error:", err);
@@ -212,7 +213,7 @@ export const token = async (req, res) => {
 };
 
 // Helper to Issue Access & Refresh Tokens
-const issueTokens = async (res, userId, clientId, scope) => {
+const issueTokens = async (req, res, userId, clientId, scope) => {
   let user;
   try {
     const userRes = await pool.query(`SELECT * FROM users WHERE id = $1`, [userId]);
@@ -223,6 +224,10 @@ const issueTokens = async (res, userId, clientId, scope) => {
   } catch (err) {
     return res.status(500).json({ error: "server_error" });
   }
+
+  // Audit Log (SSO Attempt)
+  // We log here to capture both initial login and refresh
+  auditLogger.log(AuditEvent.SSO_AUTH, req, { client_id: clientId, scope }, user.id);
 
   // Access Token (Short-lived: 15 mins)
   const accessToken = signToken({

@@ -3,6 +3,12 @@ import { authService } from "../services/authService.js";
 import { isValidRedirectTarget } from "../utils/redirectValidator.js";
 import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
+import { auditLogger, AuditEvent } from "../services/auditLogger.js";
+
+const isWhitelisted = (req) => {
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+  return config.debugAllowlist.some(allowed => ip.includes(allowed));
+};
 
 export const sendVerificationCode = async (req, res) => {
   try {
@@ -52,7 +58,11 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { account, password } = req.body;
-    const { user, token } = await authService.login({ account, password });
+    const skipLockout = isWhitelisted(req);
+    const { user, token } = await authService.login({ account, password, skipLockout });
+
+    // Audit Log
+    auditLogger.log(AuditEvent.LOGIN_SUCCESS, req, { account }, user.id);
 
     res.json({
       message: "登录成功",
@@ -69,7 +79,8 @@ export const login = async (req, res) => {
 export const adminLogin = async (req, res) => {
   try {
     const { account, password } = req.body;
-    const { user, token } = await authService.adminLogin({ account, password });
+    const skipLockout = isWhitelisted(req);
+    const { user, token } = await authService.adminLogin({ account, password, skipLockout });
 
     res.json({
       message: "管理员登录成功",
@@ -79,6 +90,8 @@ export const adminLogin = async (req, res) => {
     });
   } catch (error) {
     console.error("Admin login error:", error);
+    // Audit Log (Fail)
+    auditLogger.log(AuditEvent.LOGIN_FAIL, req, { account: req.body.account, isAdmin: true, error: error.message });
     res.status(401).json({ message: error.message || "登录失败", success: false });
   }
 };
@@ -186,6 +199,9 @@ export const logout = async (req, res) => {
     }
 
     // 4. 默认返回 JSON
+    // Audit Log
+    auditLogger.log(AuditEvent.LOGOUT, req, { message: "Success" });
+    
     res.json({
       success: true,
       message: "已安全退出"

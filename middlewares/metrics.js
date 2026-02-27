@@ -19,8 +19,20 @@ const httpRequestDurationMicroseconds = new client.Histogram({
   buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
 });
 
-// Register the histogram
+// Create a custom counter for auth failures
+const authFailures = new client.Counter({
+  name: 'auth_failures_total',
+  help: 'Total number of authentication failures',
+  labelNames: ['type']
+});
+
+// Register metrics
 register.registerMetric(httpRequestDurationMicroseconds);
+register.registerMetric(authFailures);
+
+export const recordAuthFailure = (type = 'login') => {
+  authFailures.inc({ type });
+};
 
 export const metricsMiddleware = (req, res, next) => {
   const end = httpRequestDurationMicroseconds.startTimer();
