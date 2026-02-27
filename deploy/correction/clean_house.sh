@@ -16,4 +16,7 @@ sudo fuser -k 80/tcp 2>/dev/null || true
 sudo fuser -k 443/tcp 2>/dev/null || true
 sudo fuser -k 8080/tcp 2>/dev/null || true
 
+echo ">>> [4/3] Pruning Docker Build Cache (Reclaim Disk Space)..."
+sudo docker builder prune -f
+
 echo ">>> Cleanup Complete. Ready for V1.6 Deployment."

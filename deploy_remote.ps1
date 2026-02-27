@@ -157,8 +157,9 @@ $DeployCmd = @'
         exit 1
     fi
     
-    echo '>>> Pruning dangling images...'
-    sudo docker image prune -f
+    echo '>>> Pruning Build Cache & System Garbage...'
+    sudo docker builder prune -f
+    sudo docker system prune -f
     
     echo '>>> Disk usage after prune...'
     df -h
