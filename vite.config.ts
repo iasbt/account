@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv, PluginOption } from 'vite'
+import { defineConfig, loadEnv, type PluginOption } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => {
@@ -8,21 +8,19 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react() as unknown as PluginOption],
     test: {
-      environment: "node",
-      include: ["src/lib/__tests__/**/*.test.ts", "tests/**/*.test.{js,ts}"],
-      coverage: {
-        provider: "v8",
-        reporter: ["text", "json", "html"]
-      }
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/setupTests.ts',
     },
     server: {
+      port: 5173,
       proxy: {
         '/api': {
           target: authTarget,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '')
-        }
-      }
-    }
+          secure: false,
+        },
+      },
+    },
   }
 })
