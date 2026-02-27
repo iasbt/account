@@ -30,9 +30,6 @@ export default function LoginPage() {
     try {
       await loginWithPassword(account, password)
       
-      // Get the updated user state to check role
-      const user = useAuthStore.getState().user
-
       // 登录成功后的跳转逻辑
       if (redirectUrl) {
         // 尝试通过 SSO 接口获取带 Token 的跳转链接
