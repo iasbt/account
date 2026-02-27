@@ -33,7 +33,10 @@
 
 ## Phase 6: ✅ Verification & Final Report
 - [x] **Automated Tests**: Verify CSP headers and Rate Limits via `security_audit.js`.
-- [x] **Final Report**: Generate `SECURITY_ASSESSMENT_REPORT.md`.
+- [x] **Final Report**: Generate `SECURITY_ASSESSMENT_REPORT.md` (Localized).
+- [x] **Documentation**: Localize `GALLERY_REMEDIATION.md` and other reports.
+- [x] **Remote Fix**: Upsert `gallery-client` to remote DB via `fix_gallery_client.js`.
+- [x] **Deployment**: Whitelist IP and deploy updates.
 
 ## Phase 7: 🔐 Advanced Security (Roadmap)
 - [ ] **MFA/TOTP**: Implement Time-based One-Time Password.
