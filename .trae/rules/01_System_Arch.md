@@ -1,7 +1,4 @@
----
-alwaysApply: true
----
-# System Topology & Containers (系统拓扑与容器)
+# System Topology (系统拓扑) - 架构篇
 
 > **Status**: Active
 > **Effective Date**: 2026-02-22
@@ -22,12 +19,3 @@ alwaysApply: true
 | `account-backend`| `node:20-alpine`| **接口**。Express.js 核心。 |
 | `account-frontend`| `nginx` | **Web**。React SPA 产物。 |
 | `portainer` | `portainer` | **运维**。可视化管理。 |
-
-## 3. 网络规则
-*   **内部**: `correction_default` 桥接网络。
-*   **暴露**:
-    *   443/80 (Nginx)
-    *   5432 (Postgres - 建议仅内部访问)
-*   **DNS**: 容器间必须通过服务名验证 (如 `iasbt-postgres`)。
-
-🚫 **废弃禁令**: 严禁使用 `nginx-gateway`, `postgrest`, `postgres-business`。

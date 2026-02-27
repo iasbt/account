@@ -227,16 +227,16 @@ export default function UserManager() {
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-3 pt-2 opacity-50 cursor-not-allowed">
                 <input
                   type="checkbox"
                   id="isAdmin"
                   checked={editForm.is_admin}
-                  onChange={e => setEditForm({...editForm, is_admin: e.target.checked})}
-                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                  disabled={true}
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-not-allowed"
                 />
-                <label htmlFor="isAdmin" className="text-sm font-medium text-gray-700 cursor-pointer select-none">
-                  管理员权限 (Admin Access)
+                <label htmlFor="isAdmin" className="text-sm font-medium text-gray-700 cursor-not-allowed select-none">
+                  管理员权限 (仅数据库可修改)
                 </label>
               </div>
               

@@ -66,13 +66,7 @@ export default function LoginPage() {
       } 
       
       // Default redirect if no external redirect happened
-      if (user?.isAdmin) {
-        // 管理员默认进入后台管理系统 (Admin Box)
-        navigate('/admin')
-      } else {
-        // 普通用户进入应用仪表盘 (User Box)
-        navigate('/')
-      }
+      navigate('/')
     } catch (err: unknown) {
       const message = err instanceof Error && err.message ? err.message : '登录失败，请检查账号密码'
       setError(message)

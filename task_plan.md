@@ -1,47 +1,28 @@
-# Task Plan: Comprehensive Security Assessment & Roadmap Implementation
+# 任务计划：重构 .trae/rules 规则文件
 
-> **Goal**: Conduct a full security assessment, benchmark against top open-source projects, and implement a prioritized roadmap to reach industry security baselines.
-> **Status**: In Progress
+## 状态
+- [x] 分析与探索
+- [x] 实施 - 拆分与重构
+- [x] 验证
 
-## Phase 1: 🔍 Security Assessment (Static/Dynamic/Dependency)
-- [x] **Dependency Scan**: Check `package.json`. Found `zod` v4 (potential issue).
-- [x] **Static Code Analysis**: `app.js` (CSP disabled), `config/index.js` (Weak defaults).
-- [x] **Config Review**: Rate limits exist but are high.
-- [x] **Architecture Review**: Auth flow is generally solid (PKCE, Param queries).
-- [x] **Report**: Compiled in `findings.md`.
+## 目标
+1.  **拆分规则文件**：将 `C:\My_Project\account\.trae\rules` 下的规则文件进行拆分。
+2.  **限制字符数**：确保每个规则文件的字符数不超过 985 字符。
+3.  **保持逻辑**：在拆分的同时，保持规则的逻辑结构清晰，便于管理和阅读。
 
-## Phase 2: 📊 Competitor Analysis (Keycloak/Casdoor)
-- [x] **Research Keycloak**: Brute force, CSP.
-- [x] **Research Casdoor**: Audit logs.
-- [x] **Gap Analysis**: Completed in `findings.md`.
+## 阶段
 
-## Phase 3: 🗺️ Roadmap & Strategy Formulation
-- [x] **Prioritization**: P0 (CSP, Secrets), P1 (Audit, Lockout), P2 (MFA).
-- [x] **Strategy**: Core Security First.
-- [x] **Roadmap**: Defined in `findings.md`.
+### 第一阶段：分析与探索
+- [x] 列出当前规则文件。
+- [x] 读取并分析每个规则文件的长度和内容结构。
+- [x] 制定拆分方案（哪些文件需要拆，拆成什么样）。
+- [x] 在 `findings.md` 中记录分析结果。
 
-## Phase 4: 🛡️ Implementation: High Priority Fixes (Core Security)
-- [x] **Security Headers**: Enable CSP in `app.js`.
-- [x] **Config Hardening**: Enforce `SSO_JWT_SECRET` presence in `config/index.js`.
-- [x] **Rate Limiting**: Tighten `authLimiter` in `middlewares/rateLimit.js`.
-- [x] **Zod Review**: Verify `zod` version compatibility (optional).
+### 第二阶段：实施 - 拆分与重构
+- [x] 根据拆分方案，创建新的规则文件。
+- [x] 确保新文件内容使用简体中文（根据之前的语言规范）。
+- [x] 删除或归档旧的规则文件。
 
-## Phase 5: 🚀 Implementation: Feature Enhancements
-- [x] **Audit Logging**: Create `security_logs` table and `auditLogger.js`.
-- [x] **Observability**: Add Prometheus counter for `auth_failures`.
-- [x] **Brute Force Lockout**: Implement Redis-based account lockout.
-
-## Phase 6: ✅ Verification & Final Report
-- [x] **Automated Tests**: Verify CSP headers and Rate Limits via `security_audit.js`.
-- [x] **Final Report**: Generate `SECURITY_ASSESSMENT_REPORT.md` (Localized).
-- [x] **Documentation**: Localize `GALLERY_REMEDIATION.md` and other reports.
-- [x] **Remote Fix**: Upsert `gallery-client` to remote DB via `fix_gallery_client.js`.
-- [x] **Deployment**: Whitelist IP and deploy updates.
-
-## Phase 7: 🔐 Advanced Security (Roadmap)
-- [ ] **MFA/TOTP**: Implement Time-based One-Time Password.
-- [ ] **Admin Dashboard**: Visualize security logs.
-
-## Errors Encountered
-| Error | Attempt | Resolution |
-|-------|---------|------------|
+### 第三阶段：验证
+- [x] 检查所有新文件的字符数是否符合要求（< 985 字符）。
+- [x] 确认规则内容完整且无遗漏。

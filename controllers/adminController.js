@@ -124,6 +124,12 @@ export const getAllUsers = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
+    // Check if user is admin
+    const userCheck = await pool.query("SELECT is_admin FROM public.users WHERE id = $1", [id]);
+    if (userCheck.rowCount > 0 && userCheck.rows[0].is_admin) {
+      return res.status(403).json({ success: false, message: "无法通过Web接口删除管理员账号" });
+    }
+
     const result = await pool.query(
       "DELETE FROM public.users WHERE id = $1 RETURNING id",
       [id]
@@ -153,13 +159,14 @@ export const deleteUser = async (req, res) => {
  */
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { username, email, is_admin } = req.body;
+  const { username, email } = req.body; // Removed is_admin from destructuring
 
   try {
     // Map username -> name
+    // Removed is_admin from UPDATE query
     const result = await pool.query(
-      "UPDATE public.users SET name = $1, email = $2, is_admin = COALESCE($4, is_admin), updated_at = NOW() WHERE id = $3 RETURNING id, name as username, email, is_admin",
-      [username, email, id, is_admin === undefined ? null : is_admin]
+      "UPDATE public.users SET name = $1, email = $2, updated_at = NOW() WHERE id = $3 RETURNING id, name as username, email, is_admin",
+      [username, email, id]
     );
 
     if (result.rowCount === 0) {

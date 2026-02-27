@@ -1,4 +1,4 @@
-# Deployment & Operations (部署与运维)
+# Deployment (部署) - 流水线篇
 
 > **Status**: Active
 > **Effective Date**: 2026-02-22
@@ -21,12 +21,3 @@
 │       └── nginx.conf
 ├── server.js
 ```
-
-## 3. 环境配置
-*   **DB_HOST**: `iasbt-postgres` (Docker 内部 DNS)。
-*   **NODE_ENV**: `production`。
-*   **机密**: 通过 Docker Env 或服务器端 `.env` 注入。
-
-## 4. 故障排查
-*   **版本不匹配**: 检查 `package.json` vs `server.js`。
-*   **网络**: 确认 `correction_default` 网络是否存在。

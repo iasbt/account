@@ -64,6 +64,14 @@ export const login = async (req, res) => {
     // Audit Log
     auditLogger.log(AuditEvent.LOGIN_SUCCESS, req, { account }, user.id);
 
+    // Block Admin from regular login
+    if (user.isAdmin) {
+      return res.status(403).json({ 
+        message: "管理员账号请通过管理后台登录", 
+        success: false 
+      });
+    }
+
     res.json({
       message: "登录成功",
       success: true,
