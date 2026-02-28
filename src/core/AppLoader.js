@@ -50,9 +50,28 @@ class AppLoader {
       await this.loadApp(filePath);
     });
 
-    // Setup dynamic router middleware
+    const reservedPrefixes = new Set([
+      'api',
+      'auth',
+      'admin',
+      'apps',
+      'dashboard',
+      'health',
+      'images',
+      'categories',
+      'user',
+      'metrics',
+      'sso',
+      'oauth',
+      'rest',
+      '.well-known'
+    ]);
+
     this.router.use((req, res, next) => {
-      const appName = req.path.split('/')[1]; // /api/{appName}/...
+      const appName = req.path.split('/')[1];
+      if (reservedPrefixes.has(appName)) {
+        return next();
+      }
       const app = this.registry.get(appName);
 
       if (!app) {
