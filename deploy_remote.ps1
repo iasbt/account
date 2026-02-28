@@ -165,7 +165,10 @@ $DeployCmd = @'
     
     # 6. 版本强校验 (Strong Version Verification) - Simplest
     echo '>>> Verifying Health & Version (Expected: __LOCAL_VERSION__)...'
-    HEALTH_JSON=$(curl -s http://localhost:3000/health)
+    HEALTH_JSON=$(curl -s http://localhost:3000/health || true)
+    if [ -z "$HEALTH_JSON" ] || echo "$HEALTH_JSON" | grep -q "404"; then
+        HEALTH_JSON=$(curl -s http://localhost:3000/api/health || true)
+    fi
     echo "Health Response: $HEALTH_JSON"
     
     # Simplest check: does the response contain the version string?
