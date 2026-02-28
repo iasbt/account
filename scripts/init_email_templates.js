@@ -1,5 +1,5 @@
 
-import pool from '../db.js';
+import pool from '../config/db.js';
 import { fileURLToPath } from 'url';
 
 const DEFAULTS = {
