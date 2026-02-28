@@ -1,6 +1,6 @@
 
 import bcryptjs from "bcryptjs";
-import pool from "../db.js";
+import pool from "../config/db.js";
 
 export const ensureAdminIsolation = async () => {
   if (process.env.SKIP_ADMIN_ISOLATION === "1") {
