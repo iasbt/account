@@ -196,6 +196,7 @@ $DeployCmd = $DeployCmd.Replace("__DEPLOY_DIR__", $DeployDir)
 $DeployCmd = $DeployCmd.Replace("__LOCAL_VERSION__", $LocalVersion)
 $DeployCmd = $DeployCmd.Replace("__PGADMIN_EMAIL__", $PgAdminEmail)
 $DeployCmd = $DeployCmd.Replace("__PGADMIN_PASSWORD__", $PgAdminPassword)
+$DeployCmd = $DeployCmd -replace "`r`n", "`n"
 
 # 3. 执行远程命令
 $Failures = @()
