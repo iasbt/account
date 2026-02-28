@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authService } from '../../services/authService.js';
-import pool from '../../db.js';
+import pool from '../../config/db.js';
 import bcryptjs from 'bcryptjs';
 
 // Mock dependencies
-vi.mock('../../db.js', () => ({
+vi.mock('../../config/db.js', () => ({
   default: {
     query: vi.fn(),
   },

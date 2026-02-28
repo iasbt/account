@@ -1,20 +1,6 @@
+
 import { APPLICATIONS } from "../config/apps.js";
-
-// Collect all allowed origins from config
-const STATIC_ALLOWED_ORIGINS = new Set([
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "http://119.91.71.30:5173",
-  "http://119.91.71.30",
-  "https://account.iasbt.com"
-]);
-
-// Add origins from APPLICATIONS config
-Object.values(APPLICATIONS).forEach(app => {
-  if (app.allowedOrigins) {
-    app.allowedOrigins.forEach(origin => STATIC_ALLOWED_ORIGINS.add(origin));
-  }
-});
+import { config } from "../config/index.js";
 
 /**
  * Validate if the redirect target is safe
@@ -26,34 +12,47 @@ export const isValidRedirectTarget = (targetUrl) => {
 
   try {
     const url = new URL(targetUrl);
-    const origin = url.origin;
+    
+    // 1. Check against config.allowedDomains (Suffix Match)
+    // e.g. .iasbt.com matches sub.iasbt.com
+    const isAllowedDomain = config.allowedDomains.some(domain => {
+      if (domain.startsWith(".")) {
+        return url.hostname.endsWith(domain) || url.hostname === domain.substring(1);
+      }
+      return url.hostname === domain;
+    });
 
-    // 1. Check against static allowlist and config apps
-    if (STATIC_ALLOWED_ORIGINS.has(origin)) {
+    if (isAllowedDomain) {
       return true;
     }
 
-    // 2. Allow all subdomains of iasbt.com (Production)
-    if (url.hostname.endsWith(".iasbt.com")) {
-      return true;
-    }
-
-    // 3. Allow localhost with any port (Development)
-    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
-      return true;
-    }
-
-    // 4. Check if the full URL matches any specific allowed origin (for cases where allowedOrigins contains full URLs)
-    // Note: The config seems to have full URLs in some cases, but mostly origins.
-    // Let's re-check the logic in config/apps.js: matchAppByOrigin does `allowed === origin || allowed === targetUrl`
+    // 2. Check against Registered Applications
     for (const app of Object.values(APPLICATIONS)) {
-        if (app.allowedOrigins.some(allowed => allowed === origin || allowed === targetUrl)) {
-            return true;
-        }
+      if (app.allowedOrigins && Array.isArray(app.allowedOrigins)) {
+        // Strict check: targetUrl must match one of the allowed origins/URLs
+        // or be a sub-path of an allowed URL
+        const matched = app.allowedOrigins.some(allowed => {
+            // Exact match
+            if (allowed === targetUrl) return true;
+            
+            // Origin match
+            try {
+                const allowedOrigin = new URL(allowed).origin;
+                if (url.origin === allowedOrigin) return true;
+            } catch (_e) {
+                // ignore invalid allowed origin
+            }
+            
+            return false;
+        });
+        
+        if (matched) return true;
+      }
     }
 
     return false;
-  } catch (e) {
+  } catch (_e) {
+    // Invalid URL format
     return false;
   }
 };

@@ -4,7 +4,10 @@ import * as tokenUtils from '../../utils/token.js';
 vi.mock('../../config/index.js', () => ({
   config: {
     ssoSecret: 'test-secret-key-123456',
-    ssoTokenTtl: 300
+    ssoTokenTtl: 300,
+    jwt: {
+      algorithm: 'HS256'
+    }
   }
 }));
 
@@ -19,23 +22,23 @@ describe('Token Utility', () => {
   const secret = 'test-secret-key-123456';
 
   describe('signToken & verifyToken', () => {
-    it('should sign and verify a token correctly', () => {
+    it('should sign and verify a token correctly', async () => {
       const payload = { foo: 'bar' };
       // Explicitly passing secret
       const token = tokenUtils.signToken(payload, 3600, secret);
       expect(token).toBeDefined();
       
-      const decoded = tokenUtils.verifyToken(token, secret);
+      const decoded = await tokenUtils.verifyToken(token, secret);
       expect(decoded).toMatchObject(payload);
     });
   });
 
   describe('generateToken', () => {
-    it('should generate a standard auth token using default config secret', () => {
+    it('should generate a standard auth token using default config secret', async () => {
       const token = tokenUtils.generateToken(mockUser);
       expect(token).toBeDefined();
       
-      const decoded = tokenUtils.verifyToken(token, secret);
+      const decoded = await tokenUtils.verifyToken(token, secret);
       expect(decoded.sub).toBe(mockUser.id);
       expect(decoded.email).toBe(mockUser.email);
     });

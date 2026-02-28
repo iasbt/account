@@ -1,6 +1,6 @@
 
 import { createHash } from "crypto";
-import pool from "../db.js";
+import pool from "../config/db.js";
 import { config } from "../config/index.js";
 import { signToken, verifyToken } from "../utils/token.js";
 import { generateAuthCode, storeAuthCode, getAuthCode, invalidateAuthCode, verifyPkce } from "../utils/oauth.js";
@@ -105,6 +105,7 @@ export const token = async (req, res) => {
         matchedApp = result.rows[0];
       }
     } catch (err) {
+      console.error("SSO Verify Client Error:", err);
       return res.status(500).json({ error: "server_error" });
     }
   }
@@ -130,6 +131,7 @@ export const token = async (req, res) => {
     try {
       authCodeRecord = await getAuthCode(code);
     } catch (err) {
+      console.error("SSO Get Auth Code Error:", err);
       return res.status(500).json({ error: "server_error" });
     }
 
@@ -160,7 +162,7 @@ export const token = async (req, res) => {
     await invalidateAuthCode(code);
 
     // Issue Tokens
-    return issueTokens(res, authCodeRecord.user_id, client_id, authCodeRecord.scope);
+    return issueTokens(req, res, authCodeRecord.user_id, client_id, authCodeRecord.scope);
   }
 
   // === 3. Handle 'refresh_token' ===
@@ -222,8 +224,9 @@ const issueTokens = async (req, res, userId, clientId, scope) => {
     }
     user = userRes.rows[0];
   } catch (err) {
-    return res.status(500).json({ error: "server_error" });
-  }
+      console.error("SSO Get User Error:", err);
+      return res.status(500).json({ error: "server_error" });
+    }
 
   // Audit Log (SSO Attempt)
   // We log here to capture both initial login and refresh

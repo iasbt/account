@@ -6,7 +6,7 @@ process.env.SSO_JWT_SECRET = "testsecret";
 
 const mockQuery = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
 
-vi.mock("../../../db.js", () => ({
+vi.mock("../../../config/db.js", () => ({
   default: {
     query: (...args: unknown[]) => mockQuery(...args),
   },
@@ -56,6 +56,9 @@ describe("auth login", () => {
           ],
         });
       }
+      if (text.includes("INSERT INTO security_logs")) {
+        return Promise.resolve({ rowCount: 1, rows: [] });
+      }
       return Promise.reject(new Error(`Unexpected query: ${text}`));
     });
 
@@ -85,6 +88,9 @@ describe("auth login", () => {
             },
           ],
         });
+      }
+      if (text.includes("INSERT INTO security_logs")) {
+        return Promise.resolve({ rowCount: 1, rows: [] });
       }
       return Promise.reject(new Error(`Unexpected query: ${text}`));
     });

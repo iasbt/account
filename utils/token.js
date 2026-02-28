@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import pool from "../db.js";
 import { config } from "../config/index.js";
 
 // Helper to get signing key/secret based on algorithm
@@ -54,7 +53,7 @@ export const verifyToken = async (token, secret = null) => {
   
   try {
     return jwt.verify(token, verificationKey, { algorithms: [config.jwt.algorithm] });
-  } catch (err) {
+  } catch (_err) {
     return null;
   }
 };

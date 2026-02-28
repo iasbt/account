@@ -50,5 +50,6 @@ export const config = {
     port: Number(process.env.REDIS_PORT || 6379),
     password: process.env.REDIS_PASSWORD || undefined,
   },
-  debugAllowlist: (process.env.DEBUG_ALLOWLIST || "182.135.56.98").split(",").filter(Boolean),
+  debugAllowlist: (process.env.DEBUG_ALLOWLIST || "").split(",").filter(Boolean),
+  allowedDomains: (process.env.ALLOWED_DOMAINS || ".iasbt.com,localhost,127.0.0.1").split(",").filter(Boolean),
 };

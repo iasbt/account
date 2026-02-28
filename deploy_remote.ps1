@@ -1,15 +1,30 @@
 # 自动化部署脚本 (本地 -> GitHub -> 腾讯云)
 # 使用方法: .\deploy_remote.ps1 "Commit Message"
 
+
+# Load configuration
+. "$PSScriptRoot\scripts\load_env.ps1"
+
 param(
     [string]$Message = "Auto deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')",
-    [string]$Servers = $env:DEPLOY_SERVERS
+    [string]$Servers = $global:DEPLOY_SERVER_IP,
+    [string]$KeyPath = $global:DEPLOY_KEY_PATH
 )
 
-$User = "ubuntu"
-$KeyPath = "D:\OneDrive\Desktop\trae.pem"
-$RepoDir = "/home/ubuntu/account" 
-$DeployDir = "/home/ubuntu/account/deploy/correction"
+$User = $global:DEPLOY_USER
+
+if (-not $KeyPath) {
+    Write-Warning "DEPLOY_KEY_PATH is not set. Using default key path."
+    $KeyPath = "$HOME\.ssh\id_rsa"
+}
+
+if (-not (Test-Path $KeyPath)) {
+    Write-Warning "SSH Key not found at: $KeyPath. Remote commands may fail."
+}
+
+$RepoDir = $global:REMOTE_APP_DIR
+$DeployDir = "$RepoDir/deploy/correction"
+
 $PgAdminEmail = $env:PGADMIN_DEFAULT_EMAIL
 $PgAdminPassword = $env:PGADMIN_DEFAULT_PASSWORD
 $ServerList = @()
@@ -17,7 +32,12 @@ if ($Servers) {
     $ServerList = $Servers.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ }
 }
 if (-not $ServerList -or $ServerList.Count -eq 0) {
-    $ServerList = @("119.91.71.30")
+    if ($env:DEPLOY_TARGET_IP) {
+        $ServerList = @($env:DEPLOY_TARGET_IP)
+    } else {
+        Write-Warning "DEPLOY_TARGET_IP is not set. Using default IP: 119.91.71.30"
+        $ServerList = @("119.91.71.30")
+    }
 }
 
 # 0. 读取本地版本 (Source of Truth)
@@ -82,9 +102,10 @@ $DeployCmd = @'
     
     # 1.5 Update .env for CORS (Auto Evolution)
     echo '>>> Updating .env CORS configuration...'
-    CORS_VALUE="https://account.iasbt.com,https://account.iasbt.com.pages.dnsoe5.com,https://account1-76iej0ca.edgeone.dev,http://119.91.71.30,http://119.91.71.30:5173,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+    CORS_VALUE="__CORS_ALLOWLIST__"
     if [ -f .env ]; then
         if grep -q "^CORS_ALLOWLIST=" .env; then
+
             awk -v v="$CORS_VALUE" 'BEGIN{FS=OFS="="} $1=="CORS_ALLOWLIST"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
         else
             echo "CORS_ALLOWLIST=$CORS_VALUE" >> .env
@@ -170,6 +191,7 @@ $DeployCmd = @'
 '@
 
 $DeployCmd = $DeployCmd.Replace("__REPO_DIR__", $RepoDir)
+$DeployCmd = $DeployCmd.Replace("__CORS_ALLOWLIST__", $global:CORS_ALLOWLIST)
 $DeployCmd = $DeployCmd.Replace("__DEPLOY_DIR__", $DeployDir)
 $DeployCmd = $DeployCmd.Replace("__LOCAL_VERSION__", $LocalVersion)
 $DeployCmd = $DeployCmd.Replace("__PGADMIN_EMAIL__", $PgAdminEmail)

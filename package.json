@@ -1,8 +1,9 @@
 {
   "name": "account",
   "private": true,
-  "version": "1.9.2",
+  "version": "1.9.3",
   "type": "module",
+
   "scripts": {
     "dev": "vite",
     "server": "node server.js",
@@ -11,8 +12,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "typecheck": "tsc -b",
-    "test": "vitest run",
+    "test": "vitest run --exclude tests/integration",
+    "test:integration": "vitest run tests/integration",
+
     "test:coverage": "vitest run --coverage",
+
     "preview": "vite preview"
   },
   "dependencies": {

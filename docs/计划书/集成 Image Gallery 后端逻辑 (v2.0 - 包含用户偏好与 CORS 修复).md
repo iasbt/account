@@ -1,8 +1,8 @@
-# 任务：集成 Image Gallery 后端逻辑 (v2.0 - 包含用户偏好与 CORS 修复)
+# 任务：集成 Image Gallery 后端逻辑 (v2.1 - 完整修复版)
 
 ## 背景
 前端 (http://119.91.71.30:5173) 迁移至 Account System 后出现以下阻断性问题：
-1. **API 404**: `/user/preferences`, `/images`, `/categories` 接口缺失。
+1. **API 404**: `/user/preferences`, `/user/onboarding` (POST), `/images`, `/categories` 接口缺失。
 2. **CORS Error**: Nginx 未代理上述路径，导致跨域预检失败。
 3. **Auth 401**: SSO Token 签名验证失败（Secret 不匹配）。
 
@@ -16,7 +16,6 @@
 
 **执行 SQL:**
 ```sql
--- 1. Gallery Preferences (扩展用户设置)
 CREATE TABLE IF NOT EXISTS user_preferences (
   user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   has_accepted_terms BOOLEAN DEFAULT FALSE,
@@ -26,17 +25,16 @@ CREATE TABLE IF NOT EXISTS user_preferences (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. Categories
 CREATE TABLE IF NOT EXISTS categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   color TEXT,
   sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 3. Images
 CREATE TABLE IF NOT EXISTS images (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -52,10 +50,10 @@ CREATE TABLE IF NOT EXISTS images (
   exif JSONB,
   taken_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   deleted_at TIMESTAMP WITH TIME ZONE
 );
 
--- 4. Tags & Junction
 CREATE TABLE IF NOT EXISTS tags (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT UNIQUE NOT NULL,
@@ -67,6 +65,10 @@ CREATE TABLE IF NOT EXISTS image_tags (
   tag_id UUID REFERENCES tags(id) ON DELETE CASCADE,
   PRIMARY KEY (image_id, tag_id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_images_user_id ON images(user_id);
+CREATE INDEX IF NOT EXISTS idx_images_category_id ON images(category_id);
+CREATE INDEX IF NOT EXISTS idx_categories_user_id ON categories(user_id);
 ```
 
 ---
@@ -79,14 +81,12 @@ CREATE TABLE IF NOT EXISTS image_tags (
 ```javascript
 import pool from "../db.js";
 
-// --- Preferences ---
 export const getPreferences = async (req, res) => {
   try {
     const userId = req.user.id;
     const result = await pool.query("SELECT * FROM user_preferences WHERE user_id = $1", [userId]);
     
     if (result.rowCount === 0) {
-      // 返回默认值
       return res.json({
         hasAcceptedTerms: false,
         hasSeenOnboarding: false,
@@ -113,7 +113,6 @@ export const updatePreferences = async (req, res) => {
     const userId = req.user.id;
     const { hasAcceptedTerms, hasSeenOnboarding, categoryOrder, hiddenCategoryIds } = req.body;
 
-    // Upsert logic
     const query = `
       INSERT INTO user_preferences (user_id, has_accepted_terms, has_seen_onboarding, category_order, hidden_category_ids, updated_at)
       VALUES ($1, $2, $3, $4, $5, NOW())
@@ -126,11 +125,14 @@ export const updatePreferences = async (req, res) => {
         updated_at = NOW()
       RETURNING *
     `;
-    
-    // 注意：这里需要根据前端实际传参做一些 undefined 判断处理，防止覆盖为 null
-    // 简单起见，这里假设前端传了完整对象或部分对象，实际代码建议细化
-    await pool.query(query, [userId, hasAcceptedTerms, hasSeenOnboarding, JSON.stringify(categoryOrder), JSON.stringify(hiddenCategoryIds)]);
-    
+    await pool.query(query, [
+      userId,
+      hasAcceptedTerms,
+      hasSeenOnboarding,
+      categoryOrder ? JSON.stringify(categoryOrder) : null,
+      hiddenCategoryIds ? JSON.stringify(hiddenCategoryIds) : null
+    ]);
+
     res.json({ success: true });
   } catch (error) {
     console.error("Update preferences error:", error);
@@ -138,22 +140,104 @@ export const updatePreferences = async (req, res) => {
   }
 };
 
-// --- Images (简略版) ---
+export const updateOnboarding = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { seen } = req.body;
+
+    await pool.query(
+      `
+        INSERT INTO user_preferences (user_id, has_seen_onboarding, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (user_id)
+        DO UPDATE SET has_seen_onboarding = $2, updated_at = NOW()
+      `,
+      [userId, seen]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Update onboarding error:", error);
+    res.status(500).json({ message: "更新引导状态失败" });
+  }
+};
+
 export const getImages = async (req, res) => {
-  // ... (同之前逻辑)
-  res.json([]); // 占位，请填入查询逻辑
+  try {
+    const userId = req.user.id;
+    const { category_id } = req.query;
+
+    let query = `
+      SELECT i.*,
+             json_agg(t.name) FILTER (WHERE t.name IS NOT NULL) as tags
+      FROM images i
+      LEFT JOIN image_tags it ON i.id = it.image_id
+      LEFT JOIN tags t ON it.tag_id = t.id
+      WHERE i.user_id = $1 AND i.deleted_at IS NULL
+    `;
+    const params = [userId];
+
+    if (category_id) {
+      query += ` AND i.category_id = $2`;
+      params.push(category_id);
+    }
+
+    query += ` GROUP BY i.id ORDER BY i.created_at DESC`;
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Get images error:", error);
+    res.status(500).json({ message: "获取图片失败" });
+  }
 };
 
 export const createImage = async (req, res) => {
-  // ... (同之前逻辑)
-  res.status(201).json({}); 
+  try {
+    const userId = req.user.id;
+    const { title, file_url, file_path, width, height, category_id } = req.body;
+
+    const result = await pool.query(
+      `
+        INSERT INTO images (user_id, title, file_url, file_path, width, height, category_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *
+      `,
+      [userId, title, file_url, file_path, width, height, category_id]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error("Create image error:", error);
+    res.status(500).json({ message: "上传图片失败" });
+  }
 };
 
-// --- Categories (简略版) ---
 export const getCategories = async (req, res) => {
-  const userId = req.user.id;
-  const result = await pool.query("SELECT * FROM categories WHERE user_id = $1 ORDER BY sort_order ASC", [userId]);
-  res.json(result.rows);
+  try {
+    const userId = req.user.id;
+    const result = await pool.query(
+      "SELECT * FROM categories WHERE user_id = $1 ORDER BY sort_order ASC",
+      [userId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ message: "获取分类失败" });
+  }
+};
+
+export const createCategory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, color } = req.body;
+    const result = await pool.query(
+      "INSERT INTO categories (user_id, name, color) VALUES ($1, $2, $3) RETURNING *",
+      [userId, name, color]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ message: "创建分类失败" });
+  }
 };
 ```
 
@@ -162,19 +246,27 @@ export const getCategories = async (req, res) => {
 ```javascript
 import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
-import { getPreferences, updatePreferences, getImages, createImage, getCategories } from "../controllers/galleryController.js";
+import {
+  getPreferences,
+  updatePreferences,
+  updateOnboarding,
+  getImages,
+  createImage,
+  getCategories,
+  createCategory
+} from "../controllers/galleryController.js";
 
 const router = Router();
 router.use(requireAuth);
 
-// Preferences
 router.get("/user/preferences", getPreferences);
-router.patch("/user/preferences", updatePreferences); // 支持 PATCH 更新
+router.patch("/user/preferences", updatePreferences);
+router.post("/user/onboarding", updateOnboarding);
 
-// Gallery
 router.get("/images", getImages);
 router.post("/images", createImage);
 router.get("/categories", getCategories);
+router.post("/categories", createCategory);
 
 export default router;
 ```
@@ -184,7 +276,7 @@ export default router;
 ```javascript
 import galleryRoutes from "./galleryRoutes.js";
 // ...
-router.use("/", galleryRoutes); // 挂载到根路径，适配 /user/preferences 和 /images
+router.use("/", galleryRoutes);
 ```
 
 ---
@@ -211,17 +303,13 @@ export const verifyAppToken = async (token) => {
 
 ```nginx
 server {
-    # ...
-    
-    # 转发 Gallery API
     location ~ ^/(images|categories|user/) {
         proxy_pass http://account-backend:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         
-        # 处理 CORS 预检请求 (OPTIONS)
         if ($request_method = 'OPTIONS') {
-            add_header 'Access-Control-Allow-Origin' '*'; # 或指定域名
+            add_header 'Access-Control-Allow-Origin' '*';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PATCH, PUT, DELETE';
             add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
             add_header 'Content-Type' 'text/plain; charset=utf-8';

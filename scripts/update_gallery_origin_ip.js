@@ -1,22 +1,5 @@
 
-import fs from 'fs';
-import path from 'path';
-import pkg from 'pg';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-
-const { Pool } = pkg;
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: path.join(__dirname, '../.env') });
-
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
+import pool from '../config/db.js';
 
 async function main() {
   try {

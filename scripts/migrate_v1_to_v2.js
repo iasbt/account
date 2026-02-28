@@ -68,7 +68,7 @@ async function migrateApplications() {
         const url = new URL(app.redirect_url);
         origin = url.origin;
       }
-    } catch (e) {
+    } catch (_e) {
       console.warn(`Invalid URL for app ${name}: ${app.redirect_url}`);
     }
 
@@ -154,8 +154,9 @@ async function main() {
     await migrateUsers();
 
     console.log('\nMigration Completed Successfully.');
-  } catch (err) {
-    console.error('Fatal Migration Error:', err);
+  } catch (e) {
+    console.error("Migration Error:", e);
+    process.exit(1);
   } finally {
     await pool.end();
   }

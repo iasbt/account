@@ -32,7 +32,7 @@ export const getVerificationCode = async (email) => {
       if (!code) return null;
       return { code, expires: Date.now() + 300000 }; // Redis handles expiry, return valid time
     }
-  } catch (error) {
+  } catch (_error) {
     console.warn("[VerificationStore] Redis error, checking memory store");
   }
 
@@ -52,7 +52,10 @@ export const deleteVerificationCode = async (email) => {
     if (redis.status === 'ready') {
       await redis.del(`verify:${email}`);
     }
-  } catch (e) { /* ignore */ }
+  } catch (e) {
+    console.error("Verify Code Error:", e);
+    return false;
+  }
   
   memoryStore.delete(email);
 };

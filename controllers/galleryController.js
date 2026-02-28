@@ -1,4 +1,4 @@
-import pool from "../db.js";
+import pool from "../config/db.js";
 
 // Images
 export const getImages = async (req, res) => {

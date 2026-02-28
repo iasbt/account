@@ -2,13 +2,12 @@ import { useState } from 'react'
 import { UserCircle } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
-import { apiClient } from '../services/apiClient'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const loginWithPassword = useAuthStore((state) => state.loginWithPassword)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
   const [account, setAccount] = useState('')
   const [password, setPassword] = useState('')
   const [searchParams] = useSearchParams()
@@ -20,50 +19,19 @@ export default function LoginPage() {
     
     // 捕获来源 URL，以便登录后自动跳回
     const from = searchParams.get('from') || searchParams.get('redirect')
-    let redirectUrl: string | null = null
     
     // 优先尝试 SSO 跳转 (支持跨域)
-    if (from) {
-      redirectUrl = from
-    }
-    
     try {
       await loginWithPassword(account, password)
       
       // 登录成功后的跳转逻辑
-      if (redirectUrl) {
-        // 尝试通过 SSO 接口获取带 Token 的跳转链接
-        try {
-          // 注意：这里需要手动拼接到 URL，因为 apiClient.get 期望 endpoint 是 path
-          // 而 searchParams 可能包含特殊字符，最好通过 query string 传递
-          // 但是 apiClient.get 签名只接受 endpoint 和 options
-          // 我们可以这样构造 endpoint: `/sso/issue?target=${encodeURIComponent(redirectUrl)}`
-          
-          const endpoint = `/sso/issue?target=${encodeURIComponent(redirectUrl)}`
-          const res = await apiClient.get<{ url: string }>(endpoint)
-          
-          if (res.url) {
-            window.location.href = res.url
-            return
-          }
-        } catch (ssoErr) {
-          console.warn('SSO Redirect Failed, falling back to local redirect check:', ssoErr)
-          
-          // Fallback: 如果 SSO 失败，尝试本地跳转 (仅允许同源)
-          try {
-            const url = new URL(redirectUrl, window.location.origin)
-            if (url.origin === window.location.origin) {
-              window.location.href = url.toString()
-              return
-            }
-          } catch (fallbackErr) {
-            console.warn('本地跳转失败:', fallbackErr)
-          }
-        }
-      } 
+      // 如果有来源页面 (e.g. /oauth/authorize)，直接跳回该页面让其处理后续逻辑
+      if (from) {
+        navigate(from, { replace: true })
+        return
+      }
       
-      // Default redirect if no external redirect happened
-      navigate('/')
+      navigate('/', { replace: true })
     } catch (err: unknown) {
       const message = err instanceof Error && err.message ? err.message : '登录失败，请检查账号密码'
       setError(message)

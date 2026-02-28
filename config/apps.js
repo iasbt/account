@@ -9,7 +9,7 @@ export const APPLICATIONS = {
     name: "Image Gallery",
     secret: process.env.SSO_SECRET_GALLERY || "MvVh2XGOWu0axQJFoFYbocTvAXd9tZ9J3NQzAbfIz",
     // 允许的跳转域名 (Token 接收方)
-    allowedOrigins: [
+    allowedOrigins: (process.env.APP_GALLERY_ORIGINS || [
       "http://119.91.71.30:5173/auth/callback", // 生产环境 (SSO Callback)
       "http://localhost:5173/auth/callback",    // 本地开发 (SSO Callback)
       "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口 - 主入口)
@@ -19,18 +19,18 @@ export const APPLICATIONS = {
       "https://gallery.iasbt.com",     // 生产环境 (域名)
       "http://localhost:5173",         // 本地开发
       "http://localhost:3000"          // 本地开发
-    ],
+    ].join(",")).split(","),
   },
 
   // 2. Developer Toolbox (工具箱) - 预留
   toolbox: {
     name: "Developer Toolbox",
     id: "toolbox",
-    allowedOrigins: [
+    allowedOrigins: (process.env.APP_TOOLBOX_ORIGINS || [
       "http://119.91.71.30:3001",      // 生产环境 (IP 访问)
       "https://toolbox.iasbt.com",     // 预留域名
       "http://localhost:3001"
-    ],
+    ].join(",")).split(","),
     get secret() {
       return process.env.SSO_SECRET_TOOLBOX || config.ssoSecret;
     }
@@ -40,11 +40,12 @@ export const APPLICATIONS = {
   lifeos: {
     name: "Life OS",
     id: "lifeos",
-    allowedOrigins: [
+    allowedOrigins: (process.env.APP_LIFEOS_ORIGINS || [
       "http://119.91.71.30:3002",      // 生产环境 (IP 访问)
       "https://life.iasbt.com",        // 预留域名
       "http://localhost:3002"
-    ],
+    ].join(",")).split(","),
+
     get secret() {
       return process.env.SSO_SECRET_LIFEOS || config.ssoSecret;
     }
@@ -71,6 +72,7 @@ export const matchAppByOrigin = (targetUrl) => {
     }
     return null;
   } catch (e) {
+    console.error("Failed to load apps config:", e);
     return null;
   }
 };

@@ -2,14 +2,31 @@
 # 使用方法: .\deploy_gallery.ps1 "Commit Message"
 # 适用位置: 必须放置在 C:\My_Project\image 根目录下
 
+
+# Load configuration
+$ScriptDir = $PSScriptRoot
+$LoadEnvPath = Join-Path $ScriptDir "..\..\scripts\load_env.ps1"
+if (Test-Path $LoadEnvPath) {
+    . $LoadEnvPath
+} else {
+    Write-Warning "Could not find load_env.ps1 at $LoadEnvPath"
+}
+
 param(
     [string]$Message = "Auto deploy Gallery: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 )
 
-$ServerIP = "119.91.71.30"
-$User = "ubuntu"
-$KeyPath = "D:\OneDrive\Desktop\trae.pem"
+$ServerIP = $global:DEPLOY_SERVER_IP
+if (-not $ServerIP) { $ServerIP = "119.91.71.30" }
+
+$User = $global:DEPLOY_USER
+if (-not $User) { $User = "ubuntu" }
+
+$KeyPath = $global:DEPLOY_KEY_PATH
+if (-not $KeyPath) { $KeyPath = "D:\OneDrive\Desktop\trae.pem" }
+
 $RemoteGalleryDir = "/home/ubuntu/image"
+
 
 # 1. 检查当前目录
 # 获取脚本所在目录作为基准路径
@@ -75,10 +92,10 @@ $DeployCmd = @"
         echo ">>> Creating default .env..."
         cp .env.example .env
         # Replace localhost or domain with Server IP
-        sed -i 's|http://localhost:3000|http://119.91.71.30|g' .env
-        sed -i 's|http://localhost:5173|http://119.91.71.30:5173|g' .env
-        sed -i 's|https://account.iasbt.com|http://119.91.71.30|g' .env
-        sed -i 's|VITE_SUPABASE_URL=.*|VITE_SUPABASE_URL=http://119.91.71.30|g' .env
+        sed -i "s|http://localhost:3000|http://${ServerIP}|g" .env
+        sed -i "s|http://localhost:5173|http://${ServerIP}:5173|g" .env
+        sed -i "s|https://account.iasbt.com|http://${ServerIP}|g" .env
+        sed -i "s|VITE_SUPABASE_URL=.*|VITE_SUPABASE_URL=http://${ServerIP}|g" .env
     fi
 
     # 3. Build Docker Image
@@ -88,9 +105,10 @@ $DeployCmd = @"
     export `$(grep -v '^#' .env | xargs)
 
     sudo docker build \
-      --build-arg VITE_SUPABASE_URL="http://119.91.71.30" \
-      --build-arg VITE_ACCOUNT_URL="http://119.91.71.30" \
-      --build-arg VITE_ACCOUNT_WEB_URL="http://119.91.71.30" \
+      --build-arg VITE_SUPABASE_URL="http://${ServerIP}" \
+      --build-arg VITE_ACCOUNT_URL="http://${ServerIP}" \
+      --build-arg VITE_ACCOUNT_WEB_URL="http://${ServerIP}" \
+
       --build-arg VITE_SUPABASE_ANON_KEY="`$VITE_SUPABASE_ANON_KEY" \
       --build-arg VITE_SUPABASE_SCHEMA="`$VITE_SUPABASE_SCHEMA" \
       --build-arg VITE_AMAP_KEY="`$VITE_AMAP_KEY" \

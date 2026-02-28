@@ -1,5 +1,4 @@
-import pool from './db.js';
-import bcryptjs from 'bcryptjs';
+import pool from '../config/db.js';
 
 const run = async () => {
   try {
@@ -25,7 +24,7 @@ const run = async () => {
     try {
         await pool.query("DELETE FROM public.admin_accounts");
         console.log("Deleted all users from admin_accounts.");
-    } catch (e) {
+    } catch (_e) {
         console.log("admin_accounts table might not exist or empty.");
     }
 
@@ -41,10 +40,10 @@ const run = async () => {
     console.log(`Created new admin user: ${adminUsername} / ${adminEmail}`);
 
     console.log("Reset complete.");
-  } catch (err) {
-    console.error("Error:", err);
-  } finally {
-    setTimeout(() => process.exit(0), 1000);
+    process.exit(0);
+  } catch (e) {
+    console.error("Maintenance Script Error:", e);
+    process.exit(1);
   }
 };
 

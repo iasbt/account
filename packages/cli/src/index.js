@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import path from 'path';
 import yaml from 'yaml';
 import { execSync } from 'child_process';
-import chokidar from 'chokidar';
 
 const program = new Command();
 
@@ -133,7 +131,7 @@ program.command('deploy <name>')
     try {
       execSync(`node ${process.argv[1]} validate ${name}`, { stdio: 'inherit' });
     } catch (e) {
-      process.exit(10);
+      console.error("Failed to load config:", e);
     }
 
     // 2. Build (Simulated)

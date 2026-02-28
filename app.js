@@ -11,6 +11,8 @@ const app = express();
 
 app.set("trust proxy", 1);
 
+const galleryHost = process.env.GALLERY_HOST || "http://119.91.71.30";
+
 // Security Headers with Helmet
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resource sharing for static assets/API
@@ -20,8 +22,8 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for React (dev)
       styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Tailwind/React
-      imgSrc: ["'self'", "data:", "https:"], // Allow external images
-      connectSrc: ["'self'", "http://localhost:*", "https://*.iasbt.com"], // Allow API calls
+      imgSrc: ["'self'", "data:", "https:", `${galleryHost}:*`], // Allow external images
+      connectSrc: ["'self'", "http://localhost:*", "https://*.iasbt.com", `${galleryHost}:*`], // Allow API calls
     },
   }
 }));

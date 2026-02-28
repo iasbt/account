@@ -62,7 +62,7 @@ export function getAppContext(req) {
 /**
  * Standard error handler middleware for micro-apps
  */
-export function errorHandler(err, req, res, next) {
+export function errorHandler(err, req, res, _next) {
   console.error(`[SDK] Error in ${req.baseUrl}:`, err);
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({

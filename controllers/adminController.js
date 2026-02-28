@@ -3,7 +3,7 @@
  * @description 仅限管理员操作的控制器
  */
 
-import pool from "../db.js";
+import pool from "../config/db.js";
 import { sendEmail } from "../utils/email.js";
 import { getPasswordResetLinkTemplate, getVerificationCodeTemplate, getNotificationTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode } from "../utils/verificationStore.js";

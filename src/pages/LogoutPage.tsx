@@ -22,15 +22,12 @@ export default function LogoutPage() {
         // Simple validation for safety
         try {
           const url = new URL(target);
-          const allowedHosts = [
-            'localhost', 
-            '127.0.0.1', 
-            '119.91.71.30', 
-            'account.iasbt.com'
-          ];
+          const allowedHosts = (import.meta.env.VITE_ALLOWED_LOGOUT_HOSTS || 
+            'localhost,127.0.0.1,119.91.71.30,account.iasbt.com').split(',');
           
           const isAllowed = allowedHosts.includes(url.hostname) || 
                             url.hostname.endsWith('.iasbt.com');
+
           
           if (isAllowed) {
             window.location.href = target;

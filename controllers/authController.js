@@ -4,6 +4,7 @@ import { isValidRedirectTarget } from "../utils/redirectValidator.js";
 import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
 import { auditLogger, AuditEvent } from "../services/auditLogger.js";
+import { addToBlacklist } from "../utils/redis.js";
 
 const isWhitelisted = (req) => {
   const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';

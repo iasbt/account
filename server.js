@@ -3,6 +3,7 @@ import app from "./app.js";
 import { appLoader } from "./src/core/AppLoader.js";
 import { initEmailTemplates } from "./scripts/init_email_templates.js";
 import { migratePreferences } from "./scripts/migrate_preferences.js";
+import { ensureAdminIsolation } from "./scripts/ensure_admin.js";
 // Start Email Worker
 import "./services/emailWorker.js";
 
@@ -10,7 +11,8 @@ import "./services/emailWorker.js";
 Promise.all([
   appLoader.init(),
   initEmailTemplates(),
-  migratePreferences()
+  migratePreferences(),
+  ensureAdminIsolation()
 ]).then(() => {
   console.log("Core services initialized");
   

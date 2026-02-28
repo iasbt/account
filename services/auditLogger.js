@@ -1,5 +1,5 @@
 
-import pool from "../db.js";
+import pool from "../config/db.js";
 import { recordAuthFailure } from "../middlewares/metrics.js";
 
 export const AuditEvent = {

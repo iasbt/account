@@ -174,6 +174,7 @@ async function runAudit() {
     } else {
         console.error('   ❌ Rate limit NOT hit within 70 requests.');
     }
+    console.log(`   ℹ️ Successful requests before limit/error: ${successCount}`);
 
   } catch (err) {
     console.error('❌ Audit failed with error:', err);

@@ -1,4 +1,4 @@
-import pool from "../db.js";
+import pool from "../config/db.js";
 import { randomBytes, createHash } from "crypto";
 
 // Generate a random code

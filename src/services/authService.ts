@@ -30,8 +30,16 @@ export const authService = {
     return apiClient.post<void>('/auth/send-code', { email, type });
   },
 
-  async issueSsoToken(target: string): Promise<{ url: string }> {
-    return apiClient.get<{ url: string }>(`/sso/issue?target=${encodeURIComponent(target)}`);
+  async authorize(params: {
+    client_id: string;
+    redirect_uri: string;
+    response_type: 'code';
+    scope?: string;
+    state?: string;
+    code_challenge?: string;
+    code_challenge_method?: 'S256';
+  }): Promise<{ redirect_url: string }> {
+    return apiClient.post<{ redirect_url: string }>('/oauth/authorize', params);
   },
 
   async changePassword(oldPassword: string, newPassword: string): Promise<{ success: boolean; message: string }> {

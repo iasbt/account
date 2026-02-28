@@ -1,5 +1,5 @@
 
-import pool from "../db.js";
+import pool from "../config/db.js";
 import bcryptjs from "bcryptjs";
 import { generateToken } from "../utils/token.js";
 import { sendEmail } from "../utils/email.js";

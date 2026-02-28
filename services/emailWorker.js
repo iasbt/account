@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq';
 import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
-import pool from '../db.js';
+import pool from '../config/db.js';
 
 // Redis connection for worker
 import Redis from 'ioredis';
@@ -59,7 +59,7 @@ const getProviderConfig = async () => {
 // Create Worker
 export const emailWorker = new Worker('email-queue', async (job) => {
   const { to, subject, html, type } = job.data;
-  const logId = job.id; // Or generate UUID if we want DB ID match
+  // const logId = job.id; // Or generate UUID if we want DB ID match
 
   console.log(`[EmailWorker] Processing job ${job.id}: ${type} -> ${to}`);
 
@@ -110,7 +110,7 @@ export const emailWorker = new Worker('email-queue', async (job) => {
 });
 
 // Helper: Log to DB
-async function logEmailStatus(recipient, type, subject, status, error, providerId, messageId = null) {
+async function logEmailStatus(recipient, type, subject, status, error, providerId, _messageId = null) {
   try {
     await pool.query(
       `INSERT INTO email_logs (
