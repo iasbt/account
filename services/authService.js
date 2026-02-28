@@ -8,6 +8,51 @@ import { setVerificationCode, getVerificationCode, deleteVerificationCode } from
 import { checkLockout, recordFailedAttempt, resetAttempts } from "../utils/accountLock.js";
 import { randomUUID, randomInt } from "crypto";
 
+const findUserByAccount = async (account) => {
+  const userResult = await pool.query(
+    "SELECT * FROM public.users WHERE email = $1 OR name = $1",
+    [account]
+  );
+  if (userResult.rowCount > 0) {
+    return { user: userResult.rows[0], source: "users" };
+  }
+  const legacyResult = await pool.query(
+    "SELECT * FROM public.legacy_users WHERE email = $1 OR username = $1",
+    [account]
+  );
+  if (legacyResult.rowCount > 0) {
+    return { user: legacyResult.rows[0], source: "legacy" };
+  }
+  return { user: null, source: null };
+};
+
+const normalizeLegacyUser = (legacyUser) => ({
+  id: legacyUser.id,
+  name: legacyUser.username,
+  email: legacyUser.email,
+  is_admin: legacyUser.is_admin || false,
+  password: legacyUser.password_hash
+});
+
+const upsertLegacyUserToUsers = async (legacyUser) => {
+  await pool.query(
+    `INSERT INTO public.users (id, name, email, password, is_admin, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+     ON CONFLICT (email) DO UPDATE
+     SET name = EXCLUDED.name,
+         password = EXCLUDED.password,
+         is_admin = EXCLUDED.is_admin,
+         updated_at = NOW()`,
+    [
+      legacyUser.id,
+      legacyUser.username,
+      legacyUser.email,
+      legacyUser.password_hash,
+      legacyUser.is_admin || false
+    ]
+  );
+};
+
 export const authService = {
   async sendVerificationCode(email, type = 'general') {
     const code = randomInt(100000, 1000000).toString();
@@ -66,22 +111,22 @@ export const authService = {
       }
     }
 
-    const result = await pool.query(
-      "SELECT * FROM public.users WHERE email = $1 OR name = $1",
-      [account]
-    );
-
-    if (result.rowCount === 0) {
+    const { user: foundUser, source } = await findUserByAccount(account);
+    if (!foundUser) {
       if (!skipLockout) await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
     }
 
-    const user = result.rows[0];
+    const user = source === "legacy" ? normalizeLegacyUser(foundUser) : foundUser;
     const isMatch = await bcryptjs.compare(password, user.password);
 
     if (!isMatch) {
       if (!skipLockout) await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
+    }
+    
+    if (source === "legacy") {
+      await upsertLegacyUserToUsers(foundUser);
     }
 
     // Login Success - Reset Attempts
@@ -107,20 +152,14 @@ export const authService = {
       throw new Error(`账号已被锁定，请在 ${Math.ceil(lockout.remaining / 60)} 分钟后重试`);
     }
 
-    const result = await pool.query(
-      "SELECT * FROM public.users WHERE email = $1 OR name = $1",
-      [account]
-    );
-
-    if (result.rowCount === 0) {
+    const { user: foundUser, source } = await findUserByAccount(account);
+    if (!foundUser) {
       await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
     }
 
-    const user = result.rows[0];
+    const user = source === "legacy" ? normalizeLegacyUser(foundUser) : foundUser;
     if (!user.is_admin) {
-      // Don't record attempt for non-admin user trying to access admin? 
-      // Actually, this is a failed admin login. We should probably record it.
       await recordFailedAttempt(account);
       throw new Error("无权访问");
     }
@@ -129,6 +168,10 @@ export const authService = {
     if (!isMatch) {
       await recordFailedAttempt(account);
       throw new Error("账号或密码错误");
+    }
+    
+    if (source === "legacy") {
+      await upsertLegacyUserToUsers(foundUser);
     }
 
     // Login Success - Reset Attempts
