@@ -2,14 +2,14 @@
 # 使用方法: .\deploy_remote.ps1 "Commit Message"
 
 
-# Load configuration
-. "$PSScriptRoot\scripts\load_env.ps1"
-
 param(
     [string]$Message = "Auto deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')",
     [string]$Servers = $global:DEPLOY_SERVER_IP,
     [string]$KeyPath = $global:DEPLOY_KEY_PATH
 )
+
+# Load configuration
+. "$PSScriptRoot\scripts\load_env.ps1"
 
 $User = $global:DEPLOY_USER
 
