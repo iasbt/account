@@ -1,11 +1,11 @@
-import { verifyAppToken } from "../utils/token.js";
+import { verifyAccessToken } from "../services/oidcProvider.js";
 
 export const getAuthUser = async (req) => {
   const header = req.headers.authorization || "";
   if (!header.startsWith("Bearer ")) return null;
   const token = header.split(" ")[1];
   if (!token) return null;
-  return await verifyAppToken(token);
+  return await verifyAccessToken(token);
 };
 
 export const requireAuth = async (req, res, next) => {
@@ -15,9 +15,8 @@ export const requireAuth = async (req, res, next) => {
   }
   
   // Normalize user ID from token subject
-  if (user.sub && !user.id) {
-    user.id = user.sub;
-  }
+  if (user.sub && !user.id) user.id = user.sub;
+  if (user.is_admin !== undefined && user.isAdmin === undefined) user.isAdmin = user.is_admin;
   
   req.user = user;
   next();

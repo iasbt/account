@@ -59,16 +59,40 @@ function PublicOnlyAdmin({ children }: { children: ReactElement }) {
 
 function UserLayout({ children }: { children: ReactElement }) {
   return (
-    <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased">
-      {children}
+    <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased flex flex-col">
+      <div className="flex-1">{children}</div>
+      <footer className="border-t border-border-light bg-white/70 backdrop-blur px-6 py-4">
+        <div className="mx-auto max-w-[1280px] text-center text-xs text-text-secondary">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline"
+          >
+            蜀ICP备2026002156号-2
+          </a>
+        </div>
+      </footer>
     </div>
   )
 }
 
 function AdminLayout({ children }: { children: ReactElement }) {
   return (
-    <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased">
-      {children}
+    <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased flex flex-col">
+      <div className="flex-1">{children}</div>
+      <footer className="border-t border-border-light bg-white/70 backdrop-blur px-6 py-4">
+        <div className="mx-auto max-w-[1280px] text-center text-xs text-text-secondary">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline"
+          >
+            蜀ICP备2026002156号-2
+          </a>
+        </div>
+      </footer>
     </div>
   )
 }
@@ -79,7 +103,7 @@ export default function App() {
   return (
     <Routes>
       {/* 公开路由 */}
-      <Route path="/design-system" element={<StyleGuide />} />
+      <Route path="/design-system" element={<UserLayout><StyleGuide /></UserLayout>} />
       <Route
         path="/login"
         element={
@@ -194,10 +218,10 @@ export default function App() {
         }
       />
 
-      <Route path="/logout" element={<LogoutPage />} />
+      <Route path="/logout" element={<UserLayout><LogoutPage /></UserLayout>} />
 
       {/* 404 处理 */}
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="*" element={<UserLayout><NotFoundPage /></UserLayout>} />
     </Routes>
   )
 }

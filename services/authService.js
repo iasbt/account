@@ -1,7 +1,7 @@
 
 import pool from "../config/db.js";
 import bcryptjs from "bcryptjs";
-import { generateToken } from "../utils/token.js";
+import { issueAccessToken } from "./oidcProvider.js";
 import { sendEmail } from "../utils/email.js";
 import { getVerificationCodeTemplate } from "../utils/emailTemplates.js";
 import { setVerificationCode, getVerificationCode, deleteVerificationCode } from "../utils/verificationStore.js";
@@ -9,18 +9,28 @@ import { checkLockout, recordFailedAttempt, resetAttempts } from "../utils/accou
 import { randomUUID, randomInt } from "crypto";
 
 const findUserByAccount = async (account) => {
-  const userResult = await pool.query(
-    "SELECT * FROM public.users WHERE email = $1 OR name = $1",
-    [account]
-  );
-  if (userResult.rowCount > 0) {
+  let userResult = null;
+  try {
+    userResult = await pool.query(
+      "SELECT * FROM public.users WHERE email = $1 OR name = $1",
+      [account]
+    );
+  } catch (_error) {
+    userResult = null;
+  }
+  if (userResult?.rowCount > 0) {
     return { user: userResult.rows[0], source: "users" };
   }
-  const legacyResult = await pool.query(
-    "SELECT * FROM public.legacy_users WHERE email = $1 OR username = $1",
-    [account]
-  );
-  if (legacyResult.rowCount > 0) {
+  let legacyResult = null;
+  try {
+    legacyResult = await pool.query(
+      "SELECT * FROM public.legacy_users WHERE email = $1 OR username = $1",
+      [account]
+    );
+  } catch (_error) {
+    legacyResult = null;
+  }
+  if (legacyResult?.rowCount > 0) {
     return { user: legacyResult.rows[0], source: "legacy" };
   }
   return { user: null, source: null };
@@ -51,6 +61,48 @@ const upsertLegacyUserToUsers = async (legacyUser) => {
       legacyUser.is_admin || false
     ]
   );
+};
+
+const buildSafeUser = (user) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  isAdmin: user.is_admin || false
+});
+
+const verifyCredentials = async ({ account, password, skipLockout = false, requireAdmin = false }) => {
+  if (!skipLockout) {
+    const lockout = await checkLockout(account);
+    if (lockout.locked) {
+      throw new Error(`账号已被锁定，请在 ${Math.ceil(lockout.remaining / 60)} 分钟后重试`);
+    }
+  }
+
+  const { user: foundUser, source } = await findUserByAccount(account);
+  if (!foundUser) {
+    if (!skipLockout) await recordFailedAttempt(account);
+    throw new Error("账号或密码错误");
+  }
+
+  const user = source === "legacy" ? normalizeLegacyUser(foundUser) : foundUser;
+  if (requireAdmin && !user.is_admin) {
+    if (!skipLockout) await recordFailedAttempt(account);
+    throw new Error("无权访问");
+  }
+
+  const isMatch = await bcryptjs.compare(password, user.password);
+  if (!isMatch) {
+    if (!skipLockout) await recordFailedAttempt(account);
+    throw new Error("账号或密码错误");
+  }
+
+  if (source === "legacy") {
+    await upsertLegacyUserToUsers(foundUser);
+  }
+
+  await resetAttempts(account);
+
+  return { user };
 };
 
 export const authService = {
@@ -95,97 +147,28 @@ export const authService = {
     );
 
     const user = result.rows[0];
-    const token = generateToken(user);
+    const token = await issueAccessToken(user.id);
 
     await deleteVerificationCode(email);
 
-    return { user, token };
+    return { user: buildSafeUser(user), token };
   },
 
   async login({ account, password, skipLockout = false }) {
-    // 1. Check Lockout
-    if (!skipLockout) {
-      const lockout = await checkLockout(account);
-      if (lockout.locked) {
-        throw new Error(`账号已被锁定，请在 ${Math.ceil(lockout.remaining / 60)} 分钟后重试`);
-      }
-    }
-
-    const { user: foundUser, source } = await findUserByAccount(account);
-    if (!foundUser) {
-      if (!skipLockout) await recordFailedAttempt(account);
-      throw new Error("账号或密码错误");
-    }
-
-    const user = source === "legacy" ? normalizeLegacyUser(foundUser) : foundUser;
-    const isMatch = await bcryptjs.compare(password, user.password);
-
-    if (!isMatch) {
-      if (!skipLockout) await recordFailedAttempt(account);
-      throw new Error("账号或密码错误");
-    }
-    
-    if (source === "legacy") {
-      await upsertLegacyUserToUsers(foundUser);
-    }
-
-    // Login Success - Reset Attempts
-    await resetAttempts(account);
-
-    const token = generateToken(user);
-    
-    // Return safe user object
-    const safeUser = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.is_admin
-    };
-
-    return { user: safeUser, token };
+    const { user } = await verifyCredentials({ account, password, skipLockout });
+    const token = await issueAccessToken(user.id);
+    return { user: buildSafeUser(user), token };
   },
 
-  async adminLogin({ account, password }) {
-    // 1. Check Lockout
-    const lockout = await checkLockout(account);
-    if (lockout.locked) {
-      throw new Error(`账号已被锁定，请在 ${Math.ceil(lockout.remaining / 60)} 分钟后重试`);
-    }
+  async verifyCredentials({ account, password, skipLockout = false, requireAdmin = false }) {
+    return await verifyCredentials({ account, password, skipLockout, requireAdmin });
+  },
 
-    const { user: foundUser, source } = await findUserByAccount(account);
-    if (!foundUser) {
-      await recordFailedAttempt(account);
-      throw new Error("账号或密码错误");
-    }
-
-    const user = source === "legacy" ? normalizeLegacyUser(foundUser) : foundUser;
-    if (!user.is_admin) {
-      await recordFailedAttempt(account);
-      throw new Error("无权访问");
-    }
-
-    const isMatch = await bcryptjs.compare(password, user.password);
-    if (!isMatch) {
-      await recordFailedAttempt(account);
-      throw new Error("账号或密码错误");
-    }
-    
-    if (source === "legacy") {
-      await upsertLegacyUserToUsers(foundUser);
-    }
-
-    // Login Success - Reset Attempts
-    await resetAttempts(account);
-
-    const token = generateToken(user);
-    
-    const safeUser = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      isAdmin: true
-    };
-
+  async adminLogin({ account, password, skipLockout = false }) {
+    const { user } = await verifyCredentials({ account, password, skipLockout, requireAdmin: true });
+    const token = await issueAccessToken(user.id);
+    const safeUser = buildSafeUser(user);
+    safeUser.isAdmin = true;
     return { user: safeUser, token };
   },
 

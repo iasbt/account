@@ -1,7 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
 import { Loader2, AlertTriangle } from 'lucide-react';
 
@@ -43,31 +42,16 @@ export default function SsoPage() {
     if (calledRef.current) return;
     calledRef.current = true;
 
-    const performAuthorize = async () => {
-      try {
-        const { redirect_url } = await authService.authorize({
-          client_id,
-          redirect_uri,
-          response_type: 'code',
-          scope,
-          state,
-          code_challenge,
-          code_challenge_method
-        });
+    const authorizeParams = new URLSearchParams();
+    authorizeParams.set('client_id', client_id);
+    authorizeParams.set('redirect_uri', redirect_uri);
+    authorizeParams.set('response_type', 'code');
+    if (scope) authorizeParams.set('scope', scope);
+    if (state) authorizeParams.set('state', state);
+    if (code_challenge) authorizeParams.set('code_challenge', code_challenge);
+    if (code_challenge_method) authorizeParams.set('code_challenge_method', code_challenge_method);
 
-        if (redirect_url) {
-          window.location.href = redirect_url;
-        } else {
-          setError("Server returned no redirect URL");
-        }
-      } catch (err: unknown) {
-        console.error("Authorize Error:", err);
-        const errorMessage = err instanceof Error ? err.message : "Authorization failed";
-        setError(errorMessage);
-      }
-    };
-
-    performAuthorize();
+    window.location.href = `/api/oauth/authorize?${authorizeParams.toString()}`;
   }, [searchParams, isAuthenticated, navigate]);
 
   // 1. Check Legacy Implicit Flow (target) - Fail Fast

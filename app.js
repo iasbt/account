@@ -5,7 +5,6 @@ import { loggerMiddleware } from "./middlewares/logger.js";
 import { metricsMiddleware, getMetrics } from "./middlewares/metrics.js";
 import { appLoader } from "./src/core/AppLoader.js";
 import routes from "./routes/index.js";
-import wellKnownRoutes from "./routes/wellKnownRoutes.js";
 
 const app = express();
 
@@ -34,8 +33,6 @@ app.use(corsMiddleware);
 app.use(loggerMiddleware);
 
 app.get("/metrics", getMetrics); // Expose metrics endpoint
-app.use("/.well-known", wellKnownRoutes); // Mount .well-known endpoints
-
 appLoader.mount(app);
 
 app.use(routes);

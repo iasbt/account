@@ -39,6 +39,14 @@ export const register = async (req, res) => {
 
     const { user, token } = await authService.register({ name, email, password });
 
+    const isSecure = process.env.NODE_ENV === "production";
+    res.cookie("account_token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: isSecure,
+      path: "/"
+    });
+
     res.status(201).json({
       message: "注册成功",
       success: true,
@@ -73,6 +81,14 @@ export const login = async (req, res) => {
       });
     }
 
+    const isSecure = process.env.NODE_ENV === "production";
+    res.cookie("account_token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: isSecure,
+      path: "/"
+    });
+
     res.json({
       message: "登录成功",
       success: true,
@@ -90,6 +106,14 @@ export const adminLogin = async (req, res) => {
     const { account, password } = req.body;
     const skipLockout = isWhitelisted(req);
     const { user, token } = await authService.adminLogin({ account, password, skipLockout });
+
+    const isSecure = process.env.NODE_ENV === "production";
+    res.cookie("account_token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: isSecure,
+      path: "/"
+    });
 
     res.json({
       message: "管理员登录成功",
@@ -211,6 +235,10 @@ export const logout = async (req, res) => {
     // Audit Log
     auditLogger.log(AuditEvent.LOGOUT, req, { message: "Success" });
     
+    if (typeof res.clearCookie === "function") {
+      res.clearCookie("account_token", { path: "/" });
+    }
+
     res.json({
       success: true,
       message: "已安全退出"

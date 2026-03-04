@@ -39,6 +39,20 @@ export const config = {
   ssoTokenTtl: Number(process.env.SSO_TOKEN_TTL || 900), // 15 minutes (Access Token)
   corsAllowlist: process.env.CORS_ALLOWLIST || process.env.CORS_ORIGIN || "",
   ssoRedirectAllowlist: process.env.SSO_REDIRECT_ALLOWLIST || "",
+  oidc: {
+    issuer: process.env.OIDC_ISSUER || process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`,
+    internalClientId: process.env.OIDC_INTERNAL_CLIENT_ID || "account-web",
+    internalRedirectUri: process.env.OIDC_INTERNAL_REDIRECT_URI || process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`,
+    accessTokenTtl: Number(process.env.OIDC_ACCESS_TOKEN_TTL || 900),
+    authorizationCodeTtl: Number(process.env.OIDC_AUTH_CODE_TTL || 60),
+    refreshTokenTtl: Number(process.env.OIDC_REFRESH_TOKEN_TTL || 1209600),
+    externalIssuer: process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || "",
+    externalJwksUrl: process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || "",
+    externalAudience: process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "",
+    cookieKeys: (process.env.OIDC_COOKIE_KEYS || process.env.SSO_JWT_SECRET || "dev_secret_do_not_use_in_prod")
+      .split(",")
+      .filter(Boolean)
+  },
   smtp: {
     host: process.env.SMTP_HOST || "",
     port: Number(process.env.SMTP_PORT || 465),
