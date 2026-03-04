@@ -102,33 +102,28 @@ export default function LoginPage() {
               )}
             </button>
             
-            <div className="flex items-center justify-between pt-1">
-              <Link
-                to="/register"
-                className="text-[#0071e3] hover:underline font-medium"
-              >
-                立即注册
-              </Link>
+            <div className="pt-1 space-y-2">
+              <div className="flex items-center justify-between">
+                <Link
+                  to="/register"
+                  className="text-[#0071e3] hover:underline font-medium"
+                >
+                  立即注册
+                </Link>
+                <Link
+                  to="/forgot-password"
+                  className="text-[13px] text-[#86868b] hover:text-[#0071e3] hover:underline transition-colors"
+                >
+                  忘记密码？
+                </Link>
+              </div>
+              <div className="flex items-center justify-center gap-4 text-[11px] text-[#86868b]">
+                <Link to="/privacy" className="hover:underline hover:text-[#1d1d1f] transition-colors">隐私政策</Link>
+                <span className="text-[#d2d2d7]">|</span>
+                <Link to="/terms" className="hover:underline hover:text-[#1d1d1f] transition-colors">使用条款</Link>
+              </div>
             </div>
-            <Link
-              to="/forgot-password" 
-              className="text-[13px] text-[#86868b] hover:text-[#0071e3] hover:underline transition-colors"
-            >
-              忘记密码？
-            </Link>
           </form>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-10 text-center space-y-3">
-          <p className="text-[11px] text-[#86868b]">
-            Copyright © 2024 IASBT. All rights reserved.
-          </p>
-          <div className="flex items-center justify-center gap-4 text-[11px] text-[#86868b]">
-            <a href="#" className="hover:underline hover:text-[#1d1d1f] transition-colors">隐私政策</a>
-            <span className="text-[#d2d2d7]">|</span>
-            <a href="#" className="hover:underline hover:text-[#1d1d1f] transition-colors">使用条款</a>
-          </div>
         </div>
       </div>
     </div>

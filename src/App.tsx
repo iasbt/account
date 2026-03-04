@@ -62,7 +62,8 @@ function UserLayout({ children }: { children: ReactElement }) {
     <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased flex flex-col">
       <div className="flex-1">{children}</div>
       <footer className="border-t border-border-light bg-white/70 backdrop-blur px-6 py-4">
-        <div className="mx-auto max-w-[1280px] text-center text-xs text-text-secondary">
+        <div className="mx-auto max-w-[1280px] text-center text-xs text-text-secondary space-y-2">
+          <p>Copyright © 2024 IASBT. All rights reserved.</p>
           <a
             href="https://beian.miit.gov.cn/"
             target="_blank"
@@ -82,7 +83,8 @@ function AdminLayout({ children }: { children: ReactElement }) {
     <div className="min-h-screen bg-background-light text-text-primary font-sans antialiased flex flex-col">
       <div className="flex-1">{children}</div>
       <footer className="border-t border-border-light bg-white/70 backdrop-blur px-6 py-4">
-        <div className="mx-auto max-w-[1280px] text-center text-xs text-text-secondary">
+        <div className="mx-auto max-w-[1280px] text-center text-xs text-text-secondary space-y-2">
+          <p>Copyright © 2024 IASBT. All rights reserved.</p>
           <a
             href="https://beian.miit.gov.cn/"
             target="_blank"
