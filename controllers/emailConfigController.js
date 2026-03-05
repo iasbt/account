@@ -213,14 +213,16 @@ export const getEmailLogs = async (req, res) => {
  */
 export const getEmailStats = async (req, res) => {
   try {
-    // Total sent
     const totalRes = await pool.query("SELECT COUNT(*) FROM email_logs");
-    const totalSent = parseInt(totalRes.rows[0].count);
+    const sentRes = await pool.query("SELECT COUNT(*) FROM email_logs WHERE status = 'sent'");
+    const failedRes = await pool.query("SELECT COUNT(*) FROM email_logs WHERE status = 'failed'");
+    const pendingRes = await pool.query("SELECT COUNT(*) FROM email_logs WHERE status = 'pending'");
 
-    // Success rate
-    const successRes = await pool.query("SELECT COUNT(*) FROM email_logs WHERE status = 'sent'");
-    const successCount = parseInt(successRes.rows[0].count);
-    const successRate = totalSent > 0 ? ((successCount / totalSent) * 100).toFixed(1) : 0;
+    const totalSent = parseInt(totalRes.rows[0].count, 10);
+    const sentCount = parseInt(sentRes.rows[0].count, 10);
+    const failedCount = parseInt(failedRes.rows[0].count, 10);
+    const pendingCount = parseInt(pendingRes.rows[0].count, 10);
+    const successRate = totalSent > 0 ? ((sentCount / totalSent) * 100).toFixed(1) : 0;
 
     // 24h Trend (Last 24 hours)
     const trendRes = await pool.query(`
@@ -233,10 +235,28 @@ export const getEmailStats = async (req, res) => {
       ORDER BY hour ASC
     `);
 
+    const normalizedTrend = trendRes.rows.map((item) => ({
+      hour: item.hour,
+      count: parseInt(item.count, 10)
+    }));
+
     res.json({
+      success: true,
+      stats: {
+        total: totalSent,
+        sent: sentCount,
+        failed: failedCount,
+        pending: pendingCount,
+        success_rate: parseFloat(successRate),
+        trend: normalizedTrend.map((item) => ({
+          hour: item.hour,
+          sent: item.count,
+          failed: 0
+        }))
+      },
       total_sent: totalSent,
       success_rate: parseFloat(successRate),
-      trend: trendRes.rows
+      trend: normalizedTrend
     });
   } catch (error) {
     console.error("Get Email Stats Error:", error);

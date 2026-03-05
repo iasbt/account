@@ -36,5 +36,6 @@ app.get("/metrics", getMetrics); // Expose metrics endpoint
 appLoader.mount(app);
 
 app.use(routes);
+app.use("/api", routes);
 
 export default app;

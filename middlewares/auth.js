@@ -1,11 +1,27 @@
 import { verifyAccessToken } from "../services/oidcProvider.js";
 
+const getTokenFromCookie = (cookieHeader = "") => {
+  if (!cookieHeader) return null;
+  const pairs = cookieHeader.split(";");
+  for (const pair of pairs) {
+    const [rawKey, ...rest] = pair.trim().split("=");
+    if (rawKey !== "account_token") continue;
+    const value = rest.join("=");
+    return value ? decodeURIComponent(value) : null;
+  }
+  return null;
+};
+
 export const getAuthUser = async (req) => {
   const header = req.headers.authorization || "";
-  if (!header.startsWith("Bearer ")) return null;
-  const token = header.split(" ")[1];
-  if (!token) return null;
-  return await verifyAccessToken(token);
+  const bearerToken = header.startsWith("Bearer ") ? header.split(" ")[1] : null;
+  if (bearerToken) {
+    const bearerUser = await verifyAccessToken(bearerToken);
+    if (bearerUser) return bearerUser;
+  }
+  const cookieToken = getTokenFromCookie(req.headers.cookie || "");
+  if (!cookieToken) return null;
+  return await verifyAccessToken(cookieToken);
 };
 
 export const requireAuth = async (req, res, next) => {

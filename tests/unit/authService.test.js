@@ -123,6 +123,9 @@ describe('Auth Service', () => {
         if (text.includes("FROM public.legacy_users WHERE email = $1 OR username = $1")) {
           return Promise.resolve({ rowCount: 0, rows: [] });
         }
+        if (text.includes("admin_accounts")) {
+          return Promise.resolve({ rowCount: 1, rows: [{ "?column?": 1 }] });
+        }
         return Promise.resolve({ rowCount: 0, rows: [] });
       });
 

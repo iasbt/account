@@ -42,4 +42,4 @@ services:
 networks:
   logto_net:
     name: ${DOCKER_NETWORK}
-    driver: bridge
+    external: true

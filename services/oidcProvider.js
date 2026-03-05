@@ -204,6 +204,19 @@ const loadClients = async () => {
   return clients;
 };
 
+const hasAdminAccountEmail = async (email) => {
+  if (!email) return false;
+  try {
+    const result = await pool.query(
+      "SELECT 1 FROM public.admin_accounts WHERE email = $1 LIMIT 1",
+      [email]
+    );
+    return result.rowCount > 0;
+  } catch (_error) {
+    return false;
+  }
+};
+
 try {
   await ensureOidcSchema();
 } catch (_error) {
@@ -253,7 +266,8 @@ export const oidcProvider = new Provider(oidcConfig.issuer, {
     );
     const user = userResult.rowCount ? userResult.rows[0] : legacyResult.rows[0];
     if (!user) return undefined;
-    const hasAdminAccess = user.name === "admin" && Boolean(user.is_admin);
+    const hasAdminAccess = user.name === "admin"
+      && (await hasAdminAccountEmail(user.email) || Boolean(user.is_admin));
     return {
       accountId,
       async claims() {

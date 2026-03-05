@@ -70,6 +70,19 @@ const buildSafeUser = (user) => ({
   isAdmin: user.is_admin || false
 });
 
+const hasAdminAccountEmail = async (email) => {
+  if (!email) return false;
+  try {
+    const result = await pool.query(
+      "SELECT 1 FROM public.admin_accounts WHERE email = $1 LIMIT 1",
+      [email]
+    );
+    return result.rowCount > 0;
+  } catch (_error) {
+    return false;
+  }
+};
+
 const verifyCredentials = async ({ account, password, skipLockout = false, requireAdmin = false }) => {
   const strictAdminAccount = "admin";
 
@@ -92,12 +105,15 @@ const verifyCredentials = async ({ account, password, skipLockout = false, requi
   }
 
   const user = source === "legacy" ? normalizeLegacyUser(foundUser) : foundUser;
-  if (requireAdmin && !user.is_admin) {
+  const hasBoundAdminEmail = await hasAdminAccountEmail(user.email);
+  const isAdmin = account === strictAdminAccount
+    && user.name === strictAdminAccount
+    && (hasBoundAdminEmail || Boolean(user.is_admin));
+  if (requireAdmin && !isAdmin) {
     if (!skipLockout) await recordFailedAttempt(account);
     throw new Error("无权访问");
   }
 
-  const isAdmin = account === strictAdminAccount && Boolean(user.is_admin);
   const resolvedUser = {
     ...user,
     is_admin: isAdmin

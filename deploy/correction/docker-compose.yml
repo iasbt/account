@@ -75,9 +75,12 @@ services:
       - account-backend
     networks:
       - correction_default
+      - logto_net
 
 networks:
   correction_default:
+    external: true
+  logto_net:
     external: true
 
 volumes:

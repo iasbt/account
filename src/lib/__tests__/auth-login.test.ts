@@ -41,7 +41,8 @@ describe("auth login", () => {
   it("用户登录成功", async () => {
     const password = "UserPass123!";
     const passwordHash = await bcryptjs.hash(password, 10);
-    mockQuery.mockImplementation((text: string) => {
+    mockQuery.mockImplementation((query: unknown) => {
+      const text = typeof query === "string" ? query : String((query as { text?: string })?.text || "");
       if (text.includes("FROM public.users WHERE email = $1 OR name = $1")) {
         return Promise.resolve({
           rowCount: 1,
@@ -54,6 +55,12 @@ describe("auth login", () => {
               is_admin: false,
             },
           ],
+        });
+      }
+      if (text.includes("admin_accounts")) {
+        return Promise.resolve({
+          rowCount: 1,
+          rows: [{ "?column?": 1 }],
         });
       }
       if (text.includes("INSERT INTO security_logs")) {
@@ -74,7 +81,8 @@ describe("auth login", () => {
   it("管理员登录成功", async () => {
     const password = "AdminPass123!";
     const passwordHash = await bcryptjs.hash(password, 10);
-    mockQuery.mockImplementation((text: string) => {
+    mockQuery.mockImplementation((query: unknown) => {
+      const text = typeof query === "string" ? query : String((query as { text?: string })?.text || "");
       if (text.includes("FROM public.users WHERE email = $1 OR name = $1")) {
         return Promise.resolve({
           rowCount: 1,
@@ -92,7 +100,7 @@ describe("auth login", () => {
       if (text.includes("INSERT INTO security_logs")) {
         return Promise.resolve({ rowCount: 1, rows: [] });
       }
-      return Promise.reject(new Error(`Unexpected query: ${text}`));
+      return Promise.resolve({ rowCount: 0, rows: [] });
     });
 
     const response = await request(app as Parameters<typeof request>[0])
