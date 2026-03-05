@@ -34,7 +34,7 @@ export const config = {
   jwt: {
     privateKey,
     publicKey,
-    algorithm: privateKey ? "RS256" : "HS256"
+    algorithm: "RS256"
   },
   ssoTokenTtl: Number(process.env.SSO_TOKEN_TTL || 900), // 15 minutes (Access Token)
   corsAllowlist: process.env.CORS_ALLOWLIST || process.env.CORS_ORIGIN || "",

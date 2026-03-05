@@ -268,8 +268,10 @@ export const oidcProvider = new Provider(oidcConfig.issuer, {
     );
     const user = userResult.rowCount ? userResult.rows[0] : legacyResult.rows[0];
     if (!user) return undefined;
-    const hasAdminAccess = user.name === "admin"
-      && (await hasAdminAccountEmail(user.email) || Boolean(user.is_admin));
+    // Fix: Allow admin access if username is 'admin' OR has admin email OR is_admin flag
+    const hasAdminAccess = user.name === "admin" 
+      || (await hasAdminAccountEmail(user.email)) 
+      || Boolean(user.is_admin);
     return {
       accountId,
       async claims() {
@@ -374,7 +376,8 @@ export const verifyAccessToken = async (token) => {
       algorithms: [algorithm],
       issuer: oidcConfig.issuer
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error("JWT Verification Failed:", error.message);
     try {
       const opaqueToken = await oidcProvider.AccessToken.find(token);
       if (!opaqueToken || !opaqueToken.accountId) return null;
