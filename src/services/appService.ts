@@ -21,6 +21,7 @@ export interface CreateAppDto {
 
 export interface UpdateAppDto {
   name?: string;
+  appId?: string;
   allowedOrigins?: string[];
   secret?: string;
   isActive?: boolean;
@@ -40,7 +41,14 @@ export const appService = {
   },
 
   updateApp: async (id: string, data: UpdateAppDto): Promise<App> => {
-    return adminApiClient.put<App>(`/apps/${id}`, data);
+    const payload = {
+      name: data.name,
+      appId: data.appId,
+      allowedOrigins: data.allowedOrigins,
+      secret: data.secret,
+      isActive: data.isActive,
+    }
+    return adminApiClient.put<App>(`/apps/${id}`, payload);
   },
 
   rotateSecret: async (id: string): Promise<{ secret: string }> => {

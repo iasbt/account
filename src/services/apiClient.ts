@@ -14,14 +14,32 @@ class ApiClient {
     this.token = token;
   }
 
+  private getPersistedToken(): string | null {
+    if (typeof window === 'undefined') return null
+    const keys = ['admin-auth-storage', 'auth-storage']
+    for (const key of keys) {
+      const raw = window.localStorage.getItem(key)
+      if (!raw) continue
+      try {
+        const parsed = JSON.parse(raw) as { state?: { token?: string | null } }
+        const persistedToken = parsed?.state?.token
+        if (persistedToken) return persistedToken
+      } catch {
+        continue
+      }
+    }
+    return null
+  }
+
   private getHeaders(options: RequestInit = {}): HeadersInit {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    const activeToken = this.token || this.getPersistedToken()
+    if (activeToken) {
+      headers['Authorization'] = `Bearer ${activeToken}`;
     }
 
     return headers;

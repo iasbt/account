@@ -90,8 +90,10 @@ export default function AppManager() {
       if (editingApp) {
         const updateData: UpdateAppDto = {
           name: formData.name,
+          appId: editingApp.app_id,
           allowedOrigins: origins,
-          // Secret is updated via rotate, not here
+          secret: editingApp.secret,
+          isActive: editingApp.is_active,
         };
         const updated = await appService.updateApp(editingApp.id, updateData);
         setApps(apps.map(a => a.id === editingApp.id ? updated : a));

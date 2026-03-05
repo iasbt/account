@@ -148,10 +148,47 @@ export const adminService = {
 
   // Email Logs & Stats
   getEmailLogs: async (page = 1, limit = 20) => {
-    return adminApiClient.get<{ logs: EmailLog[]; total: number; page: number; totalPages: number }>(`/admin/email/logs?page=${page}&limit=${limit}`)
+    const response = await adminApiClient.get<{ logs?: EmailLog[]; data?: EmailLog[]; total?: number; page?: number; limit?: number; totalPages?: number }>(`/admin/email/logs?page=${page}&limit=${limit}`)
+    const total = response.total ?? 0
+    const currentPage = response.page ?? page
+    const pageSize = response.limit ?? limit
+    const totalPages = response.totalPages ?? Math.max(1, Math.ceil(total / pageSize))
+    return {
+      logs: response.logs ?? response.data ?? [],
+      total,
+      page: currentPage,
+      totalPages,
+    }
   },
 
   getEmailStats: async () => {
-    return adminApiClient.get<{ stats: EmailStats }>('/admin/email/stats')
+    const response = await adminApiClient.get<{
+      stats?: EmailStats
+      total_sent?: number
+      success_rate?: number
+      trend?: Array<{ hour: string; count?: number; sent?: number; failed?: number }>
+    }>('/admin/email/stats')
+    if (response.stats) {
+      return { stats: response.stats }
+    }
+    const total = response.total_sent ?? 0
+    const successRate = response.success_rate ?? 0
+    const sent = Math.round(total * (successRate / 100))
+    const failed = Math.max(0, total - sent)
+    const trend = (response.trend ?? []).map((item) => ({
+      hour: item.hour,
+      sent: item.sent ?? item.count ?? 0,
+      failed: item.failed ?? 0,
+    }))
+    return {
+      stats: {
+        total,
+        sent,
+        failed,
+        pending: 0,
+        success_rate: successRate,
+        trend,
+      },
+    }
   }
 }
