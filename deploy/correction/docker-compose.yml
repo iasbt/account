@@ -14,8 +14,8 @@ services:
       - DB_HOST=iasbt-postgres
       - DB_PORT=5432
       # Please ensure these are set in your .env file
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-djNV78.vAswB7VT}
       - DB_NAME=postgres
       - SSO_JWT_SECRET=${SSO_JWT_SECRET}
       - CORS_ALLOWLIST=${CORS_ALLOWLIST}

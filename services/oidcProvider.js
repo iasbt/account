@@ -66,7 +66,8 @@ class OidcAdapter {
           expiresAt
         ]
       );
-    } catch (_error) {
+    } catch (error) {
+      console.error(`OIDC Adapter Upsert Error (${this.name}):`, error);
     }
   }
 
@@ -77,7 +78,8 @@ class OidcAdapter {
         `SELECT payload, consumed_at, expires_at FROM public.oidc WHERE id = $1 AND type = $2`,
         [id, this.name]
       );
-    } catch (_error) {
+    } catch (error) {
+      console.error(`OIDC Adapter Find Error (${this.name}):`, error);
       result = null;
     }
     if (!result || result.rowCount === 0) return undefined;

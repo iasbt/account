@@ -106,9 +106,10 @@ const verifyCredentials = async ({ account, password, skipLockout = false, requi
 
   const user = source === "legacy" ? normalizeLegacyUser(foundUser) : foundUser;
   const hasBoundAdminEmail = await hasAdminAccountEmail(user.email);
-  const isAdmin = account === strictAdminAccount
-    && user.name === strictAdminAccount
-    && (hasBoundAdminEmail || Boolean(user.is_admin));
+  
+  // Allow login if user is explicitly an admin (DB flag) OR is in the admin_accounts table
+  const isAdmin = Boolean(user.is_admin) || hasBoundAdminEmail;
+  
   if (requireAdmin && !isAdmin) {
     if (!skipLockout) await recordFailedAttempt(account);
     throw new Error("无权访问");
