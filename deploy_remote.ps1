@@ -148,8 +148,7 @@ $DeployCmd = @'
     # sudo docker compose down --remove-orphans
     # sudo docker volume rm correction_pgadmin_data 2>/dev/null || true
     
-    # 启动新服务 (构建 - 强制重建后端)
-    # 注意：由于 account-backend 代码不在 Volume 中，必须 build 才能生效
+    # 启动新服务 (构建 - 仅重建变更部分)
     sudo docker compose up -d --build --remove-orphans
     
     # 5. 网络对齐 (Network Alignment)
