@@ -253,6 +253,7 @@ export const oidcProvider = new Provider(oidcConfig.issuer, {
     );
     const user = userResult.rowCount ? userResult.rows[0] : legacyResult.rows[0];
     if (!user) return undefined;
+    const hasAdminAccess = user.name === "admin" && Boolean(user.is_admin);
     return {
       accountId,
       async claims() {
@@ -260,7 +261,7 @@ export const oidcProvider = new Provider(oidcConfig.issuer, {
           sub: user.id,
           name: user.name,
           email: user.email,
-          is_admin: user.is_admin || false
+          is_admin: hasAdminAccess
         };
       }
     };
@@ -358,6 +359,18 @@ export const verifyAccessToken = async (token) => {
       issuer: oidcConfig.issuer
     });
   } catch (_error) {
-    return null;
+    try {
+      const opaqueToken = await oidcProvider.AccessToken.find(token);
+      if (!opaqueToken || !opaqueToken.accountId) return null;
+      const account = await oidcProvider.Account.findAccount(undefined, opaqueToken.accountId);
+      if (!account) return null;
+      const claims = await account.claims("access_token", opaqueToken.scope || "openid profile email");
+      return {
+        ...claims,
+        sub: claims.sub || opaqueToken.accountId
+      };
+    } catch (_opaqueError) {
+      return null;
+    }
   }
 };

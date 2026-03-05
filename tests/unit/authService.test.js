@@ -27,6 +27,7 @@ vi.mock('../../utils/verificationStore.js', () => ({
 describe('Auth Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    pool.query.mockReset();
   });
 
   describe('login', () => {
@@ -106,22 +107,27 @@ describe('Auth Service', () => {
     });
 
     it('should login successfully if user is admin', async () => {
+      const adminPassword = "AdminPass123!";
       const mockAdmin = {
         id: 'admin-123',
         name: 'admin',
         email: 'admin@example.com',
-        password: '$2a$10$hashedpassword',
+        password: await bcryptjs.hash(adminPassword, 10),
         is_admin: true,
       };
 
-      pool.query.mockResolvedValueOnce({
-        rowCount: 1,
-        rows: [mockAdmin],
+      pool.query.mockImplementation((text) => {
+        if (text.includes("FROM public.users WHERE email = $1 OR name = $1")) {
+          return Promise.resolve({ rowCount: 1, rows: [mockAdmin] });
+        }
+        if (text.includes("FROM public.legacy_users WHERE email = $1 OR username = $1")) {
+          return Promise.resolve({ rowCount: 0, rows: [] });
+        }
+        return Promise.resolve({ rowCount: 0, rows: [] });
       });
 
       vi.spyOn(bcryptjs, 'compare').mockResolvedValue(true);
-
-      const result = await authService.adminLogin({ account: 'admin', password: 'password' });
+      const result = await authService.adminLogin({ account: 'admin', password: adminPassword, skipLockout: true });
 
       expect(result.user.isAdmin).toBe(true);
       expect(result).toHaveProperty('token');

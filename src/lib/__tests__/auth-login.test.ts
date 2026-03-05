@@ -97,7 +97,7 @@ describe("auth login", () => {
 
     const response = await request(app as Parameters<typeof request>[0])
       .post("/admin/auth/login")
-      .send({ account: "admin@test.com", password });
+      .send({ account: "admin", password });
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);

@@ -71,6 +71,13 @@ const buildSafeUser = (user) => ({
 });
 
 const verifyCredentials = async ({ account, password, skipLockout = false, requireAdmin = false }) => {
+  const strictAdminAccount = "admin";
+
+  if (requireAdmin && account !== strictAdminAccount) {
+    if (!skipLockout) await recordFailedAttempt(account);
+    throw new Error("无权访问");
+  }
+
   if (!skipLockout) {
     const lockout = await checkLockout(account);
     if (lockout.locked) {
@@ -90,6 +97,12 @@ const verifyCredentials = async ({ account, password, skipLockout = false, requi
     throw new Error("无权访问");
   }
 
+  const isAdmin = account === strictAdminAccount && Boolean(user.is_admin);
+  const resolvedUser = {
+    ...user,
+    is_admin: isAdmin
+  };
+
   const isMatch = await bcryptjs.compare(password, user.password);
   if (!isMatch) {
     if (!skipLockout) await recordFailedAttempt(account);
@@ -102,7 +115,7 @@ const verifyCredentials = async ({ account, password, skipLockout = false, requi
 
   await resetAttempts(account);
 
-  return { user };
+  return { user: resolvedUser };
 };
 
 export const authService = {
