@@ -133,6 +133,17 @@ $DeployCmd = @'
     # 1.6 Copy .env to deploy context (CRITICAL FIX)
     echo '>>> Copying .env to deployment directory...'
     cp .env __DEPLOY_DIR__/.env
+
+    # 1.7 Ensure Persistent RSA Keys (Prevent Session Invalidation)
+    echo '>>> Checking/Generating Persistent RSA Keys...'
+    mkdir -p __DEPLOY_DIR__/certs
+    if [ ! -f __DEPLOY_DIR__/certs/private.pem ]; then
+        echo '>>> Generating NEW persistent RSA keys...'
+        openssl genrsa -out __DEPLOY_DIR__/certs/private.pem 2048
+        openssl rsa -in __DEPLOY_DIR__/certs/private.pem -pubout -out __DEPLOY_DIR__/certs/public.pem
+    else
+        echo '>>> Existing RSA keys found. Keeping them.'
+    fi
     
     # 2. 进入部署目录 (Context Alignment)
     echo '>>> Switching to Deployment Context: __DEPLOY_DIR__'
