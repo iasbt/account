@@ -136,11 +136,12 @@ $DeployCmd = @'
 
     # 1.7 Ensure Persistent RSA Keys (Prevent Session Invalidation)
     echo '>>> Checking/Generating Persistent RSA Keys...'
-    mkdir -p __DEPLOY_DIR__/certs
+    sudo mkdir -p __DEPLOY_DIR__/certs
     if [ ! -f __DEPLOY_DIR__/certs/private.pem ]; then
         echo '>>> Generating NEW persistent RSA keys...'
-        openssl genrsa -out __DEPLOY_DIR__/certs/private.pem 2048
-        openssl rsa -in __DEPLOY_DIR__/certs/private.pem -pubout -out __DEPLOY_DIR__/certs/public.pem
+        sudo openssl genrsa -out __DEPLOY_DIR__/certs/private.pem 2048
+        sudo openssl rsa -in __DEPLOY_DIR__/certs/private.pem -pubout -out __DEPLOY_DIR__/certs/public.pem
+        sudo chmod 644 __DEPLOY_DIR__/certs/*.pem
     else
         echo '>>> Existing RSA keys found. Keeping them.'
     fi
