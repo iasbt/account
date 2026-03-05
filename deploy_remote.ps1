@@ -192,6 +192,27 @@ $DeployCmd = @'
         sudo docker logs account-backend --tail 50
         exit 1
     fi
+
+    # 7. Logto Configuration Fix (Admin Console URL)
+    echo '>>> Fixing Logto Configuration...'
+    LOGTO_DIR="__REPO_DIR__/deploy/correction/logto"
+    if [ -d "$LOGTO_DIR" ]; then
+        cd "$LOGTO_DIR"
+        echo '>>> Updating LOGTO_ADMIN_URL in .env...'
+        # Ensure .env exists (copy from somewhere or create)
+        if [ ! -f .env ]; then
+            # If no .env, try to find one or warn. 
+            # Assuming previous deployment might have created it manually, or we need to create it.
+            # For now, let's assume we edit it if it exists, or create a minimal one if needed.
+            # But safer to just edit if exists, as it contains secrets.
+            echo "⚠️ Logto .env not found. Skipping auto-update."
+        else
+            # Use sed to update LOGTO_ADMIN_URL
+            sed -i 's|LOGTO_ADMIN_URL=https://logto.iasbt.cloud|LOGTO_ADMIN_URL=https://console.logto.iasbt.cloud|g' .env
+            echo '>>> Restarting Logto services...'
+            sudo docker compose up -d --remove-orphans
+        fi
+    fi
     
     echo '>>> Pruning Build Cache & System Garbage...'
     sudo docker builder prune -f
