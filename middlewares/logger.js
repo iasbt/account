@@ -41,3 +41,5 @@ export const logAudit = (entry) => {
     ...entry,
   });
 };
+
+export { logger };
