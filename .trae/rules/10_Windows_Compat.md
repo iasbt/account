@@ -19,3 +19,8 @@
 ## 4. 脚本执行
 *   **规则**: `.ps1` 脚本必须带 `.\` 前缀 (如 `.\deploy.ps1`)。
 *   **策略**: 确保执行策略为 `RemoteSigned`。
+
+## 5. curl 使用
+*   **规则**: 在 PowerShell 中执行 HTTP 检测时，禁止直接使用 `curl`。
+*   **原因**: `curl` 在 PowerShell 中是 `Invoke-WebRequest` 的别名。
+*   **方案**: 必须使用 `curl.exe`，或显式使用 `Invoke-WebRequest`。
