@@ -4,8 +4,8 @@
 
 param(
     [string]$Message = "Auto deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')",
-    [string]$Servers = $global:DEPLOY_SERVER_IP,
-    [string]$KeyPath = $global:DEPLOY_KEY_PATH
+    [string]$Servers = "",
+    [string]$KeyPath = ""
 )
 
 # Load configuration
@@ -29,6 +29,10 @@ if (-not (Test-Path $KeyPath)) {
     Write-Warning "SSH Key not found at: $KeyPath. Remote commands may fail."
 }
 
+if (-not $Servers) {
+    $Servers = $global:DEPLOY_SERVER_IP
+}
+
 $RepoDir = $global:REMOTE_APP_DIR
 $DeployDir = "$RepoDir/deploy/correction"
 
@@ -46,6 +50,8 @@ if (-not $ServerList -or $ServerList.Count -eq 0) {
         $ServerList = @("119.91.71.30")
     }
 }
+
+Write-Host ">>> Using SSH Key: $KeyPath" -ForegroundColor Cyan
 
 # 0. 读取本地版本 (Source of Truth)
 $PackageJson = Get-Content -Path "package.json" -Raw -Encoding UTF8 | ConvertFrom-Json
