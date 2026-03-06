@@ -31,7 +31,7 @@ export const getJwks = (req, res) => {
 };
 
 export const getOpenIdConfiguration = (req, res) => {
-  const baseUrl = process.env.ACCOUNT_PUBLIC_URL || process.env.BASE_URL || "https://iasbt.cloud";
+  const baseUrl = process.env.ACCOUNT_PUBLIC_URL || process.env.BASE_URL || "https://account.iasbt.cloud";
   
   return res.json({
     issuer: baseUrl,

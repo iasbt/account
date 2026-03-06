@@ -9,7 +9,7 @@ describe('Redirect Validator', () => {
     // Ideally we should mock config.
     
     // For now, let's test the logic we know exists in the function
-    expect(isValidRedirectTarget('https://account.iasbt.com')).toBe(true);
+    expect(isValidRedirectTarget('https://account.iasbt.cloud')).toBe(true);
   });
 
   it('should allow app origins', () => {

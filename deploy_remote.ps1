@@ -45,7 +45,7 @@ $LogtoBaseHost = ([uri]$LogtoBaseUrl).Host
 $LogtoAdminHost = ([uri]$LogtoAdminUrl).Host
 $PrimaryDomain = $global:PRIMARY_DOMAIN
 $AccountPublicUrl = $global:ACCOUNT_PUBLIC_URL
-$AllowedDomains = ".$PrimaryDomain,.iasbt.com,localhost,127.0.0.1"
+$AllowedDomains = ".$PrimaryDomain,localhost,127.0.0.1"
 
 $PgAdminEmail = $env:PGADMIN_DEFAULT_EMAIL
 $PgAdminPassword = $env:PGADMIN_DEFAULT_PASSWORD
@@ -218,6 +218,8 @@ $DeployCmd = @'
     echo '>>> Aligning Networks...'
     # 确保 iasbt-postgres 加入 correction_default 网络
     sudo docker network connect correction_default iasbt-postgres 2>/dev/null || echo 'iasbt-postgres already in network or network not ready'
+    # 确保 gallery-frontend 可被 account-frontend 反向代理访问
+    sudo docker network connect correction_default gallery-frontend 2>/dev/null || echo 'gallery-frontend already in network or container not found'
     
     # 重启后端以确保 DNS 解析生效 (iasbt-postgres hostname)
     echo '>>> Restarting backend to ensure DB connection...'

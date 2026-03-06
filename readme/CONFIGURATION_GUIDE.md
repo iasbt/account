@@ -264,7 +264,7 @@
 域名与端口映射固定为：
 
 - `https://logto.iasbt.cloud` -> `logto-core:3001`（用户端）  
-- `https://console.logto.iasbt.cloud` -> `logto-core:3002`（管理端）  
+- `https://logto-console.iasbt.cloud` -> `logto-core:3002`（管理端）  
 - `https://logto.iasbt.cloud/oidc/.well-known/openid-configuration` 用于发现文档探活  
 
 ### 6.2 Logto 侧建议核对项
@@ -347,9 +347,9 @@ REDIS_PORT=6379
 REDIS_PASSWORD=<server_secret_optional>
 
 SSO_JWT_SECRET=<server_secret_long_random>
-OIDC_ISSUER=https://account.iasbt.com
+OIDC_ISSUER=https://account.iasbt.cloud
 OIDC_INTERNAL_CLIENT_ID=account-web
-OIDC_INTERNAL_REDIRECT_URI=https://account.iasbt.com
+OIDC_INTERNAL_REDIRECT_URI=https://account.iasbt.cloud
 OIDC_ACCESS_TOKEN_TTL=900
 OIDC_AUTH_CODE_TTL=60
 OIDC_REFRESH_TOKEN_TTL=1209600
@@ -359,7 +359,7 @@ LOGTO_ISSUER=https://<your-logto-issuer>
 LOGTO_JWKS_URL=https://<your-logto-issuer>/oidc/jwks
 LOGTO_AUDIENCE=<optional_resource_indicator>
 
-CORS_ALLOWLIST=https://account.iasbt.com,http://119.91.71.30
+CORS_ALLOWLIST=https://account.iasbt.cloud,http://119.91.71.30
 SMTP_HOST=<smtp_host>
 SMTP_PORT=465
 SMTP_USER=<smtp_user>

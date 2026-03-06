@@ -29,17 +29,19 @@
 - `logto-core`：`3001`（用户端容器端口）、`3002`（管理端容器端口）
 - `logto-postgres`：仅内网访问，无公网映射
 
-Logto 域名映射：
+域名映射：
 
 - `https://logto.iasbt.cloud` -> `logto-core:3001`
-- `https://console.logto.iasbt.cloud` -> `logto-core:3002`
+- `https://logto-console.iasbt.cloud` -> `logto-core:3002`
+- `https://account.iasbt.cloud` -> `account-frontend` -> `account-backend`
+- `https://iasbt.cloud` -> `account-frontend` -> `gallery-frontend`
 
 ## 4. 环境变量要求
 
 - `NODE_ENV=production`
 - `DB_HOST=iasbt-postgres`
 - `CORS_ALLOWLIST` 需包含：
-  - `https://account.iasbt.com`
+  - `https://account.iasbt.cloud`
   - `http://119.91.71.30`
 - 外部认证（Logto）优先配置：
   - `LOGTO_ISSUER`
@@ -85,7 +87,7 @@ Logto 域名映射：
 - 管理后台：`/api/admin/auth/login`、`/api/admin/users`
 - OIDC：`/.well-known/openid-configuration`、`/.well-known/jwks.json`
 - Logto 用户端：`https://logto.iasbt.cloud/oidc/.well-known/openid-configuration`
-- Logto 管理端：`https://console.logto.iasbt.cloud/`
+- Logto 管理端：`https://logto-console.iasbt.cloud/`
 - 监控：`/metrics`
 
 ## 8. 常见故障

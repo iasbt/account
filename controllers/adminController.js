@@ -10,7 +10,7 @@ import { setVerificationCode } from "../utils/verificationStore.js";
 import { config } from "../config/index.js";
 import { randomInt } from "crypto";
 
-const accountPublicUrl = (process.env.ACCOUNT_PUBLIC_URL || process.env.BASE_URL || "https://iasbt.cloud").replace(/\/+$/, "");
+const accountPublicUrl = (process.env.ACCOUNT_PUBLIC_URL || process.env.BASE_URL || "https://account.iasbt.cloud").replace(/\/+$/, "");
 
 /**
  * @route GET /api/admin/system/status

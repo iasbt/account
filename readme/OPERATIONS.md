@@ -59,17 +59,17 @@
 ## 8. Logto 域名与端口映射策略
 
 - 用户端域名：`https://logto.iasbt.cloud` -> Nginx -> `logto-core:3001`
-- 管理端域名：`https://console.logto.iasbt.cloud` -> Nginx -> `logto-core:3002`
+- 管理端域名：`https://logto-console.iasbt.cloud` -> Nginx -> `logto-core:3002`
 - OIDC 发现地址：`https://logto.iasbt.cloud/oidc/.well-known/openid-configuration`
 - JWKS 地址：`https://logto.iasbt.cloud/oidc/jwks`
-- 管理台首页：`https://console.logto.iasbt.cloud/`
+- 管理台首页：`https://logto-console.iasbt.cloud/`
 
 ## 9. Logto 404 快速排查
 
-- 先检查反代：`nginx.conf` 中两个 `server_name` 是否为 `logto.iasbt.cloud` 与 `console.logto.iasbt.cloud`
+- 先检查反代：`nginx.conf` 中两个 `server_name` 是否为 `logto.iasbt.cloud` 与 `logto-console.iasbt.cloud`
 - 再检查 Logto `.env`：`LOGTO_BASE_URL` 与 `LOGTO_ADMIN_URL` 是否与域名完全一致
 - 再检查容器端口：`logto-core` 是否监听 `3001/3002`
 - 再做本机探测：
   - `curl -H "Host: logto.iasbt.cloud" http://127.0.0.1/oidc/.well-known/openid-configuration`
-  - `curl -H "Host: console.logto.iasbt.cloud" http://127.0.0.1/`
+  - `curl -H "Host: logto-console.iasbt.cloud" http://127.0.0.1/`
 - 若仅访问用户域名根路径返回“未找到会话”，优先使用 OIDC 发现地址验证服务可用性

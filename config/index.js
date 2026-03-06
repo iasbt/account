@@ -65,5 +65,5 @@ export const config = {
     password: process.env.REDIS_PASSWORD || undefined,
   },
   debugAllowlist: (process.env.DEBUG_ALLOWLIST || "").split(",").filter(Boolean),
-  allowedDomains: (process.env.ALLOWED_DOMAINS || ".iasbt.cloud,.iasbt.com,localhost,127.0.0.1").split(",").filter(Boolean)
+  allowedDomains: (process.env.ALLOWED_DOMAINS || ".iasbt.cloud,localhost,127.0.0.1").split(",").filter(Boolean)
 };
