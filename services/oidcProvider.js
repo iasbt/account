@@ -189,26 +189,62 @@ const buildJwks = () => {
   return { keys: [{ ...jwk, use: "sig", alg: "RS256", kid: "account-rs256" }] };
 };
 
+const normalizeRedirectUris = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    if (trimmed.includes(",")) {
+      return trimmed
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+    return [trimmed];
+  }
+  return [];
+};
+
 const loadClients = async () => {
   let rows = [];
+  let idKey = "app_id";
+  let redirectKey = "allowed_origins";
+  let primaryError = null;
+
   try {
     const result = await pool.query(
       `SELECT app_id, allowed_origins, secret, is_active FROM public.applications WHERE is_active = TRUE`
     );
     rows = Array.isArray(result?.rows) ? result.rows : [];
   } catch (error) {
-    logger.error({ event: "load_clients_error", error: error.message });
-    rows = [];
+    primaryError = error;
+    try {
+      const result = await pool.query(
+        `SELECT code, redirect_url, secret, is_active FROM public.applications WHERE is_active = TRUE`
+      );
+      rows = Array.isArray(result?.rows) ? result.rows : [];
+      idKey = "code";
+      redirectKey = "redirect_url";
+    } catch (legacyError) {
+      logger.error({
+        event: "load_clients_error",
+        error: legacyError.message,
+        primary_error: primaryError?.message
+      });
+      rows = [];
+    }
   }
 
-  const clients = rows.map((row) => ({
-    client_id: row.app_id,
-    client_secret: row.secret || undefined,
-    redirect_uris: Array.isArray(row.allowed_origins) ? row.allowed_origins : [],
-    token_endpoint_auth_method: row.secret ? "client_secret_post" : "none",
-    response_types: ["code"],
-    grant_types: ["authorization_code", "refresh_token"]
-  }));
+  const clients = rows
+    .map((row) => ({
+      client_id: row[idKey],
+      client_secret: row.secret || undefined,
+      redirect_uris: normalizeRedirectUris(row[redirectKey]),
+      token_endpoint_auth_method: row.secret ? "client_secret_post" : "none",
+      response_types: ["code"],
+      grant_types: ["authorization_code", "refresh_token"]
+    }))
+    .filter((client) => client.client_id);
 
   if (!clients.find((client) => client.client_id === oidcConfig.internalClientId)) {
     clients.push({
