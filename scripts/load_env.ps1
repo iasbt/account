@@ -13,8 +13,9 @@ if (Test-Path $EnvFile) {
 if (-not $global:DEPLOY_SERVER_IP) { $global:DEPLOY_SERVER_IP = "119.91.71.30" }
 if (-not $global:DEPLOY_USER) { $global:DEPLOY_USER = "ubuntu" }
 if (-not $global:DEPLOY_KEY_PATH) { 
-    # Try to find a common key or default to a placeholder
-    if (Test-Path "D:\OneDrive\Desktop\trae.pem") {
+    if (Test-Path "C:\My_Project\account\yuanchengmiyao.pem") {
+        $global:DEPLOY_KEY_PATH = "C:\My_Project\account\yuanchengmiyao.pem"
+    } elseif (Test-Path "D:\OneDrive\Desktop\trae.pem") {
         $global:DEPLOY_KEY_PATH = "D:\OneDrive\Desktop\trae.pem"
     } else {
         $global:DEPLOY_KEY_PATH = "$HOME\.ssh\id_rsa"

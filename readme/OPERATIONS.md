@@ -1,7 +1,7 @@
 # 运维手册（OPERATIONS）
 
 > 文档版本：1.9.17  
-> 最后更新：2026-03-06
+> 最后更新：2026-03-07
 
 ## 1. 监控目标
 
@@ -44,3 +44,32 @@
 - 核心接口建立基准（P50/P95/P99）
 - 发布前执行压力测试并记录吞吐量与资源曲线
 - 当接口 SLA 低于阈值，阻断发布并进入优化流程
+
+## 7. 生产服务与端口清单（统一管理）
+
+- `account-backend`：`3000:3000`，业务 API 与鉴权核心
+- `account-frontend`：`80:80`，Web 网关与静态资源
+- `iasbt-postgres`：`5432:5432`，主业务数据库
+- `redis`：`6379:6379`，缓存与队列基础设施
+- `pgadmin`：`8888:80`，数据库可视化管理
+- `portainer`：`9000:9000`，容器运维管理
+- `logto-core`：`3001`（用户端，容器内），`3002`（管理端，容器内）
+- `logto-postgres`：无公网端口，仅 Logto 内网访问
+
+## 8. Logto 域名与端口映射策略
+
+- 用户端域名：`https://logto.iasbt.cloud` -> Nginx -> `logto-core:3001`
+- 管理端域名：`https://console.logto.iasbt.cloud` -> Nginx -> `logto-core:3002`
+- OIDC 发现地址：`https://logto.iasbt.cloud/oidc/.well-known/openid-configuration`
+- JWKS 地址：`https://logto.iasbt.cloud/oidc/jwks`
+- 管理台首页：`https://console.logto.iasbt.cloud/`
+
+## 9. Logto 404 快速排查
+
+- 先检查反代：`nginx.conf` 中两个 `server_name` 是否为 `logto.iasbt.cloud` 与 `console.logto.iasbt.cloud`
+- 再检查 Logto `.env`：`LOGTO_BASE_URL` 与 `LOGTO_ADMIN_URL` 是否与域名完全一致
+- 再检查容器端口：`logto-core` 是否监听 `3001/3002`
+- 再做本机探测：
+  - `curl -H "Host: logto.iasbt.cloud" http://127.0.0.1/oidc/.well-known/openid-configuration`
+  - `curl -H "Host: console.logto.iasbt.cloud" http://127.0.0.1/`
+- 若仅访问用户域名根路径返回“未找到会话”，优先使用 OIDC 发现地址验证服务可用性

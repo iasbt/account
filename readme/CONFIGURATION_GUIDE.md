@@ -1,7 +1,7 @@
 # 配置总册（CONFIGURATION_GUIDE）
 
 > 文档版本：1.9.17  
-> 最后更新：2026-03-06  
+> 最后更新：2026-03-07  
 > 适用范围：Account 项目本地开发、测试、部署、运维、故障排查  
 > 阅读对象：新接手工程师、开发工程师、运维工程师、发布负责人
 
@@ -191,6 +191,17 @@
 - `redis`：缓存与队列基础设施  
 - `pgadmin`：数据库可视化管理  
 
+当前生产服务与端口（统一口径）：
+
+- `account-backend`：`3000:3000`  
+- `account-frontend`：`80:80`  
+- `iasbt-postgres`：`5432:5432`  
+- `redis`：`6379:6379`  
+- `pgadmin`：`8888:80`  
+- `portainer`：`9000:9000`  
+- `logto-core`：容器 `3001/3002`（通过域名反代，不直接公网暴露）  
+- `logto-postgres`：仅内网访问  
+
 关键网络：
 
 - `correction_default`（外部网络，项目主网络）  
@@ -225,6 +236,8 @@
 - `REMOTE_APP_DIR`（默认 `/home/ubuntu/account`）  
 - `CORS_ALLOWLIST`（默认内置值）  
 
+推荐将 `DEPLOY_KEY_PATH` 固定为：`C:\My_Project\account\yuanchengmiyao.pem`，避免历史密钥权限异常导致的 `Permission denied`。
+
 **注意**：  
 脚本层变量与应用层变量不是同一层概念。前者用于“怎么发布”，后者用于“服务怎么运行”。排障时不要混淆。
 
@@ -248,6 +261,12 @@
 - `LOGTO_JWKS_URL`：Logto JWKS 公钥地址  
 - `LOGTO_AUDIENCE`：可选，建议与 Logto Resource Indicator 对齐  
 
+域名与端口映射固定为：
+
+- `https://logto.iasbt.cloud` -> `logto-core:3001`（用户端）  
+- `https://console.logto.iasbt.cloud` -> `logto-core:3002`（管理端）  
+- `https://logto.iasbt.cloud/oidc/.well-known/openid-configuration` 用于发现文档探活  
+
 ### 6.2 Logto 侧建议核对项
 
 - 租户 Issuer 与 `LOGTO_ISSUER` 完全一致（包括协议、域名、尾部路径）。  
@@ -261,6 +280,7 @@
 - `issuer mismatch`：`LOGTO_ISSUER` 与 token `iss` 不一致。  
 - `audience invalid`：配置了 `LOGTO_AUDIENCE`，但 token `aud` 不匹配。  
 - 间歇性失败：通常是网络抖动或 JWKS 缓存更新时序问题。  
+- 用户域名根路径 404：通常是直接访问用户端入口导致，优先访问 OIDC 发现地址或发起标准授权流程。  
 
 ### 6.4 切换策略建议
 

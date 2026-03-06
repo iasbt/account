@@ -14,8 +14,15 @@ param(
 $User = $global:DEPLOY_USER
 
 if (-not $KeyPath) {
-    Write-Warning "DEPLOY_KEY_PATH is not set. Using default key path."
-    $KeyPath = "$HOME\.ssh\id_rsa"
+    $KeyPath = $global:DEPLOY_KEY_PATH
+}
+if (-not $KeyPath) {
+    Write-Warning "DEPLOY_KEY_PATH is not set. Using fallback key path."
+    if (Test-Path "C:\My_Project\account\yuanchengmiyao.pem") {
+        $KeyPath = "C:\My_Project\account\yuanchengmiyao.pem"
+    } else {
+        $KeyPath = "$HOME\.ssh\id_rsa"
+    }
 }
 
 if (-not (Test-Path $KeyPath)) {
@@ -193,24 +200,31 @@ $DeployCmd = @'
         exit 1
     fi
 
-    # 7. Logto Configuration Fix (Admin Console URL)
+    # 7. Logto Configuration Fix
     echo '>>> Fixing Logto Configuration...'
     LOGTO_DIR="__REPO_DIR__/deploy/correction/logto"
     if [ -d "$LOGTO_DIR" ]; then
         cd "$LOGTO_DIR"
-        echo '>>> Updating LOGTO_ADMIN_URL in .env...'
-        # Ensure .env exists (copy from somewhere or create)
+        echo '>>> Updating LOGTO URLs in .env...'
         if [ ! -f .env ]; then
-            # If no .env, try to find one or warn. 
-            # Assuming previous deployment might have created it manually, or we need to create it.
-            # For now, let's assume we edit it if it exists, or create a minimal one if needed.
-            # But safer to just edit if exists, as it contains secrets.
             echo "⚠️ Logto .env not found. Skipping auto-update."
         else
-            # Use sed to update LOGTO_ADMIN_URL
-            sed -i 's|LOGTO_ADMIN_URL=https://logto.iasbt.cloud|LOGTO_ADMIN_URL=https://console.logto.iasbt.cloud|g' .env
+            if grep -q "^LOGTO_BASE_URL=" .env; then
+                sed -i 's|^LOGTO_BASE_URL=.*|LOGTO_BASE_URL=https://logto.iasbt.cloud|g' .env
+            else
+                echo "LOGTO_BASE_URL=https://logto.iasbt.cloud" >> .env
+            fi
+            if grep -q "^LOGTO_ADMIN_URL=" .env; then
+                sed -i 's|^LOGTO_ADMIN_URL=.*|LOGTO_ADMIN_URL=https://console.logto.iasbt.cloud|g' .env
+            else
+                echo "LOGTO_ADMIN_URL=https://console.logto.iasbt.cloud" >> .env
+            fi
             echo '>>> Restarting Logto services...'
             sudo docker compose up -d --remove-orphans
+            echo '>>> Validating Logto routes via local Nginx host headers...'
+            curl -fsS -H "Host: logto.iasbt.cloud" http://127.0.0.1/oidc/.well-known/openid-configuration >/dev/null
+            curl -fsS -H "Host: console.logto.iasbt.cloud" http://127.0.0.1/ >/dev/null
+            echo '✅ Logto proxy checks passed.'
         fi
     fi
     
