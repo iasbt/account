@@ -1,5 +1,5 @@
 
-import logger from './logger.js';
+import { logger } from './logger.js';
 import pool from '../config/db.js';
 
 const styles = {
