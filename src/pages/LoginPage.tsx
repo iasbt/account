@@ -3,6 +3,22 @@ import { UserCircle } from 'lucide-react'
 import { useAuthStore } from '../store/useAuthStore'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 
+function getSafeRedirectTarget(target: string | null): string | null {
+  if (!target) {
+    return null
+  }
+
+  try {
+    const parsed = new URL(target, window.location.origin)
+    if (parsed.origin !== window.location.origin) {
+      return null
+    }
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`
+  } catch {
+    return null
+  }
+}
+
 export default function LoginPage() {
   const navigate = useNavigate()
   const loginWithPassword = useAuthStore((state) => state.loginWithPassword)
@@ -17,17 +33,14 @@ export default function LoginPage() {
     setIsLoading(true)
     setError(null)
     
-    // 捕获来源 URL，以便登录后自动跳回
     const from = searchParams.get('from') || searchParams.get('redirect')
+    const safeFrom = getSafeRedirectTarget(from)
     
-    // 优先尝试 SSO 跳转 (支持跨域)
     try {
       await loginWithPassword(account, password)
       
-      // 登录成功后的跳转逻辑
-      // 如果有来源页面 (e.g. /oauth/authorize)，直接跳回该页面让其处理后续逻辑
-      if (from) {
-        navigate(from, { replace: true })
+      if (safeFrom) {
+        navigate(safeFrom, { replace: true })
         return
       }
       
