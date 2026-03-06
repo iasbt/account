@@ -59,11 +59,14 @@ describe("auth login", () => {
       }
       if (text.includes("admin_accounts")) {
         return Promise.resolve({
-          rowCount: 1,
-          rows: [{ "?column?": 1 }],
+          rowCount: 0,
+          rows: [],
         });
       }
       if (text.includes("INSERT INTO security_logs")) {
+        return Promise.resolve({ rowCount: 1, rows: [] });
+      }
+      if (text.includes("INSERT INTO public.oidc")) {
         return Promise.resolve({ rowCount: 1, rows: [] });
       }
       return Promise.reject(new Error(`Unexpected query: ${text}`));

@@ -46,9 +46,9 @@ export const config = {
     accessTokenTtl: Number(process.env.OIDC_ACCESS_TOKEN_TTL || 900),
     authorizationCodeTtl: Number(process.env.OIDC_AUTH_CODE_TTL || 60),
     refreshTokenTtl: Number(process.env.OIDC_REFRESH_TOKEN_TTL || 1209600),
-    externalIssuer: process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || "",
-    externalJwksUrl: process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || "",
-    externalAudience: process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "",
+    externalIssuer: process.env.LOGTO_ISSUER || process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || "",
+    externalJwksUrl: process.env.LOGTO_JWKS_URL || process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || "",
+    externalAudience: process.env.LOGTO_AUDIENCE || process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "",
     cookieKeys: (process.env.OIDC_COOKIE_KEYS || process.env.SSO_JWT_SECRET || "dev_secret_do_not_use_in_prod")
       .split(",")
       .filter(Boolean)

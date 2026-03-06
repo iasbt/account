@@ -2,6 +2,27 @@
 
 本文件记录项目的重要变更。
 
+## [1.9.17] - 2026-03-06
+### Changed
+- **OIDC External Provider**: 外部 OIDC 配置新增 Logto 优先级，支持通过 `LOGTO_ISSUER`、`LOGTO_JWKS_URL`、`LOGTO_AUDIENCE` 直接接入服务器端 Logto。
+- **Config Compatibility**: 保留 `OIDC_EXTERNAL_*` 与 `AUTHENTIK_*` 回退链路，确保已有部署配置不中断。
+
+### Documentation
+- **Env Template**: `.env.example` 增加 Logto 环境变量模板。
+- **Deployment Docs**: `readme` 文档同步增加 Logto 接入与验收说明。
+
+## [1.9.16] - 2026-03-06
+### Fixed
+- **Admin Auth**: 修复管理员登录硬编码用户名限制，管理员判定统一基于 `is_admin` 与 `admin_accounts`。
+- **OIDC Verify**: RS256 验签失败时新增 HS256 历史 Token 兼容回退，降低升级切换期鉴权失败率。
+
+### Tests
+- **Regression**: 新增管理员非固定用户名登录回归测试。
+- **Integration Stability**: 修复登录集成测试中的 OIDC AccessToken 落库 SQL mock 适配。
+
+### Documentation
+- **Delivery Docs**: 新增并维护 `readme/` 交付文档包（API/架构/部署/开发/运维/日志）。
+
 ## [1.9.0] - 2026-02-27
 ### Architecture (Major)
 - **JWKS & RSA**: 从对称加密 (HS256) 迁移至非对称加密 (RS256) 进行 JWT 签名。

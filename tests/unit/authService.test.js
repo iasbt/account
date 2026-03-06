@@ -95,14 +95,17 @@ describe('Auth Service', () => {
         is_admin: false,
       };
 
-      // Mock DB to return normal user
-      pool.query.mockResolvedValueOnce({
-        rowCount: 1,
-        rows: [mockUser],
+      pool.query.mockImplementation((text) => {
+        if (text.includes("FROM public.users WHERE email = $1 OR name = $1")) {
+          return Promise.resolve({ rowCount: 1, rows: [mockUser] });
+        }
+        if (text.includes("admin_accounts")) {
+          return Promise.resolve({ rowCount: 0, rows: [] });
+        }
+        return Promise.resolve({ rowCount: 0, rows: [] });
       });
 
-      // It should throw "无权访问" before checking password
-      await expect(authService.adminLogin({ account: 'normaluser', password: 'password' }))
+      await expect(authService.adminLogin({ account: 'normaluser', password: 'password', skipLockout: true }))
         .rejects.toThrow('无权访问');
     });
 
@@ -131,6 +134,36 @@ describe('Auth Service', () => {
 
       vi.spyOn(bcryptjs, 'compare').mockResolvedValue(true);
       const result = await authService.adminLogin({ account: 'admin', password: adminPassword, skipLockout: true });
+
+      expect(result.user.isAdmin).toBe(true);
+      expect(result).toHaveProperty('token');
+    });
+
+    it('should login successfully if admin uses non-admin username', async () => {
+      const adminPassword = "AdminPass123!";
+      const mockAdmin = {
+        id: 'admin-2',
+        name: 'iasbt_admin',
+        email: 'iasbt@outlook.com',
+        password: await bcryptjs.hash(adminPassword, 10),
+        is_admin: true,
+      };
+
+      pool.query.mockImplementation((text) => {
+        if (text.includes("FROM public.users WHERE email = $1 OR name = $1")) {
+          return Promise.resolve({ rowCount: 1, rows: [mockAdmin] });
+        }
+        if (text.includes("admin_accounts")) {
+          return Promise.resolve({ rowCount: 1, rows: [{ "?column?": 1 }] });
+        }
+        if (text.includes("FROM public.legacy_users WHERE email = $1 OR username = $1")) {
+          return Promise.resolve({ rowCount: 0, rows: [] });
+        }
+        return Promise.resolve({ rowCount: 0, rows: [] });
+      });
+
+      vi.spyOn(bcryptjs, 'compare').mockResolvedValue(true);
+      const result = await authService.adminLogin({ account: 'iasbt_admin', password: adminPassword, skipLockout: true });
 
       expect(result.user.isAdmin).toBe(true);
       expect(result).toHaveProperty('token');

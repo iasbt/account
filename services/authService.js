@@ -84,13 +84,6 @@ const hasAdminAccountEmail = async (email) => {
 };
 
 const verifyCredentials = async ({ account, password, skipLockout = false, requireAdmin = false }) => {
-  const strictAdminAccount = "admin";
-
-  if (requireAdmin && account !== strictAdminAccount) {
-    if (!skipLockout) await recordFailedAttempt(account);
-    throw new Error("无权访问");
-  }
-
   if (!skipLockout) {
     const lockout = await checkLockout(account);
     if (lockout.locked) {

@@ -1,6 +1,6 @@
 # 账户系统 (Account System) - V2.1
 
-> **状态 (Status)**: ✅ Active (V1.9.0)
+> **状态 (Status)**: ✅ Active (V1.9.17)
 > **文档 (Docs)**: [📚 Documentation Index (文档索引)](docs/INDEX.md)
 
 统一账户中心，作为“四合院”项目矩阵的数字基座，负责统一身份认证 (SSO)、权限控制 (RBAC) 和数据中台服务。
@@ -17,6 +17,16 @@
 ## 文档导航 (Documentation)
 
 请访问 [**docs/INDEX.md**](docs/INDEX.md) 查看完整文档库。
+
+### 交付文档包（readme 目录）
+- [API_DOCUMENTATION.md](readme/API_DOCUMENTATION.md)
+- [ARCHITECTURE.md](readme/ARCHITECTURE.md)
+- [DEPLOYMENT.md](readme/DEPLOYMENT.md)
+- [DEVELOPMENT_GUIDE.md](readme/DEVELOPMENT_GUIDE.md)
+- [OPERATIONS.md](readme/OPERATIONS.md)
+- [DEV_LOG.md](readme/DEV_LOG.md)
+- [FIX_LOG.md](readme/FIX_LOG.md)
+- [CHANGELOG.md](readme/CHANGELOG.md)
 
 ### 核心文档
 - **架构设计**: [01_系统概览.md](docs/01_架构设计/01_系统概览.md)

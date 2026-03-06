@@ -378,6 +378,15 @@ export const verifyAccessToken = async (token) => {
     });
   } catch (error) {
     console.error("JWT Verification Failed:", error.message);
+    if (algorithm === "RS256" && config.ssoSecret) {
+      try {
+        return jwt.verify(token, config.ssoSecret, {
+          algorithms: ["HS256"],
+          issuer: oidcConfig.issuer
+        });
+      } catch (_legacyError) {
+      }
+    }
     try {
       const opaqueToken = await oidcProvider.AccessToken.find(token);
       if (!opaqueToken || !opaqueToken.accountId) return null;
