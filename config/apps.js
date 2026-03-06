@@ -1,6 +1,7 @@
 // 注册所有接入 Account 系统的子应用
 // 每个应用都有独立的配置与密钥
 import { config } from "./index.js";
+import { logger } from "../utils/logger.js";
 
 const primaryDomain = process.env.PRIMARY_DOMAIN || "iasbt.cloud";
 const deployServerIp = process.env.DEPLOY_SERVER_IP || "119.91.71.30";
@@ -78,7 +79,7 @@ export const matchAppByOrigin = (targetUrl) => {
     }
     return null;
   } catch (e) {
-    console.error("Failed to load apps config:", e);
+    logger.error({ event: "load_apps_config_failed", error: e.message });
     return null;
   }
 };

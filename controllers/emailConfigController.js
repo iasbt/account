@@ -1,5 +1,6 @@
 import pool from '../config/db.js';
 import nodemailer from 'nodemailer';
+import { logger } from '../middlewares/logger.js';
 
 /**
  * Get all email providers
@@ -15,7 +16,7 @@ export const getProviders = async (req, res) => {
     }));
     res.json(sanitizedRows);
   } catch (error) {
-    console.error("Get Providers Error:", error);
+    logger.error({ event: "get_email_providers_error", error: error.message });
     res.status(500).json({ message: "获取邮件服务商失败" });
   }
 };
@@ -36,7 +37,7 @@ export const createProvider = async (req, res) => {
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error("Create Provider Error:", error);
+    logger.error({ event: "create_email_provider_error", error: error.message });
     res.status(500).json({ message: "创建邮件服务商失败" });
   }
 };
@@ -70,7 +71,7 @@ export const updateProvider = async (req, res) => {
     }
     res.json(result.rows[0]);
   } catch (error) {
-    console.error("Update Provider Error:", error);
+    logger.error({ event: "update_email_provider_error", error: error.message });
     res.status(500).json({ message: "更新邮件服务商失败" });
   }
 };
@@ -89,7 +90,7 @@ export const deleteProvider = async (req, res) => {
     }
     res.json({ message: "删除成功", id });
   } catch (error) {
-    console.error("Delete Provider Error:", error);
+    logger.error({ event: "delete_email_provider_error", error: error.message });
     res.status(500).json({ message: "删除邮件服务商失败" });
   }
 };

@@ -1,6 +1,7 @@
 
 import pool from '../config/db.js';
 import crypto from 'crypto';
+import { logger } from '../middlewares/logger.js';
 
 // Helper: Generate secure secret
 const generateSecret = () => crypto.randomBytes(32).toString('hex');
@@ -35,7 +36,7 @@ export const createApp = async (req, res) => {
     if (err.code === '23505') { // unique_violation
       return res.status(409).json({ message: "App ID already exists" });
     }
-    console.error("Create app error", err);
+    logger.error({ event: "create_app_error", error: err.message });
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -46,7 +47,7 @@ export const getApps = async (req, res) => {
     const result = await pool.query("SELECT * FROM public.applications ORDER BY created_at DESC");
     res.json(result.rows);
   } catch (err) {
-    console.error("Get apps error", err);
+    logger.error({ event: "get_apps_error", error: err.message });
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -61,7 +62,7 @@ export const getApp = async (req, res) => {
     }
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Get app error", err);
+    logger.error({ event: "get_app_error", error: err.message });
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -88,7 +89,7 @@ export const updateApp = async (req, res) => {
     if (err.code === '23505') {
       return res.status(409).json({ message: "App ID already exists" });
     }
-    console.error("Update app error", err);
+    logger.error({ event: "update_app_error", error: err.message });
     res.status(500).json({ message: "Internal server error" });
   }
 };

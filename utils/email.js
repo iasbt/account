@@ -1,6 +1,7 @@
 import { addEmailJob } from "./emailQueue.js";
 import nodemailer from "nodemailer";
 import { config } from "../config/index.js";
+import { logger } from "./logger.js";
 
 // Legacy direct send for debugging or fallback
 const transporter = nodemailer.createTransport({
@@ -21,10 +22,10 @@ export const sendEmailDirect = async (to, subject, html) => {
       subject,
       html,
     });
-    console.log("Message sent (Direct): %s", info.messageId);
+    logger.info({ event: "email_sent_direct", messageId: info.messageId });
     return true;
   } catch (error) {
-    console.error("Error sending email (Direct):", error);
+    logger.error({ event: "email_error_direct", error: error.message });
     return false;
   }
 };
@@ -39,14 +40,11 @@ export const sendEmailDirect = async (to, subject, html) => {
 export const sendEmail = async (to, subject, html, type = 'general') => {
   try {
     const job = await addEmailJob(to, subject, html, type);
-    console.log(`Email job added to queue: ${job.id} (${type} -> ${to})`);
+    logger.info({ event: "email_queued", jobId: job.id, type, to });
     return true;
   } catch (error) {
-    console.error("Failed to add email to queue:", error);
-    // Fallback to direct send if Redis is down?
-    // For V2.0 strict mode, we might want to fail or fallback.
-    // Let's fallback for robustness during migration.
-    console.warn("Falling back to direct send...");
+    logger.error({ event: "email_queue_error", error: error.message });
+    logger.warn({ event: "email_fallback_direct" });
     return sendEmailDirect(to, subject, html);
   }
 };

@@ -1,6 +1,7 @@
 
 import pool from "../config/db.js";
 import { recordAuthFailure } from "../middlewares/metrics.js";
+import { logger } from "../middlewares/logger.js";
 
 export const AuditEvent = {
   LOGIN_SUCCESS: "LOGIN_SUCCESS",
@@ -40,7 +41,7 @@ export const auditLogger = {
         [userId, eventType, ip, userAgent, safeDetails]
       );
     } catch (err) {
-      console.error(`[AuditLogger] Failed to log event ${eventType}:`, err.message);
+      logger.error({ event: "audit_logger_failed", eventType, error: err.message });
       // We do not throw here to prevent blocking the main flow
     }
   }

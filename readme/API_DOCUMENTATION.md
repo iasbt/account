@@ -15,7 +15,7 @@
 
 ### GET `/api/health`
 
-- 说明：部署与探活核心接口
+- 说明：部署与探活核心接口（后端原生入口为 `/health`，网关兼容 `/api/health`）
 - 响应示例：
 
 ```json
@@ -118,9 +118,13 @@
 
 ## 7. OAuth/OIDC 接口
 
+### GET `/api/oauth/authorize`
+
+- 说明：浏览器授权入口（推荐），启动授权码流程并执行跳转
+
 ### POST `/api/oauth/authorize`
 
-- 说明：启动授权码流程，支持 PKCE
+- 说明：服务端调用入口（兼容），用于以请求体方式提交授权参数
 
 ### POST `/api/oauth/token`
 

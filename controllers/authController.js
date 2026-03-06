@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
 import { auditLogger, AuditEvent } from "../services/auditLogger.js";
 import { addToBlacklist } from "../utils/redis.js";
+import { logger } from "../utils/logger.js";
 
 const isWhitelisted = (req) => {
   const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
@@ -22,7 +23,7 @@ export const sendVerificationCode = async (req, res) => {
       res.status(500).json({ message: "邮件发送失败", success: false });
     }
   } catch (error) {
-    console.error("Send code error:", error);
+    logger.error({ event: "send_code_error", message: error.message, stack: error.stack });
     res.status(500).json({ message: error.message || "发送失败", success: false });
   }
 };
@@ -59,7 +60,7 @@ export const register = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Register error:", error);
+    logger.error({ event: "register_error", message: error.message, stack: error.stack });
     res.status(400).json({ message: error.message || "注册失败", success: false });
   }
 };
@@ -96,7 +97,7 @@ export const login = async (req, res) => {
       user
     });
   } catch (error) {
-    console.error("Login error:", error);
+    logger.error({ event: "login_error", message: error.message, stack: error.stack });
     res.status(401).json({ message: error.message || "登录失败", success: false });
   }
 };
@@ -122,7 +123,7 @@ export const adminLogin = async (req, res) => {
       user
     });
   } catch (error) {
-    console.error("Admin login error:", error);
+    logger.error({ event: "admin_login_error", message: error.message, stack: error.stack });
     // Audit Log (Fail)
     auditLogger.log(AuditEvent.LOGIN_FAIL, req, { account: req.body.account, isAdmin: true, error: error.message });
     res.status(401).json({ message: error.message || "登录失败", success: false });
@@ -146,7 +147,7 @@ export const resetPassword = async (req, res) => {
     await authService.resetPassword({ email, password, code });
     res.json({ message: "密码重置成功", success: true });
   } catch (error) {
-    console.error("Reset password error:", error);
+    logger.error({ event: "reset_password_error", message: error.message, stack: error.stack });
     res.status(400).json({ message: error.message || "重置失败", success: false });
   }
 };
@@ -158,7 +159,7 @@ export const changePassword = async (req, res) => {
     await authService.changePassword(userId, { oldPassword, newPassword });
     res.json({ message: "密码修改成功", success: true });
   } catch (error) {
-    console.error("Change password error:", error);
+    logger.error({ event: "change_password_error", message: error.message, stack: error.stack });
     res.status(400).json({ message: error.message || "修改失败", success: false });
   }
 };
@@ -186,7 +187,7 @@ export const updateProfile = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("Update profile error:", error);
+    logger.error({ event: "update_profile_error", message: error.message, stack: error.stack });
     res.status(400).json({ message: error.message || "更新失败", success: false });
   }
 };
@@ -203,12 +204,12 @@ export const logout = async (req, res) => {
           const ttl = decoded.exp - now;
           if (ttl > 0) {
             await addToBlacklist(token, ttl);
-            console.log(`Token blacklisted for user ${decoded.id}, TTL: ${ttl}s`);
+            logger.info({ event: "token_blacklisted", userId: decoded.id, ttl });
           }
         }
       } catch (e) {
         // Token 可能已经过期或无效，忽略错误
-        console.warn("Logout: Token validation failed (already expired?)", e.message);
+        logger.warn({ event: "logout_token_validation_failed", message: e.message });
       }
     }
 
@@ -226,7 +227,7 @@ export const logout = async (req, res) => {
         // 假设前端与后端同域，或前端位于根路径
         return res.redirect(`/logout?target=${encodeURIComponent(target)}`);
       } else {
-        console.warn(`Blocked invalid redirect attempt to: ${target}`);
+        logger.warn({ event: "logout_invalid_redirect", target });
         // 如果 target 不合法，不重定向，而是返回 JSON 提示
       }
     }
@@ -244,7 +245,7 @@ export const logout = async (req, res) => {
       message: "已安全退出"
     });
   } catch (error) {
-    console.error("Logout error:", error);
+    logger.error({ event: "logout_error", message: error.message, stack: error.stack });
     res.status(500).json({ message: "退出失败", success: false });
   }
 };

@@ -63,16 +63,18 @@
 ```
 
 3. 脚本自动执行：
-   - `git pull`
+   - `git add .` + `git commit` + `git push origin main`（有变更时自动提交）
+   - `git fetch origin main` + `git reset --hard origin/main`
+   - 同步 `.env` 到 `deploy/correction/.env` 并检查/生成持久化 RSA 密钥
    - `docker-compose build`
    - `docker-compose up -d`
-   - 健康检查 `/api/health`
+   - 健康检查 `/health`（失败时回退 `/api/health`）
 4. 校验版本号与 `package.json` 一致
 
 ## 6. 回滚方案
 
 - 回滚触发条件：
-  - `/api/health` 不通过
+  - `/health` 与 `/api/health` 均不通过
   - 版本号校验失败
   - 核心链路（登录/后台）不可用
 - 回滚操作：
@@ -82,7 +84,7 @@
 
 ## 7. 发布后核验清单
 
-- 健康检查：`/api/health`
+- 健康检查：`/health`（兼容 `/api/health`）
 - 认证接口：`/api/auth/login`
 - 管理后台：`/api/admin/auth/login`、`/api/admin/users`
 - OIDC：`/.well-known/openid-configuration`、`/.well-known/jwks.json`

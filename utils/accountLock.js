@@ -1,5 +1,6 @@
 
 import { getRedisClient } from "./redis.js";
+import { logger } from "../middlewares/logger.js";
 
 // In-memory fallback
 const memoryStore = new Map();
@@ -21,7 +22,7 @@ export const checkLockout = async (account) => {
       return { locked: false };
     }
   } catch (error) {
-    console.warn("[AccountLock] Redis error:", error.message);
+    logger.warn({ event: "account_lock_redis_error", error: error.message });
   }
 
   // Fallback
@@ -59,7 +60,7 @@ export const recordFailedAttempt = async (account) => {
       return attempts;
     }
   } catch (error) {
-    console.warn("[AccountLock] Redis error:", error.message);
+    logger.warn({ event: "account_lock_redis_error", error: error.message });
   }
 
   // Fallback
@@ -85,7 +86,7 @@ export const resetAttempts = async (account) => {
       await redis.del(key);
     }
   } catch (error) {
-    console.warn("[AccountLock] Redis error:", error.message);
+    logger.warn({ event: "account_lock_redis_error", error: error.message });
   }
 
   memoryStore.delete(key);

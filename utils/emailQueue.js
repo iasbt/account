@@ -1,6 +1,7 @@
 import { Queue } from 'bullmq';
 import { config } from '../config/index.js';
 import Redis from 'ioredis';
+import { logger } from '../middlewares/logger.js';
 
 // Create a redis instance but don't panic if it fails
 const redisConfig = {
@@ -16,7 +17,7 @@ const connection = new Redis(redisConfig);
 connection.on('error', (err) => {
   // Suppress ECONNREFUSED logs
   if (err.code === 'ECONNREFUSED') return;
-  console.error('Redis Queue Error:', err.message);
+  logger.error({ event: 'email_queue_redis_error', error: err.message });
 });
 
 export const emailQueue = new Queue('email-queue', { connection });
@@ -32,7 +33,10 @@ export const emailQueue = new Queue('email-queue', { connection });
 export const addEmailJob = async (to, subject, html, type = 'general', options = {}) => {
   // Check if redis is ready
   if (connection.status !== 'ready') {
-    console.warn(`[Email Skipped] Redis not ready. Subject: ${subject}`);
+    logger.warn({ 
+      event: 'email_skipped_redis_not_ready', 
+      subject 
+    });
     return null;
   }
   
@@ -53,7 +57,7 @@ export const addEmailJob = async (to, subject, html, type = 'general', options =
       ...options
     });
   } catch (error) {
-    console.error('Failed to add email job:', error.message);
+    logger.error({ event: 'email_job_add_failed', error: error.message });
     return null;
   }
 };

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
+import { logger } from "../utils/logger.js";
 
 // Helper to get signing key/secret based on algorithm
 const getSigningKey = () => {
@@ -27,7 +28,7 @@ export const verifyAppToken = async (token) => {
     
     return jwt.verify(token, getVerificationKey(), { algorithms: [config.jwt.algorithm] });
   } catch (err) {
-    console.error("Token verification failed:", err.message);
+    logger.error({ event: "verify_app_token_failed", error: err.message });
     return null;
   }
 };
@@ -42,7 +43,7 @@ export const signToken = (payload, ttlSeconds, secret = null) => {
       algorithm: config.jwt.algorithm
     });
   } catch (err) {
-    console.error("Sign Token Error:", err);
+    logger.error({ event: "sign_token_error", error: err.message });
     return null;
   }
 };

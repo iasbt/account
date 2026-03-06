@@ -5,6 +5,8 @@
 > **范围**: 文档颗粒度同步审计
 > **触发**: V1.8.1 Visual App Management Feature
 
+> **归档声明**: 本文档已不再使用，仅用于历史追溯。
+
 ## 1. 变更摘要 (Change Summary)
 
 本次更新引入了 **可视化应用接入 (Visual App Management)** 功能，使得 Account 系统从单纯的 SSO Provider 进化为支持动态多应用接入的 **IAM 平台**。

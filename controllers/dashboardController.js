@@ -1,4 +1,5 @@
 import pool from "../config/db.js";
+import { logger } from "../middlewares/logger.js";
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -25,7 +26,7 @@ export const getDashboardStats = async (req, res) => {
       apps
     });
   } catch (error) {
-    console.error("Dashboard stats error", error);
+    logger.error({ event: "dashboard_stats_error", error: error.message });
     return res.status(500).json({ message: "Failed to fetch dashboard stats" });
   }
 };

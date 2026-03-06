@@ -4,6 +4,8 @@
 > **Version**: V1.9.0 (Stable)
 > **Status**: ✅ **Secure & Modernized (安全且现代化)**
 
+> **归档声明**: 本文档已不再使用，仅用于历史背景说明。
+
 ## 1. 核心安全改进 (Security Improvements)
 
 ### 1.1 完整的 PKCE 支持 (Full PKCE Support)

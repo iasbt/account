@@ -46,10 +46,10 @@
 
 ### 4.3 Token 验签策略
 
-- 外部 IdP：优先按 Logto 配置（`LOGTO_ISSUER` + `LOGTO_JWKS_URL`）进行 JWKS 验签
-- 首选：RS256（JWKS / 公钥验签）
-- 兼容：RS256 失败后回退 HS256（历史 Token 兼容）
-- 最后：尝试 OIDC opaque token 查找
+- 默认：RS256（JWKS / 公钥验签）
+- 外部 IdP：按 `LOGTO_*` -> `OIDC_EXTERNAL_*` -> `AUTHENTIK_*` 顺序装配
+- 兼容：仅对历史 Token 保留 HS256 过渡回退，计划在完成存量清退后下线
+- 兜底：保留 OIDC opaque token 查找链路用于历史场景排障
 
 ## 5. 可观测性
 
@@ -62,12 +62,12 @@
 - 编排目录：`deploy/correction/`
 - 容器：`account-backend`、`account-frontend`、`iasbt-postgres`、`portainer`
 - 部署方式：`.\deploy_remote.ps1 "<message>"`
-- 验证方式：`GET /api/health` 且版本号匹配 `package.json`
+- 验证方式：`GET /health`（兼容 `/api/health`）且版本号匹配 `package.json`
 
 ## 7. 关键设计决策
 
 - 保持 `server.js` 轻量，业务逻辑沉入 controller/service
 - 管理员权限采用“字段 + 绑定表”双轨校验，避免单点数据不一致
 - OIDC 以标准协议为主，兼容路径仅用于历史平滑过渡
-- 外部 OIDC 提供方默认优先 Logto，保留 Authentik/通用 OIDC 回退
+- 外部 OIDC 接入采用统一优先级链路，Logto 为首选来源（可按需关闭）
 - 文档同步规则作为合并前置门禁，防止代码与文档漂移

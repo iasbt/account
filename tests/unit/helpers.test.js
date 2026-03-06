@@ -49,8 +49,8 @@ describe('Helper Utilities', () => {
     });
 
     it('should fall back to defaults if allowlist is empty', () => {
-      expect(isHostAllowed('iasbt.com', [])).toBe(true);
-      expect(isHostAllowed('sub.iasbt.com', [])).toBe(true);
+      expect(isHostAllowed('iasbt.cloud', [])).toBe(true);
+      expect(isHostAllowed('sub.iasbt.cloud', [])).toBe(true);
       expect(isHostAllowed('localhost', [])).toBe(true);
       expect(isHostAllowed('127.0.0.1', [])).toBe(true);
       expect(isHostAllowed('evil.com', [])).toBe(false);

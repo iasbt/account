@@ -33,6 +33,34 @@ router.use(requireAuth);
 router.use(requireAdmin);
 
 /**
+ * @route GET /admin/users
+ * @description 获取所有用户
+ * @access Admin
+ */
+router.get("/users", getAllUsers);
+
+/**
+ * @route DELETE /admin/users/:id
+ * @description 删除用户
+ * @access Admin
+ */
+router.delete("/users/:id", deleteUser);
+
+/**
+ * @route PUT /admin/users/:id
+ * @description 更新用户
+ * @access Admin
+ */
+router.put("/users/:id", updateUser);
+
+/**
+ * @route POST /admin/users/:id/reset-password
+ * @description 重置用户密码
+ * @access Admin
+ */
+router.post("/users/:id/reset-password", resetUserPassword);
+
+/**
  * @route GET /admin/system/status
  * @description 获取系统状态
  * @access Admin
@@ -109,33 +137,5 @@ router.get("/email/logs", getEmailLogs);
  * @description Get email statistics
  */
 router.get("/email/stats", getEmailStats);
-
-/**
- * @route GET /admin/users
- * @description 获取所有用户列表
- * @access Admin (管理员)
- */
-router.get("/users", getAllUsers);
-
-/**
- * @route DELETE /admin/users/:id
- * @description 删除用户
- * @access Admin (管理员)
- */
-router.delete("/users/:id", deleteUser);
-
-/**
- * @route PUT /admin/users/:id
- * @description 更新用户信息
- * @access Admin (管理员)
- */
-router.put("/users/:id", updateUser);
-
-/**
- * @route POST /admin/users/:id/reset-password
- * @description 重置用户密码 (发送邮件)
- * @access Admin (管理员)
- */
-router.post("/users/:id/reset-password", resetUserPassword);
 
 export default router;

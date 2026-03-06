@@ -9,6 +9,7 @@ import { getPasswordResetLinkTemplate, getVerificationCodeTemplate, getNotificat
 import { setVerificationCode } from "../utils/verificationStore.js";
 import { config } from "../config/index.js";
 import { randomInt } from "crypto";
+import { logger } from "../utils/logger.js";
 
 const accountPublicUrl = (process.env.ACCOUNT_PUBLIC_URL || process.env.BASE_URL || "https://account.iasbt.cloud").replace(/\/+$/, "");
 
@@ -37,7 +38,7 @@ export const getSystemStatus = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error("System status error", error);
+    logger.error({ event: "admin_system_status_error", message: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: "获取系统状态失败" });
   }
 };
@@ -85,7 +86,7 @@ export const sendTestEmail = async (req, res) => {
       res.status(500).json({ success: false, message: "邮件发送失败，请检查服务器日志" });
     }
   } catch (error) {
-    console.error("Test email error", error);
+    logger.error({ event: "admin_test_email_error", message: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: "发送测试邮件时发生错误" });
   }
 };
@@ -111,7 +112,7 @@ export const getAllUsers = async (req, res) => {
       users: result.rows,
     });
   } catch (error) {
-    console.error("Get all users error", error);
+    logger.error({ event: "admin_get_users_error", message: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: "获取用户列表失败" });
   }
 };
@@ -147,7 +148,7 @@ export const deleteUser = async (req, res) => {
       id: result.rows[0].id
     });
   } catch (error) {
-    console.error("Delete user error", error);
+    logger.error({ event: "admin_delete_user_error", message: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: "删除用户失败" });
   }
 };
@@ -181,7 +182,7 @@ export const updateUser = async (req, res) => {
       user: result.rows[0]
     });
   } catch (error) {
-    console.error("Update user error", error);
+    logger.error({ event: "admin_update_user_error", message: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: "更新用户失败" });
   }
 };
@@ -215,7 +216,7 @@ export const resetUserPassword = async (req, res) => {
     
     res.json({ success: true, message: "重置邮件已发送" });
   } catch (error) {
-    console.error("Reset password error", error);
+    logger.error({ event: "admin_reset_password_error", message: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: "重置操作失败" });
   }
 };

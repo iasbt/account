@@ -40,7 +40,12 @@ export default function LoginPage() {
       await loginWithPassword(account, password)
       
       if (safeFrom) {
-        navigate(safeFrom, { replace: true })
+        // If target is an API endpoint (e.g. SSO interaction), use full page reload
+        if (safeFrom.startsWith('/api/')) {
+          window.location.href = safeFrom
+        } else {
+          navigate(safeFrom, { replace: true })
+        }
         return
       }
       

@@ -2,6 +2,7 @@ import { Worker } from 'bullmq';
 import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
 import pool from '../config/db.js';
+import { logger } from '../middlewares/logger.js';
 
 // Redis connection for worker
 import Redis from 'ioredis';
@@ -39,7 +40,11 @@ const getProviderConfig = async () => {
       };
     }
   } catch (err) {
-    console.error('Failed to fetch provider config, falling back to ENV', err);
+    logger.error({ 
+      event: 'email_provider_config_error', 
+      message: 'Failed to fetch provider config, falling back to ENV', 
+      error: err.message 
+    });
   }
 
   // Fallback to ENV
@@ -59,9 +64,13 @@ const getProviderConfig = async () => {
 // Create Worker
 export const emailWorker = new Worker('email-queue', async (job) => {
   const { to, subject, html, type } = job.data;
-  // const logId = job.id; // Or generate UUID if we want DB ID match
-
-  console.log(`[EmailWorker] Processing job ${job.id}: ${type} -> ${to}`);
+  
+  logger.info({ 
+    event: 'email_job_start', 
+    jobId: job.id, 
+    type, 
+    recipient: to 
+  });
 
   let providerId = null;
 
@@ -69,9 +78,6 @@ export const emailWorker = new Worker('email-queue', async (job) => {
     // 1. Get Config
     const providerConfig = await getProviderConfig();
     providerId = providerConfig.id;
-
-    // 2. Log Start (Optional, usually we log result)
-    // await logEmailStatus(to, type, subject, 'sending', null, providerId);
 
     // 3. Create Transporter
     const transporter = nodemailer.createTransport({
@@ -89,7 +95,12 @@ export const emailWorker = new Worker('email-queue', async (job) => {
       html,
     });
 
-    console.log(`[EmailWorker] Sent: ${info.messageId}`);
+    logger.info({ 
+      event: 'email_sent', 
+      jobId: job.id, 
+      messageId: info.messageId, 
+      recipient: to 
+    });
 
     // 5. Log Success
     await logEmailStatus(to, type, subject, 'sent', null, providerId, info.messageId);
@@ -97,7 +108,11 @@ export const emailWorker = new Worker('email-queue', async (job) => {
     return info;
 
   } catch (err) {
-    console.error(`[EmailWorker] Failed job ${job.id}:`, err);
+    logger.error({ 
+      event: 'email_job_failed', 
+      jobId: job.id, 
+      error: err.message 
+    });
     
     // 6. Log Failure
     await logEmailStatus(to, type, subject, 'failed', err.message, providerId);
@@ -127,14 +142,17 @@ async function logEmailStatus(recipient, type, subject, status, error, providerI
       ]
     );
   } catch (dbErr) {
-    console.error('[EmailWorker] Failed to write log:', dbErr);
+    logger.error({ 
+      event: 'email_log_db_error', 
+      error: dbErr.message 
+    });
   }
 }
 
 emailWorker.on('completed', (job) => {
-  console.log(`[EmailWorker] Job ${job.id} completed!`);
+  logger.debug({ event: 'bullmq_job_completed', jobId: job.id });
 });
 
 emailWorker.on('failed', (job, err) => {
-  console.log(`[EmailWorker] Job ${job.id} failed with ${err.message}`);
+  logger.error({ event: 'bullmq_job_failed', jobId: job.id, error: err.message });
 });

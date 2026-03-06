@@ -25,7 +25,10 @@ router.get("/interaction/:uid", async (req, res, next) => {
       const token = getBearerToken(req) || getCookieToken(req);
       const payload = token ? await verifyAccessToken(token) : null;
       if (!payload || !payload.sub) {
-        return res.status(401).json({ message: "未登录或凭证已过期" });
+        // Redirect to frontend login if not authenticated
+        // This allows seamless SSO flow (User -> Login -> Back to Interaction)
+        const returnUrl = `/api/interaction/${req.params.uid}`;
+        return res.redirect(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       }
 
       return await oidcProvider.interactionFinished(

@@ -1,6 +1,7 @@
 
 import { config } from "../config/index.js";
 import { createPublicKey } from "crypto";
+import { logger } from "../middlewares/logger.js";
 
 let jwksCache = null;
 
@@ -25,7 +26,7 @@ export const getJwks = (req, res) => {
     jwksCache = { keys: [jwk] };
     return res.json(jwksCache);
   } catch (err) {
-    console.error("JWKS Error:", err);
+    logger.error({ event: "jwks_error", error: err.message });
     return res.status(500).json({ error: "server_error" });
   }
 };

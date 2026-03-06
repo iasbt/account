@@ -1,5 +1,6 @@
 import { config } from "../config/index.js";
 import { parseOrigins, isOriginAllowed, defaultAllowlist } from "../utils/helpers.js";
+import { logger } from "../utils/logger.js";
 
 const originAllowlist = parseOrigins(config.corsAllowlist);
 const effectiveAllowlist = originAllowlist.length > 0 ? originAllowlist : defaultAllowlist;
@@ -24,12 +25,11 @@ export const corsMiddleware = (req, res, next) => {
   
   // Debug Log for CORS troubleshooting
   if (origin) {
-    console.log(`[CORS] Incoming Origin: ${origin}`);
-    console.log(`[CORS] Effective Allowlist: ${JSON.stringify(effectiveAllowlist)}`);
+    logger.debug({ event: "cors_check", origin, allowed: isAllowed });
   }
 
   if (origin && !isAllowed) {
-    console.warn(`[CORS] Blocked Origin: ${origin}. Allowed: ${effectiveAllowlist.join(", ")}`);
+    logger.warn({ event: "cors_blocked", origin, allowlist: effectiveAllowlist });
     if (req.method === "OPTIONS") {
       return res.sendStatus(403);
     }

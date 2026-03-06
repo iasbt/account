@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { createPrivateKey, createPublicKey, generateKeyPairSync } from "crypto";
 import pool from "../config/db.js";
 import { config } from "../config/index.js";
+import { logger } from "../utils/logger.js";
 
 const fallbackIssuer = `http://localhost:${process.env.PORT || 3000}`;
 const oidcConfig = {
@@ -38,6 +39,21 @@ const ensureOidcSchema = async () => {
   await pool.query(`CREATE INDEX IF NOT EXISTS oidc_uid_idx ON public.oidc (uid);`);
 };
 
+const ensureAppsSchema = async () => {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS public.applications (
+      id SERIAL PRIMARY KEY,
+      app_id VARCHAR(255) UNIQUE NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      secret VARCHAR(255),
+      allowed_origins TEXT[],
+      is_active BOOLEAN DEFAULT TRUE,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+};
+
 class OidcAdapter {
   constructor(name) {
     this.name = name;
@@ -67,7 +83,7 @@ class OidcAdapter {
         ]
       );
     } catch (error) {
-      console.error(`OIDC Adapter Upsert Error (${this.name}):`, error);
+      logger.error({ event: "oidc_adapter_upsert_error", name: this.name, error: error.message });
     }
   }
 
@@ -79,7 +95,7 @@ class OidcAdapter {
         [id, this.name]
       );
     } catch (error) {
-      console.error(`OIDC Adapter Find Error (${this.name}):`, error);
+      logger.error({ event: "oidc_adapter_find_error", name: this.name, error: error.message });
       result = null;
     }
     if (!result || result.rowCount === 0) return undefined;
@@ -180,7 +196,8 @@ const loadClients = async () => {
       `SELECT app_id, allowed_origins, secret, is_active FROM public.applications WHERE is_active = TRUE`
     );
     rows = Array.isArray(result?.rows) ? result.rows : [];
-  } catch (_error) {
+  } catch (error) {
+    logger.error({ event: "load_clients_error", error: error.message });
     rows = [];
   }
 
@@ -214,14 +231,17 @@ const hasAdminAccountEmail = async (email) => {
       [email]
     );
     return result.rowCount > 0;
-  } catch (_error) {
+  } catch (error) {
+    logger.error({ event: "check_admin_email_error", email, error: error.message });
     return false;
   }
 };
 
 try {
   await ensureOidcSchema();
-} catch (_error) {
+  await ensureAppsSchema();
+} catch (error) {
+  logger.error({ event: "oidc_schema_init_error", error: error.message });
 }
 const clients = await loadClients();
 
@@ -251,6 +271,13 @@ export const oidcProvider = new Provider(oidcConfig.issuer, {
   },
   features: {
     devInteractions: { enabled: false }
+  },
+  pkce: {
+    methods: ["S256"],
+    required: (_ctx, client) => {
+      // Require PKCE for public clients (no client_secret)
+      return client.tokenEndpointAuthMethod === "none";
+    }
   },
   claims: {
     openid: ["sub"],
@@ -284,6 +311,43 @@ export const oidcProvider = new Provider(oidcConfig.issuer, {
       }
     };
   }
+});
+
+// === Audit Logging (Structured) ===
+oidcProvider.on('grant.success', (ctx) => {
+  logger.info({
+    event: 'sso_grant_success',
+    client_id: ctx.oidc.client?.clientId,
+    account_id: ctx.oidc.account?.accountId,
+    grant_id: ctx.oidc.grantId,
+    scope: ctx.oidc.params?.scope
+  });
+});
+
+oidcProvider.on('grant.error', (ctx, error) => {
+  logger.error({
+    event: 'sso_grant_error',
+    error: error.message,
+    error_description: error.error_description,
+    client_id: ctx.oidc.client?.clientId,
+    account_id: ctx.oidc.account?.accountId
+  });
+});
+
+oidcProvider.on('interaction.started', (ctx, prompt) => {
+  logger.info({
+    event: 'sso_interaction_started',
+    client_id: ctx.oidc.client?.clientId,
+    prompt: prompt.name
+  });
+});
+
+oidcProvider.on('server_error', (ctx, error) => {
+  logger.error({
+    event: 'sso_server_error',
+    error: error.message,
+    stack: error.stack
+  });
 });
 
 export const issueAccessToken = async (accountId) => {
@@ -377,7 +441,7 @@ export const verifyAccessToken = async (token) => {
       issuer: oidcConfig.issuer
     });
   } catch (error) {
-    console.error("JWT Verification Failed:", error.message);
+    logger.error({ event: "jwt_verification_failed", error: error.message });
     if (algorithm === "RS256" && config.ssoSecret) {
       try {
         return jwt.verify(token, config.ssoSecret, {

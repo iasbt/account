@@ -5,6 +5,7 @@ import yaml from 'yaml';
 import chokidar from 'chokidar';
 import express from 'express';
 import { Pool } from 'pg';
+import { logger } from '../../middlewares/logger.js';
 
 // Simple DB pool for status updates
 let pool;
@@ -38,7 +39,7 @@ class AppLoader {
         ADD COLUMN IF NOT EXISTS last_reload_at TIMESTAMP DEFAULT NOW();
       `);
     } catch (dbErr) {
-      console.error('[AppLoader] Schema migration failed:', dbErr);
+      logger.error({ event: "app_loader_schema_migration_failed", error: dbErr.message });
     }
     
     // Initial Load
@@ -46,7 +47,7 @@ class AppLoader {
 
     // Watch for changes
     chokidar.watch(this.configDir).on('change', async (filePath) => {
-      console.log(`[AppLoader] Config changed: ${filePath}`);
+      logger.info({ event: "app_loader_config_changed", filePath });
       await this.loadApp(filePath);
     });
 
@@ -129,7 +130,11 @@ class AppLoader {
     const displayName = meta?.label || name; // YAML meta.label maps to DB name
     const appSecret = secret || `sec_${Math.random().toString(36).slice(2)}`;
 
-    console.log(`[AppLoader] Loading ${appId} (v${version})...`);
+    logger.info({
+      event: 'app_load_start',
+      appId,
+      version
+    }, `[AppLoader] Loading ${appId} (v${version})...`);
 
     try {
       // 1. Validate (Simple check)
@@ -158,9 +163,9 @@ class AppLoader {
       // 4. Update DB
       await this.updateStatus(appId, displayName, 'active', config, allowedOrigins || [], appSecret);
 
-      console.log(`[AppLoader] ${appId} loaded successfully.`);
+      logger.info({ event: 'app_load_success', appId }, `[AppLoader] ${appId} loaded successfully.`);
     } catch (err) {
-      console.error(`[AppLoader] Failed to load ${appId}:`, err);
+      logger.error({ event: 'app_load_failed', appId, error: err.message }, `[AppLoader] Failed to load ${appId}`);
       this.registry.set(appId, {
         config,
         router: null,
@@ -186,7 +191,7 @@ class AppLoader {
         [appId, name, config.version, status, JSON.stringify(config), allowedOrigins, secret]
       );
     } catch (e) {
-      console.error('[AppLoader] DB Update Failed:', e);
+      logger.error({ event: 'app_loader_db_update_failed', error: e.message }, '[AppLoader] DB Update Failed');
     }
   }
 

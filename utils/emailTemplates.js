@@ -1,4 +1,5 @@
 
+import logger from './logger.js';
 import pool from '../config/db.js';
 
 const styles = {
@@ -100,10 +101,17 @@ export const loadTemplates = async () => {
       res.rows.forEach(row => {
         templateCache[row.type] = row;
       });
-      console.log('Email templates loaded from DB:', Object.keys(templateCache));
+      logger.info({
+        event: 'email_templates_loaded',
+        count: res.rows.length,
+        types: Object.keys(templateCache)
+      }, 'Email templates loaded from DB');
     }
   } catch (err) {
-    console.error('Failed to load email templates from DB:', err.message);
+    logger.error({
+      event: 'email_templates_load_failed',
+      error: err.message
+    }, 'Failed to load email templates from DB');
   }
 };
 

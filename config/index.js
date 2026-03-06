@@ -64,6 +64,7 @@ export const config = {
     port: Number(process.env.REDIS_PORT || 6379),
     password: process.env.REDIS_PASSWORD || undefined,
   },
+  galleryHost: process.env.GALLERY_HOST || "http://119.91.71.30",
   debugAllowlist: (process.env.DEBUG_ALLOWLIST || "").split(",").filter(Boolean),
   allowedDomains: (process.env.ALLOWED_DOMAINS || ".iasbt.cloud,localhost,127.0.0.1").split(",").filter(Boolean)
 };

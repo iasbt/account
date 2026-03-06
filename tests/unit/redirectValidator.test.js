@@ -14,7 +14,7 @@ describe('Redirect Validator', () => {
 
   it('should allow app origins', () => {
     // Assuming Gallery is registered
-    expect(isValidRedirectTarget('https://gallery.iasbt.com/callback')).toBe(true);
+    expect(isValidRedirectTarget('https://gallery.iasbt.cloud/callback')).toBe(true);
   });
 
   it('should reject external domains', () => {

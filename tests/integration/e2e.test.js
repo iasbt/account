@@ -42,6 +42,9 @@ describeIntegration('Integration Tests: End-to-End Flow', () => {
       await pool.query('DROP TABLE IF EXISTS public.users CASCADE');
       await pool.query('DROP TABLE IF EXISTS public.applications CASCADE');
       await pool.query('DROP TABLE IF EXISTS public.refresh_tokens CASCADE');
+      await pool.query('DROP TABLE IF EXISTS public.oidc CASCADE');
+      await pool.query('DROP TABLE IF EXISTS public.admin_accounts CASCADE');
+      await pool.query('DROP TABLE IF EXISTS public.security_logs CASCADE');
       
       // Run Migrations (Simplified schema)
       await pool.query(`
@@ -55,10 +58,15 @@ describeIntegration('Integration Tests: End-to-End Flow', () => {
         );
         CREATE TABLE IF NOT EXISTS public.applications (
           id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+          app_id VARCHAR(255) UNIQUE,
           name text NOT NULL,
           secret text NOT NULL,
           allowed_origins text[] DEFAULT '{}',
           is_active boolean DEFAULT true,
+          version VARCHAR(50) DEFAULT '1.0.0',
+          status VARCHAR(50) DEFAULT 'active',
+          config JSONB DEFAULT '{}',
+          last_reload_at TIMESTAMP DEFAULT NOW(),
           created_at timestamptz DEFAULT now()
         );
         CREATE TABLE IF NOT EXISTS public.refresh_tokens (
@@ -68,6 +76,31 @@ describeIntegration('Integration Tests: End-to-End Flow', () => {
           expires_at timestamptz NOT NULL,
           revoked boolean DEFAULT false,
           created_at timestamptz DEFAULT now()
+        );
+        CREATE TABLE IF NOT EXISTS public.oidc (
+          id TEXT PRIMARY KEY,
+          type TEXT NOT NULL,
+          payload JSONB NOT NULL,
+          grant_id TEXT,
+          user_code TEXT,
+          uid TEXT,
+          expires_at TIMESTAMPTZ,
+          consumed_at TIMESTAMPTZ
+        );
+        CREATE TABLE IF NOT EXISTS public.admin_accounts (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(50) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS public.security_logs (
+            id SERIAL PRIMARY KEY,
+            event_type VARCHAR(50) NOT NULL,
+            user_id VARCHAR(50),
+            ip_address VARCHAR(45),
+            user_agent TEXT,
+            details JSONB,
+            created_at TIMESTAMPTZ DEFAULT NOW()
         );
       `);
     } catch (e) {

@@ -1,6 +1,7 @@
 import { Router } from "express";
-import pool from "../config/db.js";
+import { z } from "zod";
 import { requireAuth } from "../middlewares/auth.js";
+import { validate } from "../middlewares/validate.js";
 import { 
   getImages, 
   createImage, 
@@ -8,36 +9,56 @@ import {
   createCategory,
   getPreferences,
   updatePreferences,
+  getOnboarding,
   updateOnboarding
 } from "../controllers/galleryController.js";
 
 const router = Router();
 
+// Schemas
+const createImageSchema = z.object({
+  body: z.object({
+    title: z.string().min(1, "标题不能为空"),
+    file_url: z.string().url("图片URL无效"),
+    file_path: z.string().optional(),
+    width: z.number().positive("宽度必须大于0"),
+    height: z.number().positive("高度必须大于0"),
+    category_id: z.number().optional()
+  })
+});
+
+const createCategorySchema = z.object({
+  body: z.object({
+    name: z.string().min(1, "分类名称不能为空"),
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "颜色代码无效").optional()
+  })
+});
+
+const updatePreferencesSchema = z.object({
+  body: z.object({
+    hasAcceptedTerms: z.boolean().optional(),
+    hasSeenOnboarding: z.boolean().optional(),
+    categoryOrder: z.array(z.number()).optional(),
+    hiddenCategoryIds: z.array(z.number()).optional()
+  })
+});
+
 router.use(requireAuth); // Protect all routes
 
 // Images
 router.get("/images", getImages);
-router.post("/images", createImage);
+router.post("/images", validate(createImageSchema), createImage);
 
 // Categories
 router.get("/categories", getCategories);
-router.post("/categories", createCategory);
+router.post("/categories", validate(createCategorySchema), createCategory);
 
 // User Preferences
 router.get("/user/preferences", getPreferences);
-router.patch("/user/preferences", updatePreferences);
+router.patch("/user/preferences", validate(updatePreferencesSchema), updatePreferences);
 
 // User Onboarding (Legacy/Specific check)
-router.get("/user/onboarding", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT has_seen_onboarding FROM user_preferences WHERE user_id = $1", [req.user.id]);
-    const completed = result.rows[0]?.has_seen_onboarding || false;
-    res.json({ completed });
-  } catch (error) {
-    console.error("Onboarding check error:", error);
-    res.status(500).json({ completed: false });
-  }
-});
+router.get("/user/onboarding", getOnboarding);
 
 router.post("/user/onboarding", updateOnboarding);
 

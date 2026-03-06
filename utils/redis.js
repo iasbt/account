@@ -1,5 +1,6 @@
 import Redis from "ioredis";
 import { config } from "../config/index.js";
+import { logger } from "../middlewares/logger.js";
 
 // Use singleton pattern for Redis connection
 let redisClient = null;
@@ -34,11 +35,11 @@ export const getRedisClient = () => {
          // console.warn("[Redis] Connection refused (Is Redis running?)");
          return;
       }
-      console.error("[Redis] Error:", err.message);
+      logger.error({ event: "redis_connection_error", error: err.message });
     });
 
     redisClient.on("connect", () => {
-      console.log("[Redis] Connected");
+      logger.info({ event: "redis_connected" });
     });
   }
   return redisClient;
@@ -60,7 +61,7 @@ export const addToBlacklist = async (token, expiresInSeconds) => {
     // Set key with expiration matches the token's remaining life
     await client.set(`${BLACKLIST_PREFIX}${token}`, "1", "EX", Math.ceil(expiresInSeconds));
   } catch (error) {
-    console.warn("[Redis] Add to blacklist failed:", error.message);
+    logger.warn({ event: "redis_blacklist_add_failed", error: error.message });
   }
 };
 
@@ -81,7 +82,7 @@ export const isBlacklisted = async (token) => {
     const result = await client.get(`${BLACKLIST_PREFIX}${token}`);
     return result === "1";
   } catch (error) {
-    console.warn("[Redis] Check failed:", error.message);
+    logger.warn({ event: "redis_blacklist_check_failed", error: error.message });
     return false;
   }
 };

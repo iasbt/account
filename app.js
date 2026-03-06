@@ -1,16 +1,18 @@
 import express from "express";
 import helmet from "helmet";
+import { config } from "./config/index.js";
 import { corsMiddleware } from "./middlewares/cors.js";
 import { loggerMiddleware } from "./middlewares/logger.js";
 import { metricsMiddleware, getMetrics } from "./middlewares/metrics.js";
 import { appLoader } from "./src/core/AppLoader.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 import routes from "./routes/index.js";
 
 const app = express();
 
 app.set("trust proxy", 1);
 
-const galleryHost = process.env.GALLERY_HOST || "http://119.91.71.30";
+const galleryHost = config.galleryHost;
 const cspConnectSources = (process.env.CSP_CONNECT_SRC || "https://*.iasbt.cloud,https://*.iasbt.com")
   .split(",")
   .map((item) => item.trim())
@@ -39,7 +41,15 @@ app.use(loggerMiddleware);
 app.get("/metrics", getMetrics); // Expose metrics endpoint
 appLoader.mount(app);
 
-app.use(routes);
+// Mount routes
+// Note: Frontend uses /api prefix (via VITE_AUTH_BASE_URL)
+// Nginx also routes /api to this backend.
 app.use("/api", routes);
+
+// Also mount at root for internal/legacy calls or if Nginx strips prefix
+app.use(routes);
+
+// Error handling middleware
+app.use(errorHandler);
 
 export default app;
