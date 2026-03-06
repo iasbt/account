@@ -211,6 +211,8 @@ $DeployCmd = @'
     
     # 启动新服务 (构建 - 仅重建变更部分)
     sudo docker compose up -d --build --remove-orphans
+    echo '>>> Restarting frontend to apply latest nginx.conf...'
+    sudo docker restart account-frontend
     
     # 5. 网络对齐 (Network Alignment)
     echo '>>> Aligning Networks...'
