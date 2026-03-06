@@ -12,11 +12,13 @@ if (Test-Path $EnvFile) {
 # Set defaults if not set by .env.ps1 or environment
 if (-not $global:DEPLOY_SERVER_IP) { $global:DEPLOY_SERVER_IP = "119.91.71.30" }
 if (-not $global:DEPLOY_USER) { $global:DEPLOY_USER = "ubuntu" }
-if (-not $global:DEPLOY_KEY_PATH) { 
-    if (Test-Path "C:\My_Project\account\yuanchengmiyao.pem") {
-        $global:DEPLOY_KEY_PATH = "C:\My_Project\account\yuanchengmiyao.pem"
-    } elseif (Test-Path "D:\OneDrive\Desktop\trae.pem") {
-        $global:DEPLOY_KEY_PATH = "D:\OneDrive\Desktop\trae.pem"
+$PreferredDeployKey = "C:\My_Project\account\yuanchengmiyao.pem"
+$LegacyDeployKey = "D:\OneDrive\Desktop\trae.pem"
+if (Test-Path $PreferredDeployKey) {
+    $global:DEPLOY_KEY_PATH = $PreferredDeployKey
+} elseif (-not $global:DEPLOY_KEY_PATH) {
+    if (Test-Path $LegacyDeployKey) {
+        $global:DEPLOY_KEY_PATH = $LegacyDeployKey
     } else {
         $global:DEPLOY_KEY_PATH = "$HOME\.ssh\id_rsa"
     }

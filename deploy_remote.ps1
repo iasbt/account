@@ -16,10 +16,14 @@ $User = $global:DEPLOY_USER
 if (-not $KeyPath) {
     $KeyPath = $global:DEPLOY_KEY_PATH
 }
+$PreferredDeployKey = "C:\My_Project\account\yuanchengmiyao.pem"
+if ($KeyPath -eq "D:\OneDrive\Desktop\trae.pem" -and (Test-Path $PreferredDeployKey)) {
+    $KeyPath = $PreferredDeployKey
+}
 if (-not $KeyPath) {
     Write-Warning "DEPLOY_KEY_PATH is not set. Using fallback key path."
-    if (Test-Path "C:\My_Project\account\yuanchengmiyao.pem") {
-        $KeyPath = "C:\My_Project\account\yuanchengmiyao.pem"
+    if (Test-Path $PreferredDeployKey) {
+        $KeyPath = $PreferredDeployKey
     } else {
         $KeyPath = "$HOME\.ssh\id_rsa"
     }
