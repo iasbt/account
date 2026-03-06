@@ -5,9 +5,10 @@ export const parseOrigins = (value) =>
     .filter(Boolean);
 
 export const defaultAllowlist = [
-  "https://account.iasbt.com",
   "https://iasbt.cloud",
   "https://www.iasbt.cloud",
+  "https://account.iasbt.cloud",
+  "https://account.iasbt.com",
   "*.vercel.app",
   "http://119.91.71.30",
   "https://119.91.71.30",
@@ -25,6 +26,7 @@ export const defaultAllowlist = [
   "http://127.0.0.1:5175",
   "http://localhost:5176",
   "http://127.0.0.1:5176",
+  "https://iasbt.cloud/login",
   "https://account.iasbt.com/login",
 ];
 
@@ -62,6 +64,7 @@ export const isHostAllowed = (host, allowlist) => {
   if (allowlist.length > 0) {
     return allowlist.some((item) => host === item || host.endsWith(`.${item}`));
   }
+  if (host === "iasbt.cloud" || host.endsWith(".iasbt.cloud")) return true;
   if (host === "iasbt.com" || host.endsWith(".iasbt.com")) return true;
   if (host === "localhost" || host === "127.0.0.1") return true;
   return false;

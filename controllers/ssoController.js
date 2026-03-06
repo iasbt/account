@@ -239,7 +239,7 @@ const issueTokens = async (req, res, userId, clientId, scope) => {
     email: user.email,
     isAdmin: user.is_admin,
     aud: clientId,
-    iss: 'account.iasbt.com',
+    iss: config.oidc.issuer,
     scope: scope
   }, config.ssoTokenTtl); 
 

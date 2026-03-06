@@ -11,6 +11,10 @@ const app = express();
 app.set("trust proxy", 1);
 
 const galleryHost = process.env.GALLERY_HOST || "http://119.91.71.30";
+const cspConnectSources = (process.env.CSP_CONNECT_SRC || "https://*.iasbt.cloud,https://*.iasbt.com")
+  .split(",")
+  .map((item) => item.trim())
+  .filter(Boolean);
 
 // Security Headers with Helmet
 app.use(helmet({
@@ -22,7 +26,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for React (dev)
       styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for Tailwind/React
       imgSrc: ["'self'", "data:", "https:", `${galleryHost}:*`], // Allow external images
-      connectSrc: ["'self'", "http://localhost:*", "https://*.iasbt.com", `${galleryHost}:*`], // Allow API calls
+      connectSrc: ["'self'", "http://localhost:*", ...cspConnectSources, `${galleryHost}:*`], // Allow API calls
     },
   }
 }));

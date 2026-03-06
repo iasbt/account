@@ -23,10 +23,12 @@ export default function LogoutPage() {
         try {
           const url = new URL(target);
           const allowedHosts = (import.meta.env.VITE_ALLOWED_LOGOUT_HOSTS || 
-            'localhost,127.0.0.1,119.91.71.30,account.iasbt.com').split(',');
+            'localhost,127.0.0.1,119.91.71.30,iasbt.cloud,account.iasbt.cloud,account.iasbt.com').split(',');
+          const allowedDomainSuffixes = (import.meta.env.VITE_ALLOWED_LOGOUT_DOMAIN_SUFFIXES ||
+            '.iasbt.cloud,.iasbt.com').split(',').map((item: string) => item.trim()).filter(Boolean);
           
           const isAllowed = allowedHosts.includes(url.hostname) || 
-                            url.hostname.endsWith('.iasbt.com');
+                            allowedDomainSuffixes.some((suffix: string) => url.hostname.endsWith(suffix));
 
           
           if (isAllowed) {

@@ -39,6 +39,13 @@ if (-not $Servers) {
 
 $RepoDir = $global:REMOTE_APP_DIR
 $DeployDir = "$RepoDir/deploy/correction"
+$LogtoBaseUrl = $global:LOGTO_BASE_URL
+$LogtoAdminUrl = $global:LOGTO_ADMIN_URL
+$LogtoBaseHost = ([uri]$LogtoBaseUrl).Host
+$LogtoAdminHost = ([uri]$LogtoAdminUrl).Host
+$PrimaryDomain = $global:PRIMARY_DOMAIN
+$AccountPublicUrl = $global:ACCOUNT_PUBLIC_URL
+$AllowedDomains = ".$PrimaryDomain,.iasbt.com,localhost,127.0.0.1"
 
 $PgAdminEmail = $env:PGADMIN_DEFAULT_EMAIL
 $PgAdminPassword = $env:PGADMIN_DEFAULT_PASSWORD
@@ -50,8 +57,8 @@ if (-not $ServerList -or $ServerList.Count -eq 0) {
     if ($env:DEPLOY_TARGET_IP) {
         $ServerList = @($env:DEPLOY_TARGET_IP)
     } else {
-        Write-Warning "DEPLOY_TARGET_IP is not set. Using default IP: 119.91.71.30"
-        $ServerList = @("119.91.71.30")
+        Write-Warning "DEPLOY_TARGET_IP is not set. Using default IP: $($global:DEPLOY_SERVER_IP)"
+        $ServerList = @($global:DEPLOY_SERVER_IP)
     }
 }
 
@@ -129,6 +136,31 @@ $DeployCmd = @'
         fi
     else
         echo "CORS_ALLOWLIST=$CORS_VALUE" > .env
+    fi
+    if grep -q "^PRIMARY_DOMAIN=" .env; then
+        awk -v v="__PRIMARY_DOMAIN__" 'BEGIN{FS=OFS="="} $1=="PRIMARY_DOMAIN"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+    else
+        echo "PRIMARY_DOMAIN=__PRIMARY_DOMAIN__" >> .env
+    fi
+    if grep -q "^ACCOUNT_PUBLIC_URL=" .env; then
+        awk -v v="__ACCOUNT_PUBLIC_URL__" 'BEGIN{FS=OFS="="} $1=="ACCOUNT_PUBLIC_URL"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+    else
+        echo "ACCOUNT_PUBLIC_URL=__ACCOUNT_PUBLIC_URL__" >> .env
+    fi
+    if grep -q "^OIDC_ISSUER=" .env; then
+        awk -v v="__ACCOUNT_PUBLIC_URL__" 'BEGIN{FS=OFS="="} $1=="OIDC_ISSUER"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+    else
+        echo "OIDC_ISSUER=__ACCOUNT_PUBLIC_URL__" >> .env
+    fi
+    if grep -q "^OIDC_INTERNAL_REDIRECT_URI=" .env; then
+        awk -v v="__ACCOUNT_PUBLIC_URL__" 'BEGIN{FS=OFS="="} $1=="OIDC_INTERNAL_REDIRECT_URI"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+    else
+        echo "OIDC_INTERNAL_REDIRECT_URI=__ACCOUNT_PUBLIC_URL__" >> .env
+    fi
+    if grep -q "^ALLOWED_DOMAINS=" .env; then
+        awk -v v="__ALLOWED_DOMAINS__" 'BEGIN{FS=OFS="="} $1=="ALLOWED_DOMAINS"{$2=v} {print}' .env > .env.tmp && mv .env.tmp .env
+    else
+        echo "ALLOWED_DOMAINS=__ALLOWED_DOMAINS__" >> .env
     fi
     
     if [ -n "__PGADMIN_EMAIL__" ]; then
@@ -220,20 +252,20 @@ $DeployCmd = @'
             echo "⚠️ Logto .env not found. Skipping auto-update."
         else
             if grep -q "^LOGTO_BASE_URL=" .env; then
-                sed -i 's|^LOGTO_BASE_URL=.*|LOGTO_BASE_URL=https://logto.iasbt.cloud|g' .env
+                sed -i 's|^LOGTO_BASE_URL=.*|LOGTO_BASE_URL=__LOGTO_BASE_URL__|g' .env
             else
-                echo "LOGTO_BASE_URL=https://logto.iasbt.cloud" >> .env
+                echo "LOGTO_BASE_URL=__LOGTO_BASE_URL__" >> .env
             fi
             if grep -q "^LOGTO_ADMIN_URL=" .env; then
-                sed -i 's|^LOGTO_ADMIN_URL=.*|LOGTO_ADMIN_URL=https://console.logto.iasbt.cloud|g' .env
+                sed -i 's|^LOGTO_ADMIN_URL=.*|LOGTO_ADMIN_URL=__LOGTO_ADMIN_URL__|g' .env
             else
-                echo "LOGTO_ADMIN_URL=https://console.logto.iasbt.cloud" >> .env
+                echo "LOGTO_ADMIN_URL=__LOGTO_ADMIN_URL__" >> .env
             fi
             echo '>>> Restarting Logto services...'
             sudo docker compose up -d --remove-orphans
             echo '>>> Validating Logto routes via local Nginx host headers...'
-            curl -fsS -H "Host: logto.iasbt.cloud" http://127.0.0.1/oidc/.well-known/openid-configuration >/dev/null
-            curl -fsS -H "Host: console.logto.iasbt.cloud" http://127.0.0.1/ >/dev/null
+            curl -fsS -H "Host: __LOGTO_BASE_HOST__" http://127.0.0.1/oidc/.well-known/openid-configuration >/dev/null
+            curl -fsS -H "Host: __LOGTO_ADMIN_HOST__" http://127.0.0.1/ >/dev/null
             echo '✅ Logto proxy checks passed.'
         fi
     fi
@@ -256,6 +288,13 @@ $DeployCmd = $DeployCmd.Replace("__DEPLOY_DIR__", $DeployDir)
 $DeployCmd = $DeployCmd.Replace("__LOCAL_VERSION__", $LocalVersion)
 $DeployCmd = $DeployCmd.Replace("__PGADMIN_EMAIL__", $PgAdminEmail)
 $DeployCmd = $DeployCmd.Replace("__PGADMIN_PASSWORD__", $PgAdminPassword)
+$DeployCmd = $DeployCmd.Replace("__LOGTO_BASE_URL__", $LogtoBaseUrl)
+$DeployCmd = $DeployCmd.Replace("__LOGTO_ADMIN_URL__", $LogtoAdminUrl)
+$DeployCmd = $DeployCmd.Replace("__LOGTO_BASE_HOST__", $LogtoBaseHost)
+$DeployCmd = $DeployCmd.Replace("__LOGTO_ADMIN_HOST__", $LogtoAdminHost)
+$DeployCmd = $DeployCmd.Replace("__PRIMARY_DOMAIN__", $PrimaryDomain)
+$DeployCmd = $DeployCmd.Replace("__ACCOUNT_PUBLIC_URL__", $AccountPublicUrl)
+$DeployCmd = $DeployCmd.Replace("__ALLOWED_DOMAINS__", $AllowedDomains)
 $DeployCmd = $DeployCmd -replace "`r`n", "`n"
 
 # 3. 执行远程命令

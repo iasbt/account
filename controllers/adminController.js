@@ -10,6 +10,8 @@ import { setVerificationCode } from "../utils/verificationStore.js";
 import { config } from "../config/index.js";
 import { randomInt } from "crypto";
 
+const accountPublicUrl = (process.env.ACCOUNT_PUBLIC_URL || process.env.BASE_URL || "https://iasbt.cloud").replace(/\/+$/, "");
+
 /**
  * @route GET /api/admin/system/status
  * @description 获取系统状态信息
@@ -67,7 +69,7 @@ export const sendTestEmail = async (req, res) => {
         subject = "测试: 重置密码验证";
         break;
       case 'reset_link':
-        html = getPasswordResetLinkTemplate("https://account.iasbt.com/reset-password?token=test");
+        html = getPasswordResetLinkTemplate(`${accountPublicUrl}/reset-password?token=test`);
         subject = "测试: 密码重置链接";
         break;
       default:
@@ -205,7 +207,7 @@ export const resetUserPassword = async (req, res) => {
     
     // 前端页面地址，需确保路由存在
     // 假设 ResetPasswordPage 路由为 /reset-password
-    const resetLink = `https://account.iasbt.com/reset-password?email=${encodeURIComponent(user.email)}&code=${code}`;
+    const resetLink = `${accountPublicUrl}/reset-password?email=${encodeURIComponent(user.email)}&code=${code}`;
     
     const html = getPasswordResetLinkTemplate(resetLink);
     

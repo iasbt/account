@@ -2,6 +2,12 @@
 // 每个应用都有独立的配置与密钥
 import { config } from "./index.js";
 
+const primaryDomain = process.env.PRIMARY_DOMAIN || "iasbt.cloud";
+const deployServerIp = process.env.DEPLOY_SERVER_IP || "119.91.71.30";
+const galleryDomain = process.env.GALLERY_DOMAIN || `gallery.${primaryDomain}`;
+const toolboxDomain = process.env.TOOLBOX_DOMAIN || `toolbox.${primaryDomain}`;
+const lifeDomain = process.env.LIFE_DOMAIN || `life.${primaryDomain}`;
+
 export const APPLICATIONS = {
   // 1. Image Gallery (图库)
   gallery: {
@@ -10,13 +16,13 @@ export const APPLICATIONS = {
     secret: process.env.SSO_SECRET_GALLERY || "MvVh2XGOWu0axQJFoFYbocTvAXd9tZ9J3NQzAbfIz",
     // 允许的跳转域名 (Token 接收方)
     allowedOrigins: (process.env.APP_GALLERY_ORIGINS || [
-      "http://119.91.71.30:5173/auth/callback", // 生产环境 (SSO Callback)
+      `http://${deployServerIp}:5173/auth/callback`, // 生产环境 (SSO Callback)
       "http://localhost:5173/auth/callback",    // 本地开发 (SSO Callback)
-      "http://119.91.71.30:5173",      // 生产环境 (Vite 预览端口 - 主入口)
-      "http://119.91.71.30",           // 生产环境 (IP 访问 - 兼容)
-      "http://119.91.71.30:3000",      // 生产环境 (Node 默认端口)
-      "http://119.91.71.30:8080",      // 生产环境 (备用端口)
-      "https://gallery.iasbt.com",     // 生产环境 (域名)
+      `http://${deployServerIp}:5173`,      // 生产环境 (Vite 预览端口 - 主入口)
+      `http://${deployServerIp}`,           // 生产环境 (IP 访问 - 兼容)
+      `http://${deployServerIp}:3000`,      // 生产环境 (Node 默认端口)
+      `http://${deployServerIp}:8080`,      // 生产环境 (备用端口)
+      `https://${galleryDomain}`,     // 生产环境 (域名)
       "http://localhost:5173",         // 本地开发
       "http://localhost:3000"          // 本地开发
     ].join(",")).split(","),
@@ -27,8 +33,8 @@ export const APPLICATIONS = {
     name: "Developer Toolbox",
     id: "toolbox",
     allowedOrigins: (process.env.APP_TOOLBOX_ORIGINS || [
-      "http://119.91.71.30:3001",      // 生产环境 (IP 访问)
-      "https://toolbox.iasbt.com",     // 预留域名
+      `http://${deployServerIp}:3001`,      // 生产环境 (IP 访问)
+      `https://${toolboxDomain}`,     // 预留域名
       "http://localhost:3001"
     ].join(",")).split(","),
     get secret() {
@@ -41,8 +47,8 @@ export const APPLICATIONS = {
     name: "Life OS",
     id: "lifeos",
     allowedOrigins: (process.env.APP_LIFEOS_ORIGINS || [
-      "http://119.91.71.30:3002",      // 生产环境 (IP 访问)
-      "https://life.iasbt.com",        // 预留域名
+      `http://${deployServerIp}:3002`,      // 生产环境 (IP 访问)
+      `https://${lifeDomain}`,        // 预留域名
       "http://localhost:3002"
     ].join(",")).split(","),
 
