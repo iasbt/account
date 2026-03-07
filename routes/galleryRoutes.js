@@ -10,7 +10,11 @@ import {
   getPreferences,
   updatePreferences,
   getOnboarding,
-  updateOnboarding
+  updateOnboarding,
+  updateUserProfile,
+  getApiKeys,
+  createApiKey,
+  deleteApiKey
 } from "../controllers/galleryController.js";
 
 const router = Router();
@@ -43,6 +47,19 @@ const updatePreferencesSchema = z.object({
   })
 });
 
+const updateUserProfileSchema = z.object({
+  body: z.object({
+    name: z.string().optional(),
+    avatar_url: z.string().url().optional()
+  })
+});
+
+const createApiKeySchema = z.object({
+  body: z.object({
+    name: z.string().min(1, "Name is required")
+  })
+});
+
 router.use(requireAuth); // Protect all routes
 
 // Images
@@ -59,7 +76,14 @@ router.patch("/user/preferences", validate(updatePreferencesSchema), updatePrefe
 
 // User Onboarding (Legacy/Specific check)
 router.get("/user/onboarding", getOnboarding);
-
 router.post("/user/onboarding", updateOnboarding);
+
+// User Profile
+router.patch("/user/profile", validate(updateUserProfileSchema), updateUserProfile);
+
+// API Keys
+router.get("/user/apikeys", getApiKeys);
+router.post("/user/apikeys", validate(createApiKeySchema), createApiKey);
+router.delete("/user/apikeys/:id", deleteApiKey);
 
 export default router;

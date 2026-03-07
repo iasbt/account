@@ -183,3 +183,62 @@ export const getOnboarding = async (req, res) => {
     res.status(500).json({ completed: false });
   }
 };
+
+// User Profile
+export const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, avatar_url } = req.body;
+
+    const result = await pool.query(
+      `UPDATE users SET name = COALESCE($1, name), avatar_url = COALESCE($2, avatar_url), updated_at = NOW() WHERE id = $3 RETURNING *`,
+      [name, avatar_url, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    logger.error({ event: "update_user_profile_error", error: error.message });
+    res.status(500).json({ message: "Update failed" });
+  }
+};
+
+// API Keys
+export const getApiKeys = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Placeholder: Return empty list for now until API Key table is created
+    res.json([]);
+  } catch (error) {
+    logger.error({ event: "get_api_keys_error", error: error.message });
+    res.status(500).json({ message: "Failed to fetch API keys" });
+  }
+};
+
+export const createApiKey = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name } = req.body;
+    // Placeholder: Generate a fake key
+    const key = `sk_${Math.random().toString(36).substring(2)}`;
+    res.status(201).json({ id: Date.now(), name, key, created_at: new Date() });
+  } catch (error) {
+    logger.error({ event: "create_api_key_error", error: error.message });
+    res.status(500).json({ message: "Failed to create API key" });
+  }
+};
+
+export const deleteApiKey = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    // Placeholder
+    res.json({ success: true });
+  } catch (error) {
+    logger.error({ event: "delete_api_key_error", error: error.message });
+    res.status(500).json({ message: "Failed to delete API key" });
+  }
+};
