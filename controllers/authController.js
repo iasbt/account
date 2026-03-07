@@ -194,9 +194,10 @@ export const updateProfile = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
+    const logtoMode = config.authMode === "logto";
     // 1. 获取 Token 并加入黑名单
     const token = req.headers.authorization?.split(" ")[1];
-    if (token) {
+    if (token && !logtoMode) {
       try {
         const decoded = jwt.verify(token, config.ssoSecret);
         if (decoded && decoded.exp) {
@@ -208,7 +209,6 @@ export const logout = async (req, res) => {
           }
         }
       } catch (e) {
-        // Token 可能已经过期或无效，忽略错误
         logger.warn({ event: "logout_token_validation_failed", message: e.message });
       }
     }

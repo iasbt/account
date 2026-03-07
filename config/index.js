@@ -23,6 +23,7 @@ const logtoBaseUrl = normalizeUrl(process.env.LOGTO_BASE_URL || process.env.LOGT
 const logtoIssuer = normalizeOidcIssuer(process.env.LOGTO_ISSUER || process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || logtoBaseUrl);
 const logtoJwksUrl = normalizeUrl(process.env.LOGTO_JWKS_URL || process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || (logtoIssuer ? `${logtoIssuer}/jwks` : ""));
 const logtoAudience = normalizeUrl(process.env.LOGTO_AUDIENCE || process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "");
+const authMode = (process.env.AUTH_MODE || (logtoIssuer ? "logto" : "internal")).trim().toLowerCase();
 
 // Load keys
 let privateKey = null;
@@ -55,6 +56,7 @@ export const config = {
   ssoTokenTtl: Number(process.env.SSO_TOKEN_TTL || 900), // 15 minutes (Access Token)
   corsAllowlist: process.env.CORS_ALLOWLIST || process.env.CORS_ORIGIN || "",
   ssoRedirectAllowlist: process.env.SSO_REDIRECT_ALLOWLIST || "",
+  authMode,
   oidc: {
     issuer: process.env.OIDC_ISSUER || process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`,
     internalClientId: process.env.OIDC_INTERNAL_CLIENT_ID || "account-web",

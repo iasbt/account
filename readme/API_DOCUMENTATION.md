@@ -1,7 +1,7 @@
 # API 文档（API Documentation）
 
-> 文档版本：1.9.17  
-> 最后更新：2026-03-06  
+> 文档版本：1.9.24  
+> 最后更新：2026-03-07  
 > 基础前缀：`/api`（除特别说明外）
 
 ## 1. 统一约定
@@ -22,11 +22,16 @@
 {
   "status": "ok",
   "service": "account-backend",
-  "version": "1.9.17"
+  "version": "1.9.24"
 }
 ```
 
 ## 3. 认证接口
+
+### 说明
+
+- 统一认证已切换为 Logto（外部 OIDC）
+- `/api/auth/register`、`/api/auth/login`、`/api/auth/reset-password`、`/api/auth/change-password` 在 Logto 模式下返回 `410`
 
 ### POST `/api/auth/register`
 
@@ -118,6 +123,8 @@
 
 ## 7. OAuth/OIDC 接口
 
+- 说明：Logto 模式下以下端点返回 `410`
+
 ### GET `/api/oauth/authorize`
 
 - 说明：浏览器授权入口（推荐），启动授权码流程并执行跳转
@@ -144,9 +151,8 @@
 - `429`：触发限流
 - `500`：服务内部错误
 
-## 9. 本次修复关联说明（1.9.17）
+## 9. 本次修复关联说明（1.9.24）
 
-- 管理员登录不再依赖固定用户名 `admin`
-- `admin_accounts` 邮箱绑定与 `is_admin` 标记均可通过管理员鉴权
-- OIDC 验签链路支持 RS256 失败后的 HS256 兼容回退
-- 外部 OIDC 可直接使用 Logto：`LOGTO_ISSUER`、`LOGTO_JWKS_URL`、`LOGTO_AUDIENCE`
+- 认证默认切换为 Logto（`AUTH_MODE=logto`）
+- 内建 OAuth/OIDC 端点在 Logto 模式下返回 `410`
+- `.well-known` 端点在 Logto 模式下重定向到外部 OIDC

@@ -1,7 +1,7 @@
 # 架构说明（ARCHITECTURE）
 
-> 文档版本：1.9.17  
-> 最后更新：2026-03-06
+> 文档版本：1.9.24  
+> 最后更新：2026-03-07
 
 ## 1. 系统拓扑
 
@@ -33,9 +33,9 @@
 
 ### 4.1 登录链路
 
-- 用户登录：`/api/auth/login`
+- 用户登录：Logto OIDC 授权码流程
 - 管理员登录：`/api/admin/auth/login`
-- Token 发放：`services/oidcProvider.js -> issueAccessToken`
+- Token 验签：`services/oidcProvider.js -> verifyAccessToken`
 
 ### 4.2 管理员判定
 
@@ -46,10 +46,9 @@
 
 ### 4.3 Token 验签策略
 
-- 默认：RS256（JWKS / 公钥验签）
+- 默认：外部 OIDC（Logto）验签
 - 外部 IdP：按 `LOGTO_*` -> `OIDC_EXTERNAL_*` -> `AUTHENTIK_*` 顺序装配
-- 兼容：仅对历史 Token 保留 HS256 过渡回退，计划在完成存量清退后下线
-- 兜底：保留 OIDC opaque token 查找链路用于历史场景排障
+- 兼容：仅对历史 Token 保留 HS256 过渡回退
 
 ## 5. 可观测性
 
@@ -68,6 +67,6 @@
 
 - 保持 `server.js` 轻量，业务逻辑沉入 controller/service
 - 管理员权限采用“字段 + 绑定表”双轨校验，避免单点数据不一致
-- OIDC 以标准协议为主，兼容路径仅用于历史平滑过渡
-- 外部 OIDC 接入采用统一优先级链路，Logto 为首选来源（可按需关闭）
+- 认证以 Logto 为唯一来源，内建 OAuth/OIDC 端点默认关闭
+- 外部 OIDC 接入采用统一优先级链路，Logto 为首选来源
 - 文档同步规则作为合并前置门禁，防止代码与文档漂移
