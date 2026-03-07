@@ -196,10 +196,11 @@ $DeployCmd = @'
     else
         echo "LOGTO_JWKS_URL=https://logto.iasbt.cloud/oidc/jwks" >> .env
     fi
+    # Use App ID as Audience because we are using ID Token for authentication
     if grep -q "^LOGTO_AUDIENCE=" .env; then
-        sed -i 's|^LOGTO_AUDIENCE=.*|LOGTO_AUDIENCE=https://logto.iasbt.cloud/oidc|g' .env
+        sed -i 's|^LOGTO_AUDIENCE=.*|LOGTO_AUDIENCE=ixfys7q24qqojz38547po|g' .env
     else
-        echo "LOGTO_AUDIENCE=https://logto.iasbt.cloud/oidc" >> .env
+        echo "LOGTO_AUDIENCE=ixfys7q24qqojz38547po" >> .env
     fi
     if grep -q "^LOGTO_END_SESSION_ENDPOINT=" .env; then
         sed -i 's|^LOGTO_END_SESSION_ENDPOINT=.*|LOGTO_END_SESSION_ENDPOINT=https://logto.iasbt.cloud/oidc/session/end|g' .env
