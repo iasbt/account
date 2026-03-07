@@ -47,6 +47,24 @@ export const config = {
     port: Number(process.env.REDIS_PORT || 6379),
     password: process.env.REDIS_PASSWORD || undefined,
   },
+  storage: {
+    provider: process.env.STORAGE_PROVIDER || "r2",
+    r2: {
+      endpoint: process.env.R2_ENDPOINT,
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+      bucket: process.env.R2_BUCKET,
+      publicUrl: process.env.R2_PUBLIC_URL,
+    },
+    doge: {
+      endpoint: process.env.DOGE_ENDPOINT,
+      accessKeyId: process.env.DOGE_ACCESS_KEY_ID,
+      secretAccessKey: process.env.DOGE_SECRET_ACCESS_KEY,
+      bucket: process.env.DOGE_BUCKET,
+      publicUrl: process.env.DOGE_PUBLIC_URL,
+      region: process.env.DOGE_REGION,
+    }
+  },
   galleryHost: process.env.GALLERY_HOST || "http://119.91.71.30",
   debugAllowlist: (process.env.DEBUG_ALLOWLIST || "").split(",").filter(Boolean),
   allowedDomains: (process.env.ALLOWED_DOMAINS || ".iasbt.cloud,localhost,127.0.0.1").split(",").filter(Boolean)

@@ -2,31 +2,22 @@ import { verifyAccessToken } from "../services/logtoAuth.js";
 import { syncLogtoUser } from "../services/userService.js";
 import { logger } from "../utils/logger.js";
 
-const getTokenFromCookie = (cookieHeader = "") => {
-  if (!cookieHeader) return null;
-  const pairs = cookieHeader.split(";");
-  for (const pair of pairs) {
-    const [rawKey, ...rest] = pair.trim().split("=");
-    if (rawKey !== "account_token") continue;
-    const value = rest.join("=");
-    return value ? decodeURIComponent(value) : null;
-  }
-  return null;
-};
+// Legacy cookie check removed. We now strictly use Bearer Token from Logto SDK.
 
-export const getAuthUser = async (req) => {
+export const getAuthUser = async (/** @type {import("express").Request} */ req) => {
   const header = req.headers.authorization || "";
   const bearerToken = header.startsWith("Bearer ") ? header.split(" ")[1] : null;
+  
   if (bearerToken) {
     const bearerUser = await verifyAccessToken(bearerToken);
     if (bearerUser) return bearerUser;
   }
-  const cookieToken = getTokenFromCookie(req.headers.cookie || "");
-  if (!cookieToken) return null;
-  return await verifyAccessToken(cookieToken);
+  
+  // No token or invalid token
+  return null;
 };
 
-export const requireAuth = async (req, res, next) => {
+export const requireAuth = async (/** @type {any} */ req, /** @type {import("express").Response} */ res, /** @type {import("express").NextFunction} */ next) => {
   const user = await getAuthUser(req);
   if (!user) {
     return res.status(401).json({ message: "未登录或凭证已过期" });
@@ -45,7 +36,8 @@ export const requireAuth = async (req, res, next) => {
       user.local_id = syncedUser.id;
     }
   } catch (err) {
-    logger.warn({ event: "user_sync_failed", error: err.message, userId: user.id });
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    logger.warn({ event: "user_sync_failed", error: errorMessage, userId: user.id });
     // We don't block the request, but subsequent DB writes might fail
   }
 

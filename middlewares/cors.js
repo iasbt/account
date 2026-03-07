@@ -5,9 +5,9 @@ import { logger } from "../utils/logger.js";
 const originAllowlist = parseOrigins(config.corsAllowlist);
 const effectiveAllowlist = originAllowlist.length > 0 ? originAllowlist : defaultAllowlist;
 
-const normalizeOrigin = (value) => (value || "").trim().replace(/\/+$/, "");
+const normalizeOrigin = (/** @type {string} */ value) => (value || "").trim().replace(/\/+$/, "");
 
-const isSameOrigin = (origin, req) => {
+const isSameOrigin = (/** @type {string} */ origin, /** @type {import("express").Request} */ req) => {
   const normalizedOrigin = normalizeOrigin(origin);
   if (!normalizedOrigin) return false;
   const host = req.headers.host;
@@ -17,7 +17,7 @@ const isSameOrigin = (origin, req) => {
   return normalizedOrigin === `${protocol}://${host}`;
 };
 
-export const corsMiddleware = (req, res, next) => {
+export const corsMiddleware = (/** @type {import("express").Request} */ req, /** @type {import("express").Response} */ res, /** @type {import("express").NextFunction} */ next) => {
   const origin = req.headers.origin;
   const allowedByAllowlist = origin && isOriginAllowed(origin, effectiveAllowlist);
   const allowedBySameOrigin = origin && isSameOrigin(origin, req);

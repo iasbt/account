@@ -15,9 +15,10 @@ export const logger = winston.createLogger({
 });
 
 // Helper for structured logging
-export const logEvent = (event, data = {}, level = 'info') => {
+export const logEvent = (/** @type {string} */ event, /** @type {object} */ data = {}, /** @type {string} */ level = 'info') => {
   logger.log({
     level,
+    message: event, // Added required message property
     event,
     ...data
   });

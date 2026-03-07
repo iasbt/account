@@ -1,7 +1,7 @@
 import { config } from "../config/index.js";
 import { logger } from "../utils/logger.js";
 
-export const errorHandler = (err, req, res, _next) => {
+export const errorHandler = (/** @type {any} */ err, /** @type {any} */ req, /** @type {import("express").Response} */ res, /** @type {import("express").NextFunction} */ _next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 

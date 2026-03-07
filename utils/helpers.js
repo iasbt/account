@@ -1,7 +1,10 @@
+/**
+ * @param {string | undefined} value
+ */
 export const parseOrigins = (value) =>
   (value || "")
     .split(",")
-    .map((item) => item.trim().replace(/\/+$/, ""))
+    .map((/** @type {string} */ item) => item.trim().replace(/\/+$/, ""))
     .filter(Boolean);
 
 export const defaultAllowlist = [
@@ -29,13 +32,17 @@ export const defaultAllowlist = [
   "https://account.iasbt.cloud/login",
 ];
 
+/**
+ * @param {string | undefined} origin
+ * @param {string[]} allowlist
+ */
 export const isOriginAllowed = (origin, allowlist) => {
   if (!origin) return true;
   const effectiveAllowlist = allowlist.length > 0 ? allowlist : defaultAllowlist;
   
   try {
     const { host, protocol } = new URL(origin);
-    return effectiveAllowlist.some((allowed) => {
+    return effectiveAllowlist.some((/** @type {string} */ allowed) => {
       if (!allowed) return false;
       if (allowed.includes("*")) {
         const escaped = allowed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -52,23 +59,34 @@ export const isOriginAllowed = (origin, allowlist) => {
   }
 };
 
+/**
+ * @param {string} raw
+ */
 export const parseAllowlist = (raw) => {
   return raw
     .split(",")
-    .map((item) => item.trim())
+    .map((/** @type {string} */ item) => item.trim())
     .filter(Boolean);
 };
 
+/**
+ * @param {string} host
+ * @param {string[]} allowlist
+ */
 export const isHostAllowed = (host, allowlist) => {
   if (allowlist.length > 0) {
-    return allowlist.some((item) => host === item || host.endsWith(`.${item}`));
+    return allowlist.some((/** @type {string} */ item) => host === item || host.endsWith(`.${item}`));
   }
   if (host === "iasbt.cloud" || host.endsWith(".iasbt.cloud")) return true;
   if (host === "localhost" || host === "127.0.0.1") return true;
   return false;
 };
 
+/**
+ * @param {Record<string, any>} headers
+ */
 export const redactHeaders = (headers) => {
+  /** @type {Record<string, any>} */
   const result = {};
   for (const [key, value] of Object.entries(headers)) {
     if (key.toLowerCase() === "authorization") {
