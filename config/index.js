@@ -12,10 +12,10 @@ const normalizeOidcIssuer = (value) => {
   return normalized.endsWith("/oidc") ? normalized : `${normalized}/oidc`;
 };
 
-const logtoBaseUrl = normalizeUrl(process.env.LOGTO_BASE_URL || process.env.LOGTO_PUBLIC_URL || process.env.LOGTO_URL || "");
+const logtoBaseUrl = normalizeUrl(process.env.LOGTO_BASE_URL || process.env.LOGTO_PUBLIC_URL || process.env.LOGTO_URL || "https://logto.iasbt.cloud");
 const logtoIssuer = normalizeOidcIssuer(process.env.LOGTO_ISSUER || process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || logtoBaseUrl);
 const logtoJwksUrl = normalizeUrl(process.env.LOGTO_JWKS_URL || process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || (logtoIssuer ? `${logtoIssuer}/jwks` : ""));
-const logtoAudience = normalizeUrl(process.env.LOGTO_AUDIENCE || process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "");
+const logtoAudience = normalizeUrl(process.env.LOGTO_AUDIENCE || process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "ixfys7q24qqojz38547po");
 const logtoEndSessionEndpoint = normalizeUrl(process.env.LOGTO_END_SESSION_ENDPOINT || (logtoBaseUrl ? `${logtoBaseUrl}/oidc/session/end` : ""));
 const publicUrl = normalizeUrl(process.env.ACCOUNT_PUBLIC_URL || process.env.PUBLIC_URL || "");
 if (process.env.NODE_ENV === "production") {

@@ -33,15 +33,14 @@
 
 ### 4.1 登录链路
 
-- 用户登录：Logto OIDC 授权码流程
-- 管理员登录：`/api/admin/auth/login`
-- Token 验签：`services/oidcProvider.js -> verifyAccessToken`
+- 用户/管理员登录：Logto OIDC 授权码流程
+- Token 验签：`services/logtoAuth.js -> verifyAccessToken` (RS256 via JWKS)
 
 ### 4.2 管理员判定
 
 - 可信条件：
-  - `users.is_admin = true`
-  - 或邮箱存在于 `admin_accounts`
+  - Logto Role 包含 `admin`
+  - 或 Logto Organization Role 包含 `:admin` 结尾的角色
 - 中间件：`requireAuth -> requireAdmin`
 
 ### 4.3 Token 验签策略
