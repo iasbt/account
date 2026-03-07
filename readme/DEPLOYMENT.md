@@ -1,6 +1,6 @@
 # 部署手册（DEPLOYMENT）
 
-> 文档版本：1.9.17  
+> 文档版本：1.9.22  
 > 最后更新：2026-03-07
 
 ## 1. 部署原则
@@ -43,10 +43,12 @@
 - `CORS_ALLOWLIST` 需包含：
   - `https://account.iasbt.cloud`
   - `http://119.91.71.30`
-- 外部认证（Logto）优先配置：
-  - `LOGTO_ISSUER`
-  - `LOGTO_JWKS_URL`
+- 外部认证（Logto）推荐配置：
+  - `LOGTO_BASE_URL`（推荐）
+  - `LOGTO_ISSUER`（可选）
+  - `LOGTO_JWKS_URL`（可选）
   - `LOGTO_AUDIENCE`（可选，按 Logto Resource 配置）
+- 说明：当仅设置 `LOGTO_BASE_URL` 时，系统会自动补齐 `/oidc` 与 `/oidc/jwks`
 - 部署 SSH 私钥建议配置：`DEPLOY_KEY_PATH=C:\My_Project\account\yuanchengmiyao.pem`
 - 机密信息仅通过服务器 `.env` 或 Docker Env 注入
 
@@ -59,7 +61,7 @@
 2. 执行部署脚本：
 
 ```powershell
-.\deploy_remote.ps1 "release: v1.9.17"
+.\deploy_remote.ps1 "release: v1.9.22"
 ```
 
 3. 脚本自动执行：

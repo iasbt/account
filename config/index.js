@@ -8,6 +8,22 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const normalizeUrl = (value) => {
+  if (!value) return "";
+  return value.trim().replace(/^`|`$/g, "").replace(/\/$/, "");
+};
+
+const normalizeOidcIssuer = (value) => {
+  const normalized = normalizeUrl(value);
+  if (!normalized) return "";
+  return normalized.endsWith("/oidc") ? normalized : `${normalized}/oidc`;
+};
+
+const logtoBaseUrl = normalizeUrl(process.env.LOGTO_BASE_URL || process.env.LOGTO_PUBLIC_URL || process.env.LOGTO_URL || "");
+const logtoIssuer = normalizeOidcIssuer(process.env.LOGTO_ISSUER || process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || logtoBaseUrl);
+const logtoJwksUrl = normalizeUrl(process.env.LOGTO_JWKS_URL || process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || (logtoIssuer ? `${logtoIssuer}/jwks` : ""));
+const logtoAudience = normalizeUrl(process.env.LOGTO_AUDIENCE || process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "");
+
 // Load keys
 let privateKey = null;
 let publicKey = null;
@@ -46,9 +62,9 @@ export const config = {
     accessTokenTtl: Number(process.env.OIDC_ACCESS_TOKEN_TTL || 900),
     authorizationCodeTtl: Number(process.env.OIDC_AUTH_CODE_TTL || 60),
     refreshTokenTtl: Number(process.env.OIDC_REFRESH_TOKEN_TTL || 1209600),
-    externalIssuer: process.env.LOGTO_ISSUER || process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || "",
-    externalJwksUrl: process.env.LOGTO_JWKS_URL || process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || "",
-    externalAudience: process.env.LOGTO_AUDIENCE || process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "",
+    externalIssuer: logtoIssuer,
+    externalJwksUrl: logtoJwksUrl,
+    externalAudience: logtoAudience,
     cookieKeys: (process.env.OIDC_COOKIE_KEYS || process.env.SSO_JWT_SECRET || "dev_secret_do_not_use_in_prod")
       .split(",")
       .filter(Boolean)
