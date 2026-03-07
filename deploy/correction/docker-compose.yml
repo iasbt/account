@@ -62,22 +62,24 @@ services:
       - correction_default
 
   # Frontend Service (Nginx + React Static)
-  account-frontend:
-    build:
-      context: ../..
-      dockerfile: deploy/correction/Dockerfile.web
-    container_name: account-frontend
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      # Mount the custom nginx config
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
-      - account-backend
-    networks:
-      - correction_default
-      - logto-isolated
+  # REMOVED: account-frontend is deprecated.
+  # We now only deploy account-backend as an API service.
+  # account-frontend:
+  #   build:
+  #     context: ../..
+  #     dockerfile: deploy/correction/Dockerfile.web
+  #   container_name: account-frontend
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     # Mount the custom nginx config
+  #     - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  #   depends_on:
+  #     - account-backend
+  #   networks:
+  #     - correction_default
+  #     - logto-isolated
 
 networks:
   correction_default:
