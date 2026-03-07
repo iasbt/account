@@ -1,6 +1,6 @@
 # 运维手册（OPERATIONS）
 
-> 文档版本：1.9.22  
+> 文档版本：1.9.23  
 > 最后更新：2026-03-07
 
 ## 1. 监控目标
@@ -64,6 +64,7 @@
 - JWKS 地址：`https://logto.iasbt.cloud/oidc/jwks`
 - 管理台首页：`https://logto-console.iasbt.cloud/`
 - 建议优先设置 `LOGTO_BASE_URL`，系统会自动补齐 `/oidc` 与 `/oidc/jwks`
+- 若出现 JWKS 匹配失败，优先确认上述两条接口是否被 CDN 缓存
 - 若未启用外部 OIDC，此章可跳过，主链路以 `account.iasbt.cloud` 的内建 OIDC 为准
 
 ## 9. 外部 OIDC 404 快速排查（可选）

@@ -1,6 +1,6 @@
 # 部署手册（DEPLOYMENT）
 
-> 文档版本：1.9.22  
+> 文档版本：1.9.23  
 > 最后更新：2026-03-07
 
 ## 1. 部署原则
@@ -61,7 +61,7 @@
 2. 执行部署脚本：
 
 ```powershell
-.\deploy_remote.ps1 "release: v1.9.22"
+.\deploy_remote.ps1 "release: v1.9.23"
 ```
 
 3. 脚本自动执行：
@@ -100,4 +100,5 @@
 - 容器网络异常：确认 `correction_default` 网络存在
 - 管理员鉴权失败：检查 `users.is_admin` 与 `admin_accounts` 数据一致性
 - Logto 验签失败：检查 `LOGTO_ISSUER` 与 Token `iss` 是否完全一致，并验证 `LOGTO_JWKS_URL` 可访问
+- Logto JWKS 缓存异常：确认 `logto.iasbt.cloud` 的 `/.well-known/openid-configuration` 与 `/oidc/jwks` 响应不被缓存
 - SSH 密钥权限失败：优先使用 `C:\My_Project\account\yuanchengmiyao.pem` 并检查密钥文件可读权限
