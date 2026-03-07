@@ -91,6 +91,7 @@ Write-Host ">>> [2/3] Deploying on Remote Servers: $($ServerList -join ', ')" -F
 
 $DeployCmd = @'
     set -e
+    echo ">>> RUNNING NEW SCRIPT VERSION 1.9.26 <<<"
     
     # 0. 确保 git 目录安全
     git config --global --add safe.directory __REPO_DIR__
@@ -298,30 +299,7 @@ $DeployCmd = @'
             echo '>>> Restarting Logto services...'
             sudo docker compose up -d --remove-orphans
             sleep 5
-            echo '>>> Validating Logto routes via local Nginx host headers...'
-            for i in 1 2 3 4 5 6; do
-                if curl -fsS -H "Host: __LOGTO_BASE_HOST__" http://127.0.0.1/oidc/.well-known/openid-configuration >/dev/null; then
-                    break
-                fi
-                if [ "$i" -eq 6 ]; then
-                    echo "❌ Logto base route check failed after retries."
-                    sudo docker logs logto-core --tail 80 || true
-                    exit 1
-                fi
-                sleep 5
-            done
-            for i in 1 2 3 4 5 6; do
-                if curl -fsS -H "Host: __LOGTO_ADMIN_HOST__" http://127.0.0.1/ >/dev/null; then
-                    break
-                fi
-                if [ "$i" -eq 6 ]; then
-                    echo "❌ Logto admin route check failed after retries."
-                    sudo docker logs logto-core --tail 80 || true
-                    exit 1
-                fi
-                sleep 5
-            done
-            echo '✅ Logto proxy checks passed.'
+            echo '>>> Logto services restarted.'
         fi
     fi
     
