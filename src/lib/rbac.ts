@@ -1,4 +1,4 @@
-import type { AuthUser } from '../store/useAuthStore';
+import type { LogtoUser } from './logtoUser';
 
 // 1. 定义权限原子 (Permissions)
 // 使用 "资源:动作" 的格式，清晰明确
@@ -36,7 +36,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
  * @param requiredPermission 需要的权限
  * @returns boolean
  */
-export function hasPermission(user: AuthUser | null, requiredPermission: Permission): boolean {
+export function hasPermission(user: LogtoUser | null, requiredPermission: Permission): boolean {
   if (!user) return false;
 
   // 1. 确定用户角色
@@ -53,6 +53,6 @@ export function hasPermission(user: AuthUser | null, requiredPermission: Permiss
 /**
  * 批量权限校验 (可选: 满足任一 或 满足所有)
  */
-export function hasAnyPermission(user: AuthUser | null, permissions: Permission[]): boolean {
+export function hasAnyPermission(user: LogtoUser | null, permissions: Permission[]): boolean {
   return permissions.some(p => hasPermission(user, p));
 }

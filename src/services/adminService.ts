@@ -1,6 +1,5 @@
 
 import { adminApiClient } from './apiClient'
-import type { AuthUser } from '../types/auth'
 
 export interface AdminUser {
   id: string
@@ -61,10 +60,6 @@ export interface EmailStats {
   trend: { hour: string; sent: number; failed: number }[]
 }
 
-interface LoginResponse {
-  token: string
-  user: AuthUser
-}
 
 export interface SystemStatus {
   nodeVersion: string
@@ -85,10 +80,6 @@ export interface SystemStatus {
 }
 
 export const adminService = {
-  login: async (account: string, password: string): Promise<LoginResponse> => {
-    return adminApiClient.post<LoginResponse>('/admin/auth/login', { account, password });
-  },
-
   getUsers: async () => {
     return adminApiClient.get<AdminUsersResponse>('/admin/users')
   },

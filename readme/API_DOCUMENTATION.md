@@ -1,6 +1,6 @@
 # API 文档（API Documentation）
 
-> 文档版本：1.9.24  
+> 文档版本：1.9.25  
 > 最后更新：2026-03-07  
 > 基础前缀：`/api`（除特别说明外）
 
@@ -30,60 +30,14 @@
 
 ### 说明
 
-- 统一认证已切换为 Logto（外部 OIDC）
-- `/api/auth/register`、`/api/auth/login`、`/api/auth/reset-password`、`/api/auth/change-password` 在 Logto 模式下返回 `410`
-
-### POST `/api/auth/register`
-
-- 请求体：
-
-```json
-{
-  "name": "alice",
-  "email": "alice@example.com",
-  "password": "Passw0rd!",
-  "code": "123456"
-}
-```
-
-### POST `/api/auth/login`
-
-- 请求体：
-
-```json
-{
-  "account": "alice@example.com",
-  "password": "Passw0rd!"
-}
-```
-
-- 成功响应示例：
-
-```json
-{
-  "success": true,
-  "token": "eyJ...",
-  "user": {
-    "id": "uuid",
-    "name": "alice",
-    "email": "alice@example.com",
-    "isAdmin": false
-  }
-}
-```
+- 统一认证仅使用 Logto（外部 OIDC）
+- 本地注册/登录/重置密码接口已移除
 
 ### GET `/api/auth/me`
 
 - 说明：校验当前 Token 并返回用户信息
 
 ## 4. 管理员接口
-
-### POST `/api/admin/auth/login`
-
-- 说明：管理员登录
-- 管理员判定：
-  - `users.is_admin = true`，或
-  - 邮箱存在于 `admin_accounts` 表
 
 ### GET `/api/admin/users`
 
@@ -123,24 +77,9 @@
 
 ## 7. OAuth/OIDC 接口
 
-- 说明：Logto 模式下以下端点返回 `410`
-
-### GET `/api/oauth/authorize`
-
-- 说明：浏览器授权入口（推荐），启动授权码流程并执行跳转
-
-### POST `/api/oauth/authorize`
-
-- 说明：服务端调用入口（兼容），用于以请求体方式提交授权参数
-
-### POST `/api/oauth/token`
-
-- 说明：授权码换 Token / Refresh Token 刷新
-
-### GET `/.well-known/openid-configuration`
-### GET `/.well-known/jwks.json`
-
-- 说明：OIDC 发现与公钥分发
+- 本地 OAuth/OIDC 已废弃，仅保留 Logto 端点
+- `/api/oauth/*` 与 `/interaction/*` 返回 `410`
+- `/.well-known/*` 重定向至 Logto
 
 ## 8. 错误码与错误语义
 
@@ -151,8 +90,7 @@
 - `429`：触发限流
 - `500`：服务内部错误
 
-## 9. 本次修复关联说明（1.9.24）
+## 9. 本次修复关联说明（1.9.25）
 
-- 认证默认切换为 Logto（`AUTH_MODE=logto`）
-- 内建 OAuth/OIDC 端点在 Logto 模式下返回 `410`
-- `.well-known` 端点在 Logto 模式下重定向到外部 OIDC
+- 认证统一切换为 Logto
+- 移除本地 OAuth/OIDC 与本地登录接口

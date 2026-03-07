@@ -1,7 +1,7 @@
 # API Specs (API 契约) - 基础篇
 
 > **Status**: Active
-> **Effective Date**: 2026-02-24
+> **Effective Date**: 2026-03-07
 > **Enforcement**: 📝 **Stable (稳定)**
 > **Prefix**: `/api`
 
@@ -10,10 +10,10 @@
 *   **响应**: `{"status":"ok","service":"account-backend","version":"X.Y.Z"}`
 *   **作用**: 部署脚本用于验证部署是否成功的核心依据。
 
-## 2. 认证
-*   **POST** `/api/auth/register`: `{name, email, password, code}`
-*   **POST** `/api/auth/login`: `{account, password}` -> `{token, user}`
-*   **GET** `/api/auth/me`: 验证 Token 有效性。
+## 2. 认证 (Deprecated)
+*   **注意**: 本地认证已全面废弃，所有身份验证必须通过 Logto OIDC 进行。
+*   **Token**: 所有受保护接口必须验证 Logto Access Token。
+*   **详情**: 参见 `05_API_SSO_Config.md`。
 
 ## 3. 版本策略
 *   **格式**: `Major.Minor.Patch` (如 1.8.1)。

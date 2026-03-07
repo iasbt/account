@@ -11,6 +11,6 @@
 *   **使用 Store**: 用户与认证等全局状态必须在 `store/*.ts` 中管理。
 
 ## 2. 认证标准
-*   **Token**: 由 `ApiClient` (拦截器) 统一管理。
-*   **类型**: 使用 `types/auth.ts` 中定义的 `AuthUser`。
-*   **循环依赖**: 通过提取 Types 避免 Store <-> Service 的循环依赖。
+*   **Token**: 由 Logto SDK (`@logto/react`) 自动管理，通过 `getAccessToken` 获取。
+*   **类型**: 使用 `lib/logtoUser.ts` 或 Logto SDK 提供的类型。
+*   **状态**: 使用 `useLogto` Hook 获取认证状态。

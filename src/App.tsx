@@ -1,60 +1,64 @@
 import type { ReactElement } from 'react'
+import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
-import AdminLoginPage from './pages/AdminLoginPage'
-import RegisterPage from './pages/RegisterPage'
-import ProfilePage from './pages/ProfilePage'
-import { useAuthStore } from './store/useAuthStore'
-import { useAdminStore } from './store/useAdminStore'
+import { useLogto } from '@logto/react'
 import DashboardPage from './pages/DashboardPage'
 import AdminPanel from './pages/AdminPanel'
 import StyleGuide from './pages/StyleGuide'
 import NotFoundPage from './pages/NotFoundPage'
 import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
-import ForgotPasswordPage from './pages/ForgotPasswordPage'
-import ResetPasswordPage from './pages/ResetPasswordPage'
-import SsoPage from './pages/SsoPage'
-import LogoutPage from './pages/LogoutPage'
-
-// --- 路由守卫 ---
+import ProfilePage from './pages/ProfilePage'
+import CallbackPage from './pages/CallbackPage'
+import { useLogtoUser } from './lib/logtoUser'
+import { apiClient, adminApiClient } from './services/apiClient'
 
 function RequireAuth({ children }: { children: ReactElement }) {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, isLoading } = useLogto()
   const location = useLocation()
 
+  if (isLoading) return null
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
-
   return children
 }
 
 function RequireAdmin({ children }: { children: ReactElement }) {
-  const { isAuthenticated } = useAdminStore()
+  const { isAuthenticated, isLoading } = useLogto()
+  const user = useLogtoUser()
   const location = useLocation()
 
+  if (isLoading) return null
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace state={{ from: location }} />
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
-
-  return children
-}
-
-function PublicOnlyUser({ children }: { children: ReactElement }) {
-  const { isAuthenticated } = useAuthStore()
-  if (isAuthenticated) {
+  if (!user?.isAdmin) {
     return <Navigate to="/" replace />
   }
   return children
 }
 
-function PublicOnlyAdmin({ children }: { children: ReactElement }) {
-  const { isAuthenticated } = useAdminStore()
+function LogtoEntry() {
+  const { signIn, isAuthenticated, isLoading } = useLogto()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (isLoading || isAuthenticated) return
+    const redirectUri = window.location.origin + '/callback'
+    void signIn(redirectUri)
+  }, [isLoading, isAuthenticated, signIn])
+
   if (isAuthenticated) {
-    return <Navigate to="/admin" replace />
+    const target = (location.state as { from?: { pathname?: string } })?.from?.pathname || '/'
+    return <Navigate to={target} replace />
   }
-  return children
+
+  return (
+    <div className="min-h-screen flex items-center justify-center text-text-secondary">
+      正在跳转到 Logto 登录...
+    </div>
+  )
 }
 
 function UserLayout({ children }: { children: ReactElement }) {
@@ -99,94 +103,36 @@ function AdminLayout({ children }: { children: ReactElement }) {
   )
 }
 
-// --- 主应用 ---
-
 export default function App() {
+  const { isAuthenticated, getAccessToken } = useLogto()
+
+  useEffect(() => {
+    let cancelled = false
+    if (!isAuthenticated) {
+      apiClient.setToken(null)
+      adminApiClient.setToken(null)
+      return
+    }
+    const sync = async () => {
+      const token = await getAccessToken()
+      if (cancelled) return
+      apiClient.setToken(token || null)
+      adminApiClient.setToken(token || null)
+    }
+    sync()
+    return () => {
+      cancelled = true
+    }
+  }, [isAuthenticated, getAccessToken])
+
   return (
     <Routes>
-      {/* 公开路由 */}
       <Route path="/design-system" element={<UserLayout><StyleGuide /></UserLayout>} />
-      <Route
-        path="/login"
-        element={
-          <PublicOnlyUser>
-            <UserLayout>
-              <LoginPage />
-            </UserLayout>
-          </PublicOnlyUser>
-        }
-      />
-
-      <Route
-        path="/admin/login"
-        element={
-          <PublicOnlyAdmin>
-            <AdminLayout>
-              <AdminLoginPage />
-            </AdminLayout>
-          </PublicOnlyAdmin>
-        }
-      />
-
-      <Route
-        path="/sso/issue"
-        element={
-          <RequireAuth>
-            <UserLayout>
-              <SsoPage />
-            </UserLayout>
-          </RequireAuth>
-        }
-      />
-
-      <Route
-        path="/oauth/authorize"
-        element={
-          <RequireAuth>
-            <UserLayout>
-              <SsoPage />
-            </UserLayout>
-          </RequireAuth>
-        }
-      />
-
-      <Route
-        path="/register"
-        element={
-          <PublicOnlyUser>
-            <UserLayout>
-              <RegisterPage />
-            </UserLayout>
-          </PublicOnlyUser>
-        }
-      />
-      
-      <Route
-        path="/forgot-password"
-        element={
-          <PublicOnlyUser>
-            <UserLayout>
-              <ForgotPasswordPage />
-            </UserLayout>
-          </PublicOnlyUser>
-        }
-      />
-      
-      <Route
-        path="/reset-password"
-        element={
-          <PublicOnlyUser>
-            <UserLayout>
-              <ResetPasswordPage />
-            </UserLayout>
-          </PublicOnlyUser>
-        }
-      />
-      
+      <Route path="/login" element={<UserLayout><LogtoEntry /></UserLayout>} />
+      <Route path="/callback" element={<UserLayout><CallbackPage /></UserLayout>} />
       <Route path="/terms" element={<UserLayout><TermsPage /></UserLayout>} />
       <Route path="/privacy" element={<UserLayout><PrivacyPage /></UserLayout>} />
 
-      {/* 受保护路由 */}
       <Route
         path="/"
         element={
@@ -197,7 +143,6 @@ export default function App() {
           </RequireAuth>
         }
       />
-
       <Route
         path="/profile"
         element={
@@ -208,7 +153,6 @@ export default function App() {
           </RequireAuth>
         }
       />
-
       <Route
         path="/admin"
         element={
@@ -220,9 +164,6 @@ export default function App() {
         }
       />
 
-      <Route path="/logout" element={<UserLayout><LogoutPage /></UserLayout>} />
-
-      {/* 404 处理 */}
       <Route path="*" element={<UserLayout><NotFoundPage /></UserLayout>} />
     </Routes>
   )

@@ -1,7 +1,8 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLogto } from '@logto/react'
 import { LogOut, ExternalLink, UserCircle, Database, Server, LayoutGrid, Image, Hammer, Activity } from 'lucide-react'
-import { useAuthStore } from '../store/useAuthStore'
+import { useLogtoUser } from '../lib/logtoUser'
 import { dashboardService, type DashboardStats } from '../services/dashboardService'
 
 // Local metadata mapping for known apps to enhance the display
@@ -27,7 +28,8 @@ const APP_METADATA: Record<string, { icon: ReactNode; description: string }> = {
 
 export default function DashboardPage() {
   const navigate = useNavigate()
-  const { user, logout } = useAuthStore()
+  const { signOut } = useLogto()
+  const user = useLogtoUser()
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState<DashboardStats | null>(null)
 
@@ -42,8 +44,7 @@ export default function DashboardPage() {
 
   const handleSignOut = () => {
     setLoading(true)
-    logout()
-    navigate('/login')
+    void signOut(window.location.origin + '/')
   }
 
   const handleLaunch = async (app: { url: string; sso?: boolean }) => {
@@ -84,7 +85,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 overflow-hidden rounded-full bg-background-light border border-border-light flex items-center justify-center">
               {user?.avatar ? (
-                <img src={user.avatar} alt={user.displayName} className="h-full w-full object-cover" />
+                <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
               ) : (
                 <span className="text-sm font-medium text-text-secondary">
                   {user?.name?.substring(0, 2).toUpperCase() || 'UA'}
@@ -92,7 +93,7 @@ export default function DashboardPage() {
               )}
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-text-primary">{user?.displayName || user?.name}</h1>
+              <h1 className="text-sm font-semibold text-text-primary">{user?.name || user?.email}</h1>
               <p className="text-xs text-text-secondary">IASBT ID</p>
             </div>
           </div>

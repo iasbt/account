@@ -1,12 +1,13 @@
 # API Specs (API 契约) - Gallery 服务篇
 
 > **Status**: Active
-> **Effective Date**: 2026-02-24
+> **Effective Date**: 2026-03-07
 > **Enforcement**: 📝 **Stable (稳定)**
 
-## 1. 相册服务 (Gallery Service) - V1.8.16
+## 1. 相册服务 (Gallery Service) - V1.8.17 (Logto Integrated)
 *   **前缀**: `/` (Nginx 直接反向代理，无 `/api` 前缀)。
-*   **Auth**: 支持 App Secret 验证 (通过 `aud` 字段)。
+*   **Auth**: **必须** 使用 Logto Bearer Token。不支持 App Secret 或 `aud` 验证。
+*   **Token**: 请求头必须携带 `Authorization: Bearer <logto_access_token>`。
 
 ### 1.1 图片管理
 *   **GET** `/images`: 获取图片列表。

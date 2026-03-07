@@ -1,12 +1,5 @@
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const normalizeUrl = (value) => {
   if (!value) return "";
@@ -23,53 +16,25 @@ const logtoBaseUrl = normalizeUrl(process.env.LOGTO_BASE_URL || process.env.LOGT
 const logtoIssuer = normalizeOidcIssuer(process.env.LOGTO_ISSUER || process.env.OIDC_EXTERNAL_ISSUER || process.env.AUTHENTIK_ISSUER || logtoBaseUrl);
 const logtoJwksUrl = normalizeUrl(process.env.LOGTO_JWKS_URL || process.env.OIDC_EXTERNAL_JWKS_URL || process.env.AUTHENTIK_JWKS_URL || (logtoIssuer ? `${logtoIssuer}/jwks` : ""));
 const logtoAudience = normalizeUrl(process.env.LOGTO_AUDIENCE || process.env.OIDC_EXTERNAL_AUDIENCE || process.env.AUTHENTIK_AUDIENCE || "");
-const authMode = (process.env.AUTH_MODE || (logtoIssuer ? "logto" : "internal")).trim().toLowerCase();
-
-// Load keys
-let privateKey = null;
-let publicKey = null;
-try {
-  const certsDir = path.join(__dirname, "../certs");
-  if (fs.existsSync(path.join(certsDir, "private.pem"))) {
-    privateKey = fs.readFileSync(path.join(certsDir, "private.pem"), "utf8");
-    publicKey = fs.readFileSync(path.join(certsDir, "public.pem"), "utf8");
-  }
-} catch (e) {
-  console.warn("Failed to load RSA keys:", e.message);
+const logtoEndSessionEndpoint = normalizeUrl(process.env.LOGTO_END_SESSION_ENDPOINT || (logtoBaseUrl ? `${logtoBaseUrl}/oidc/session/end` : ""));
+const publicUrl = normalizeUrl(process.env.ACCOUNT_PUBLIC_URL || process.env.PUBLIC_URL || "");
+if (process.env.NODE_ENV === "production") {
+  if (!logtoIssuer) throw new Error("FATAL: LOGTO_ISSUER is missing in production environment.");
+  if (!logtoJwksUrl) throw new Error("FATAL: LOGTO_JWKS_URL is missing in production environment.");
 }
 
 export const config = {
   port: Number(process.env.PORT || 3000),
   logLevel: process.env.LOG_LEVEL || "info",
-  ssoSecret: (() => {
-    const secret = process.env.SSO_JWT_SECRET;
-    if (!secret && process.env.NODE_ENV === "production") {
-      throw new Error("FATAL: SSO_JWT_SECRET is missing in production environment.");
-    }
-    return secret || "dev_secret_do_not_use_in_prod";
-  })(),
-  jwt: {
-    privateKey,
-    publicKey,
-    algorithm: "RS256"
-  },
-  ssoTokenTtl: Number(process.env.SSO_TOKEN_TTL || 900), // 15 minutes (Access Token)
   corsAllowlist: process.env.CORS_ALLOWLIST || process.env.CORS_ORIGIN || "",
   ssoRedirectAllowlist: process.env.SSO_REDIRECT_ALLOWLIST || "",
-  authMode,
-  oidc: {
-    issuer: process.env.OIDC_ISSUER || process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`,
-    internalClientId: process.env.OIDC_INTERNAL_CLIENT_ID || "account-web",
-    internalRedirectUri: process.env.OIDC_INTERNAL_REDIRECT_URI || process.env.PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`,
-    accessTokenTtl: Number(process.env.OIDC_ACCESS_TOKEN_TTL || 900),
-    authorizationCodeTtl: Number(process.env.OIDC_AUTH_CODE_TTL || 60),
-    refreshTokenTtl: Number(process.env.OIDC_REFRESH_TOKEN_TTL || 1209600),
-    externalIssuer: logtoIssuer,
-    externalJwksUrl: logtoJwksUrl,
-    externalAudience: logtoAudience,
-    cookieKeys: (process.env.OIDC_COOKIE_KEYS || process.env.SSO_JWT_SECRET || "dev_secret_do_not_use_in_prod")
-      .split(",")
-      .filter(Boolean)
+  publicUrl,
+  logto: {
+    baseUrl: logtoBaseUrl,
+    issuer: logtoIssuer,
+    jwksUrl: logtoJwksUrl,
+    audience: logtoAudience,
+    endSessionEndpoint: logtoEndSessionEndpoint
   },
   smtp: {
     host: process.env.SMTP_HOST || "",

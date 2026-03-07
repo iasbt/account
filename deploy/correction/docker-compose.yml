@@ -17,7 +17,11 @@ services:
       - DB_USER=${DB_USER:-root}
       - DB_PASSWORD=${DB_PASSWORD:-djNV78.vAswB7VT}
       - DB_NAME=postgres
-      - SSO_JWT_SECRET=${SSO_JWT_SECRET}
+      - LOGTO_BASE_URL=${LOGTO_BASE_URL}
+      - LOGTO_ISSUER=${LOGTO_ISSUER}
+      - LOGTO_JWKS_URL=${LOGTO_JWKS_URL}
+      - LOGTO_AUDIENCE=${LOGTO_AUDIENCE}
+      - LOGTO_END_SESSION_ENDPOINT=${LOGTO_END_SESSION_ENDPOINT}
       - CORS_ALLOWLIST=${CORS_ALLOWLIST}
       - PORT=3000
       - SMTP_HOST=${SMTP_HOST}
@@ -28,8 +32,6 @@ services:
       - correction_default
     ports:
       - "3000:3000"
-    volumes:
-      - ./certs:/app/certs
 
   redis:
     image: redis:alpine

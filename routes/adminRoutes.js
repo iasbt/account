@@ -8,7 +8,6 @@ import { Router } from "express";
 import { requireAuth } from "../middlewares/auth.js";
 import { requireAdmin } from "../middlewares/roleCheck.js";
 import { getAllUsers, deleteUser, updateUser, resetUserPassword, getSystemStatus, sendTestEmail } from "../controllers/adminController.js";
-import { adminLogin } from "../controllers/authController.js";
 import { 
   getProviders, 
   createProvider, 
@@ -23,8 +22,6 @@ import {
 } from "../controllers/emailConfigController.js";
 
 const router = Router();
-
-router.post("/auth/login", adminLogin);
 
 // --- 中间件堆栈 ---
 // 1. 验证 Token (认证)

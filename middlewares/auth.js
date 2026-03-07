@@ -1,4 +1,4 @@
-import { verifyAccessToken } from "../services/oidcProvider.js";
+import { verifyAccessToken } from "../services/logtoAuth.js";
 
 const getTokenFromCookie = (cookieHeader = "") => {
   if (!cookieHeader) return null;

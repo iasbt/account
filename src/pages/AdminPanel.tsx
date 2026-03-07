@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLogto } from '@logto/react'
 import { LogOut, LayoutDashboard, Users, Settings, Box, Mail } from 'lucide-react'
-import { useAdminStore } from '../store/useAdminStore'
+import { useLogtoUser } from '../lib/logtoUser'
 import UserManager from '../components/admin/UserManager'
 import AppManager from '../components/admin/AppManager'
 import SystemManager from '../components/admin/SystemManager'
@@ -12,11 +13,11 @@ type Tab = 'users' | 'apps' | 'settings' | 'email'
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('users')
   const navigate = useNavigate()
-  const logout = useAdminStore(state => state.logout)
+  const { signOut } = useLogto()
+  const user = useLogtoUser()
 
   const handleLogout = () => {
-    logout()
-    navigate('/admin/login')
+    void signOut(window.location.origin + '/')
   }
 
   return (
@@ -30,7 +31,7 @@ export default function AdminPanel() {
               Admin System
             </h1>
           </div>
-          <p className="text-xs text-gray-500 font-medium">企业级统一身份认证管理</p>
+          <p className="text-xs text-gray-500 font-medium">{user?.email || 'Logto 管理员'}</p>
         </div>
         
         <nav className="flex-1 p-4 space-y-1">
@@ -113,4 +114,3 @@ export default function AdminPanel() {
     </div>
   )
 }
-

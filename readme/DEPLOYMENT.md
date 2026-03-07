@@ -1,6 +1,6 @@
 # 部署手册（DEPLOYMENT）
 
-> 文档版本：1.9.24  
+> 文档版本：1.9.25  
 > 最后更新：2026-03-07
 
 ## 1. 部署原则
@@ -40,7 +40,9 @@
 
 - `NODE_ENV=production`
 - `DB_HOST=iasbt-postgres`
-- `AUTH_MODE=logto`
+- `LOGTO_BASE_URL=https://logto.iasbt.cloud`
+- `LOGTO_ISSUER=https://logto.iasbt.cloud/oidc`
+- `LOGTO_JWKS_URL=https://logto.iasbt.cloud/oidc/jwks`
 - `CORS_ALLOWLIST` 需包含：
   - `https://account.iasbt.cloud`
   - `http://119.91.71.30`

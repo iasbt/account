@@ -1,24 +1,26 @@
 import { describe, it, expect } from 'vitest';
 import { hasPermission, hasAnyPermission, ROLE_PERMISSIONS } from './rbac';
-import type { AuthUser } from '../store/useAuthStore';
+import type { LogtoUser } from './logtoUser';
 
 describe('RBAC System', () => {
   // Mock Users
-  const adminUser: AuthUser = {
+  const adminUser: LogtoUser = {
     id: '1',
     name: 'admin',
-    displayName: 'Admin',
-    avatar: '',
     email: 'admin@example.com',
+    avatar: '',
+    roles: ['admin'],
+    organizationRoles: [],
     isAdmin: true
   };
 
-  const normalUser: AuthUser = {
+  const normalUser: LogtoUser = {
     id: '2',
     name: 'user',
-    displayName: 'User',
-    avatar: '',
     email: 'user@example.com',
+    avatar: '',
+    roles: [],
+    organizationRoles: [],
     isAdmin: false
   };
 
