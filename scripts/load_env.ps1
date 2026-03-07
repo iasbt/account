@@ -30,5 +30,5 @@ if (Test-Path $PreferredDeployKey) {
 if (-not $global:REMOTE_APP_DIR) { $global:REMOTE_APP_DIR = "/home/ubuntu/account" }
 
 if (-not $global:CORS_ALLOWLIST) {
-    $global:CORS_ALLOWLIST = "$($global:ACCOUNT_PUBLIC_URL),https://www.$($global:PRIMARY_DOMAIN),https://account.$($global:PRIMARY_DOMAIN),http://$($global:DEPLOY_SERVER_IP),https://$($global:DEPLOY_SERVER_IP),http://$($global:DEPLOY_SERVER_IP):5173,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+    $global:CORS_ALLOWLIST = "https://iasbt.cloud,$($global:ACCOUNT_PUBLIC_URL),https://www.$($global:PRIMARY_DOMAIN),https://account.$($global:PRIMARY_DOMAIN),http://$($global:DEPLOY_SERVER_IP),https://$($global:DEPLOY_SERVER_IP),http://$($global:DEPLOY_SERVER_IP):5173,https://account-*.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
 }

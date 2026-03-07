@@ -8,7 +8,7 @@ let jwksCache = {
   keys: []
 };
 
-const fetchJwks = async (jwksUrl) => {
+const fetchJwks = async (/** @type {string} */ jwksUrl) => {
   try {
     const res = await fetch(jwksUrl);
     if (!res.ok) {
@@ -22,7 +22,8 @@ const fetchJwks = async (jwksUrl) => {
     }
     return data.keys;
   } catch (error) {
-    logger.error({ event: "jwks_fetch_error", error: error.message });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error({ event: "jwks_fetch_error", error: errorMessage });
     return null;
   }
 };
@@ -49,47 +50,48 @@ const loadJwks = async (forceRefresh = false) => {
   return jwksCache.keys.length > 0 ? jwksCache : null; // Return stale cache if fetch fails
 };
 
-const getVerificationKey = async (kid) => {
+const getVerificationKey = async (/** @type {string | undefined} */ kid) => {
   let cache = await loadJwks();
   if (!cache) return null;
 
-  let key = kid ? cache.keys.find((item) => item.kid === kid) : cache.keys[0];
+  let key = kid ? cache.keys.find((/** @type {{ kid: string; }} */ item) => item.kid === kid) : cache.keys[0];
 
   // If key not found, try force refresh once
   if (!key && kid) {
     logger.warn({ event: "jwks_key_not_found", kid, action: "force_refresh" });
     cache = await loadJwks(true);
     if (cache) {
-      key = cache.keys.find((item) => item.kid === kid);
+      key = cache.keys.find((/** @type {{ kid: string; }} */ item) => item.kid === kid);
     }
   }
 
   if (!key) {
-    logger.error({ event: "jwks_key_missing_after_refresh", kid, availableKids: cache.keys.map(k => k.kid) });
+    logger.error({ event: "jwks_key_missing_after_refresh", kid, availableKids: cache.keys.map((/** @type {{ kid: any; }} */ k) => k.kid) });
     return null;
   }
 
   try {
     return createPublicKey({ key, format: "jwk" });
   } catch (error) {
-    logger.error({ event: "jwks_key_creation_failed", error: error.message });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error({ event: "jwks_key_creation_failed", error: errorMessage });
     return null;
   }
 };
 
-const resolveAdminFlag = (payload) => {
+const resolveAdminFlag = (/** @type {any} */ payload) => {
   if (payload?.isAdmin !== undefined) return payload.isAdmin;
   if (payload?.is_admin !== undefined) return payload.is_admin;
   const roles = Array.isArray(payload?.roles) ? payload.roles : [];
   const orgRoles = Array.isArray(payload?.organization_roles) ? payload.organization_roles : [];
-  return roles.includes("admin") || orgRoles.some((role) => role.endsWith(":admin"));
+  return roles.includes("admin") || orgRoles.some((/** @type {string} */ role) => role.endsWith(":admin"));
 };
 
-const normalizeIssuer = (iss) => {
+const normalizeIssuer = (/** @type {string | undefined} */ iss) => {
   return iss ? iss.replace(/\/$/, "") : "";
 };
 
-export const verifyAccessToken = async (token) => {
+export const verifyAccessToken = async (/** @type {string} */ token) => {
   const decoded = jwt.decode(token, { complete: true });
   if (!decoded?.payload) {
     logger.warn({ event: "token_decode_failed" });
