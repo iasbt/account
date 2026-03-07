@@ -178,8 +178,36 @@ $DeployCmd = @'
             echo "PGADMIN_DEFAULT_PASSWORD=__PGADMIN_PASSWORD__" >> .env
         fi
     fi
+
+    # 1.6 Logto Configuration Injection (Auto Evolution)
+    echo '>>> Injecting Logto Environment Variables...'
+    if grep -q "^LOGTO_BASE_URL=" .env; then
+        sed -i 's|^LOGTO_BASE_URL=.*|LOGTO_BASE_URL=https://logto.iasbt.cloud|g' .env
+    else
+        echo "LOGTO_BASE_URL=https://logto.iasbt.cloud" >> .env
+    fi
+    if grep -q "^LOGTO_ISSUER=" .env; then
+        sed -i 's|^LOGTO_ISSUER=.*|LOGTO_ISSUER=https://logto.iasbt.cloud/oidc|g' .env
+    else
+        echo "LOGTO_ISSUER=https://logto.iasbt.cloud/oidc" >> .env
+    fi
+    if grep -q "^LOGTO_JWKS_URL=" .env; then
+        sed -i 's|^LOGTO_JWKS_URL=.*|LOGTO_JWKS_URL=https://logto.iasbt.cloud/oidc/jwks|g' .env
+    else
+        echo "LOGTO_JWKS_URL=https://logto.iasbt.cloud/oidc/jwks" >> .env
+    fi
+    if grep -q "^LOGTO_AUDIENCE=" .env; then
+        sed -i 's|^LOGTO_AUDIENCE=.*|LOGTO_AUDIENCE=https://logto.iasbt.cloud/oidc|g' .env
+    else
+        echo "LOGTO_AUDIENCE=https://logto.iasbt.cloud/oidc" >> .env
+    fi
+    if grep -q "^LOGTO_END_SESSION_ENDPOINT=" .env; then
+        sed -i 's|^LOGTO_END_SESSION_ENDPOINT=.*|LOGTO_END_SESSION_ENDPOINT=https://logto.iasbt.cloud/oidc/session/end|g' .env
+    else
+        echo "LOGTO_END_SESSION_ENDPOINT=https://logto.iasbt.cloud/oidc/session/end" >> .env
+    fi
     
-    # 1.6 Copy .env to deploy context (CRITICAL FIX)
+    # 1.7 Copy .env to deploy context (CRITICAL FIX)
     echo '>>> Copying .env to deployment directory...'
     cp .env __DEPLOY_DIR__/.env
 
