@@ -1,18 +1,23 @@
 import winston from 'winston';
 
-const { combine, timestamp, json } = winston.format;
-
-// Create Winston logger instance
-export const logger = winston.createLogger({
+const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: combine(
-    timestamp(),
-    json() // Log in JSON format for easier parsing by aggregation tools
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
   ),
+  defaultMeta: { service: 'account-service' },
   transports: [
-    new winston.transports.Console()
-  ],
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
+  ]
 });
+
+export { logger };
 
 // Helper for structured logging
 export const logEvent = (/** @type {string} */ event, /** @type {object} */ data = {}, /** @type {string} */ level = 'info') => {
